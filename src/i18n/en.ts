@@ -695,6 +695,8 @@ const en = {
   "updState_installing": "installing…",
   "updState_unsupported": "not available in this browser",
   "updPendingToast": "A new version is available: Settings → Appearance → Updates",
+  "updState_downloaded": "update downloaded",
+  "updApply": "Install now",
   "lockAfterMinutes": "Auto-lock (min)",
   "lockAfterHint": "Idle minutes before the screen locks · 0 = disabled",
   "securityNote": "The session is stored in this browser. With auto-lock on, anyone using this device will need the password.",

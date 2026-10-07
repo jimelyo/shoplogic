@@ -1,8 +1,9 @@
 {
   "name": "shoplogic",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
+  "main": "electron/main.cjs",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -10,13 +11,16 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "check:i18n": "node scripts/check-locales.mjs",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "electron .",
+    "dist": "npm run build && electron-builder --win"
   },
   "dependencies": {
     "chart.js": "^4.5.1",
     "date-fns": "^3.6.0",
     "dexie": "^3.2.7",
     "dexie-react-hooks": "^1.1.7",
+    "electron-updater": "^6.8.9",
     "i18next": "^26.4.2",
     "jspdf": "^4.2.1",
     "lucide-react": "^1.52.0",
@@ -33,6 +37,8 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",
+    "electron": "^44.7.0",
+    "electron-builder": "^26.15.3",
     "fake-indexeddb": "^6.2.5",
     "jsdom": "^29.1.1",
     "oxlint": "^1.81.0",
@@ -40,5 +46,20 @@
     "typescript": "~6.0.2",
     "vite": "^8.3.0",
     "vitest": "^4.1.11"
+  },
+  "build": {
+    "appId": "com.shoplogic.pro",
+    "productName": "ShopLogic Pro",
+    "directories": { "output": "release" },
+    "files": ["dist/**", "electron/**"],
+    "publish": [{ "provider": "github", "owner": "jimelyo", "repo": "shoplogic" }],
+    "win": { "target": [{ "target": "nsis", "arch": ["x64"] }] },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "ShopLogic-Setup-${version}.${ext}",
+      "createDesktopShortcut": true,
+      "shortcutName": "ShopLogic Pro"
+    }
   }
 }

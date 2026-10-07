@@ -11,7 +11,27 @@
 import { useStore } from '../store/store';
 import i18n from '../i18n';
 
-export type UpdateState = 'idle' | 'checking' | 'updateReady' | 'installing';
+export type UpdateState = 'idle' | 'checking' | 'updateReady' | 'downloaded' | 'installing';
+
+/** Bridge exposed by electron/preload.cjs when running inside the desktop app. */
+interface DesktopBridge {
+  isDesktop: boolean;
+  getVersion: () => Promise<string | null>;
+  getUpdaterState: () => Promise<{ supported: boolean; version: string | null; downloading: boolean; progress: { percent: number } | null } | null>;
+  checkForUpdates: () => Promise<unknown>;
+  applyUpdate: () => Promise<unknown>;
+  installUpdate: () => Promise<unknown>;
+  setAutoDownload: (enabled: boolean) => Promise<unknown>;
+  onStateChange: (cb: (p: { state: string; progress?: { percent: number } | null }) => void) => () => void;
+}
+
+declare global {
+  interface Window { shoplogicDesktop?: DesktopBridge }
+}
+
+const desktop: DesktopBridge | null = typeof window !== 'undefined' ? (window.shoplogicDesktop ?? null) : null;
+/** True inside the Windows desktop app (Electron), false in browsers/PWA. */
+export const IS_DESKTOP = Boolean(desktop);
 
 export interface UpdateSnapshot {
   /** idle: nothing new · checking: update() in flight · updateReady: waiting worker · installing: reloading now. */
@@ -82,9 +102,10 @@ export const updatePrefs = {
   setAuto(autoInstall: boolean) {
     snapshot = { ...snapshot, autoInstall };
     localStorage.setItem(AUTO_KEY, autoInstall ? '1' : '0');
+    if (desktop) void desktop.setAutoDownload(autoInstall);
     // Entering auto mode applies a pending update right away.
-    if (autoInstall && snapshot.state === 'updateReady') applyUpdate();
-    else emit();
+    if (autoInstall && (snapshot.state === 'updateReady' || snapshot.state === 'downloaded')) { void applyUpdate(); return; }
+    emit();
   },
 };
 
@@ -93,9 +114,11 @@ export function isUpdateSupported(): boolean {
   return typeof navigator !== 'undefined' && 'serviceWorker' in navigator;
 }
 
-/** Asks the server whether a new service worker exists; safe to call concurrently. */
+/** Asks the server whether a new version exists; safe to call concurrently. */
 export function requestUpdateCheck(): void {
-  if (checking || !registration) return;
+  if (checking) return;
+  if (desktop) { void desktop.checkForUpdates().catch(() => undefined); return; }
+  if (!registration) return;
   checking = true;
   setState('checking');
   registration.update()
@@ -108,10 +131,17 @@ export function requestUpdateCheck(): void {
 }
 
 /**
- * Activates the waiting worker and reloads the page so the new version takes
- * effect immediately. Returns false when there is nothing to apply.
+ * Activates the waiting worker / downloads + relaunches (desktop) so the new
+ * version takes effect immediately. Returns false when there is nothing to do.
  */
 export function applyUpdate(): boolean {
+  if (desktop) {
+    if (snapshot.state !== 'updateReady' && snapshot.state !== 'downloaded') return false;
+    if (snapshot.state === 'downloaded') { void desktop.installUpdate().catch(() => undefined); setState('installing'); return true; }
+    void desktop.applyUpdate().catch(() => undefined);
+    setState('checking'); // Downloading; the bridge flips us to 'downloaded' when done.
+    return true;
+  }
   const waiting = registration?.waiting;
   if (!waiting || !navigator.serviceWorker.controller) return false;
   setState('installing');
@@ -148,11 +178,13 @@ export const INTERVAL_OPTIONS: { seconds: number; label: string }[] = [
   { seconds: DAY, label: 'settings.updInterval_24h' },
 ];
 
-/** Wires the SW lifecycle listeners and the periodic check; idempotent. */
+/** Wires the updater listeners and the periodic check; idempotent. */
 export async function initUpdateSystem(): Promise<void> {
-  if (initialized || !isUpdateSupported()) return;
+  if (initialized) return;
   initialized = true;
   window.addEventListener('online', () => { if (snapshot.intervalSeconds > 0) requestUpdateCheck(); });
+  if (desktop) { initDesktopUpdater(); return; }
+  if (!isUpdateSupported()) { snapshot = { ...snapshot, supported: false }; emit(); return; }
   try {
     let reg = await navigator.serviceWorker.getRegistration();
     if (!reg) {
@@ -179,5 +211,24 @@ export async function initUpdateSystem(): Promise<void> {
     emit();
     return;
   }
+  if (snapshot.intervalSeconds > 0) armTimer();
+}
+
+/** Desktop (Electron) branch: electron-updater reports through the bridge. */
+async function initDesktopUpdater(): Promise<void> {
+  const bridge = window.shoplogicDesktop!;
+  snapshot = { ...snapshot, supported: true };
+  emit();
+  void bridge.setAutoDownload(snapshot.autoInstall).catch(() => undefined);
+  bridge.onStateChange((p) => {
+    switch (p.state) {
+      case 'checking': setState('checking'); break;
+      case 'updateReady': setState('updateReady'); if (snapshot.autoInstall) applyUpdate(); break;
+      case 'downloading': setState('checking'); break;
+      case 'installReady': setState('downloaded'); if (snapshot.autoInstall) { void bridge.installUpdate().catch(() => undefined); setState('installing'); } break;
+      case 'idle': setState('idle'); break;
+      case 'error': setState('idle'); break;
+    }
+  });
   if (snapshot.intervalSeconds > 0) armTimer();
 }

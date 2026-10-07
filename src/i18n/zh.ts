@@ -695,6 +695,8 @@ const zh = {
   "updState_installing": "安装中…",
   "updState_unsupported": "此浏览器不支持",
   "updPendingToast": "有新版本可用：设置 → 外观 → 更新",
+  "updState_downloaded": "更新已下载",
+  "updApply": "立即安装",
   "lockAfterMinutes": "自动锁定（分钟）",
   "lockAfterHint": "无操作多少分钟后锁定屏幕 · 0 = 关闭",
   "securityNote": "会话保存在此浏览器中。启用自动锁定后，使用该设备的人需要输入密码。",
