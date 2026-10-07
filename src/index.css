@@ -1,0 +1,134 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+  --color-sl-bg: var(--sl-bg);
+  --color-sl-card: var(--sl-card);
+  --color-sl-card2: var(--sl-card-2);
+  --color-sl-text: var(--sl-text);
+  --color-sl-muted: var(--sl-muted);
+  --color-sl-border: var(--sl-border);
+  --color-sl-input: var(--sl-input);
+  --color-sl-hover: var(--sl-hover);
+  --color-sl-sidebar: var(--sl-sidebar);
+  --color-sl-sidebar-text: var(--sl-sidebar-text);
+  --color-sl-sidebar-muted: var(--sl-sidebar-muted);
+  --color-sl-sidebar-hover: var(--sl-sidebar-hover);
+  --color-sl-sidebar-border: var(--sl-sidebar-border);
+  --color-primary: var(--sl-primary);
+  --color-primary-hover: var(--sl-primary-hover);
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Noto Sans Arabic", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --animate-scale-in: scaleIn 0.18s ease-out;
+  --animate-fade-in: fadeIn 0.2s ease-out;
+  --animate-slide-in-right: slideInRight 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+  --animate-slide-up: slideUp 0.3s ease-out;
+
+  @keyframes scaleIn { from { opacity: 0; transform: scale(0.94); } to { opacity: 1; transform: scale(1); } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slideInRight { from { opacity: 0; transform: translateX(110%); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+}
+
+/* ---------- Base themes ---------- */
+:root,
+.light {
+  --sl-bg: #f1f5f9;
+  --sl-card: #ffffff;
+  --sl-card-2: #f8fafc;
+  --sl-text: #1e293b;
+  --sl-muted: #64748b;
+  --sl-border: #e2e8f0;
+  --sl-input: #ffffff;
+  --sl-hover: #f1f5f9;
+  --sl-sidebar: #ffffff;
+  --sl-sidebar-text: #1e293b;
+  --sl-sidebar-muted: #64748b;
+  --sl-sidebar-hover: #f1f5f9;
+  --sl-sidebar-border: #e2e8f0;
+  --sl-primary: #4f46e5;
+  --sl-primary-hover: #4338ca;
+}
+
+.dark {
+  --sl-bg: #0f172a;
+  --sl-card: #1e293b;
+  --sl-card-2: #172033;
+  --sl-text: #e2e8f0;
+  --sl-muted: #94a3b8;
+  --sl-border: #334155;
+  --sl-input: #0f172a;
+  --sl-hover: #273449;
+  --sl-sidebar: #0b1222;
+  --sl-sidebar-text: #e2e8f0;
+  --sl-sidebar-muted: #94a3b8;
+  --sl-sidebar-hover: #1e293b;
+  --sl-sidebar-border: #1e293b;
+  --sl-primary: #6366f1;
+  --sl-primary-hover: #4f46e5;
+}
+
+/* ---------- Light accents (tint) ---------- */
+.light.accent-green { --sl-border: #bbf7d0; --sl-card: #f0fdf4; --sl-card-2: #ecfdf5; --sl-hover: #dcfce7; --sl-sidebar: #f0fdf4; --sl-sidebar-hover: #dcfce7; --sl-sidebar-border: #bbf7d0; --sl-primary: #16a34a; --sl-primary-hover: #15803d; }
+.light.accent-red { --sl-border: #fecaca; --sl-card: #fff5f5; --sl-card-2: #fef2f2; --sl-hover: #fee2e2; --sl-sidebar: #fff5f5; --sl-sidebar-hover: #fee2e2; --sl-sidebar-border: #fecaca; --sl-primary: #dc2626; --sl-primary-hover: #b91c1c; }
+.light.accent-blue { --sl-border: #bfdbfe; --sl-card: #f0f7ff; --sl-card-2: #eff6ff; --sl-hover: #dbeafe; --sl-sidebar: #f0f7ff; --sl-sidebar-hover: #dbeafe; --sl-sidebar-border: #bfdbfe; --sl-primary: #2563eb; --sl-primary-hover: #1d4ed8; }
+.light.accent-purple { --sl-border: #ddd6fe; --sl-card: #faf5ff; --sl-card-2: #f5f3ff; --sl-hover: #ede9fe; --sl-sidebar: #faf5ff; --sl-sidebar-hover: #ede9fe; --sl-sidebar-border: #ddd6fe; --sl-primary: #7c3aed; --sl-primary-hover: #6d28d9; }
+.light.accent-orange { --sl-border: #fed7aa; --sl-card: #fffaf5; --sl-card-2: #fff7ed; --sl-hover: #ffedd5; --sl-sidebar: #fffaf5; --sl-sidebar-hover: #ffedd5; --sl-sidebar-border: #fed7aa; --sl-primary: #ea580c; --sl-primary-hover: #c2410c; }
+
+/* ---------- Dark accents (background) ---------- */
+.dark.accent-green { --sl-bg: #064e3b; --sl-sidebar: #064e3b; --sl-primary: #22c55e; --sl-primary-hover: #16a34a; }
+.dark.accent-red { --sl-bg: #7f1d1d; --sl-sidebar: #7f1d1d; --sl-primary: #f87171; --sl-primary-hover: #ef4444; }
+.dark.accent-blue { --sl-bg: #1e3a5f; --sl-sidebar: #1e3a5f; --sl-primary: #60a5fa; --sl-primary-hover: #3b82f6; }
+.dark.accent-purple { --sl-bg: #3b0764; --sl-sidebar: #3b0764; --sl-primary: #a78bfa; --sl-primary-hover: #8b5cf6; }
+.dark.accent-orange { --sl-bg: #7c2d12; --sl-sidebar: #7c2d12; --sl-primary: #fb923c; --sl-primary-hover: #f97316; }
+
+.dark:not(.accent-default) {
+  --sl-card: color-mix(in srgb, var(--sl-bg), white 8%);
+  --sl-card-2: color-mix(in srgb, var(--sl-bg), white 4%);
+  --sl-border: color-mix(in srgb, var(--sl-bg), white 18%);
+  --sl-input: color-mix(in srgb, var(--sl-bg), black 22%);
+  --sl-hover: color-mix(in srgb, var(--sl-bg), white 13%);
+  --sl-sidebar-hover: color-mix(in srgb, var(--sl-bg), white 11%);
+  --sl-sidebar-border: color-mix(in srgb, var(--sl-bg), white 12%);
+  --sl-muted: color-mix(in srgb, var(--sl-text), var(--sl-bg) 32%);
+  --sl-sidebar-muted: color-mix(in srgb, var(--sl-text), var(--sl-bg) 30%);
+}
+
+/* ---------- Global ---------- */
+html, body, #root { min-height: 100%; }
+body {
+  background: var(--sl-bg);
+  color: var(--sl-text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+*, *::before, *::after {
+  transition-property: background-color, border-color, color, fill, stroke, box-shadow;
+  transition-duration: 400ms;
+  transition-timing-function: ease;
+}
+button, a, input, select, textarea { transition-duration: 150ms; }
+
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--sl-muted), transparent 60%); border-radius: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+.sl-skeleton {
+  background: linear-gradient(90deg, var(--sl-hover) 25%, color-mix(in srgb, var(--sl-hover), var(--sl-card) 60%) 37%, var(--sl-hover) 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+}
+@keyframes shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+
+.container-cards { container-type: inline-size; }
+
+/* RTL tweaks */
+[dir="rtl"] .rtl-flip { transform: scaleX(-1); }
+
+input[type="number"]::-webkit-inner-spin-button { opacity: 0.4; }
+select { background-image: none; }
+
+@media print {
+  body * { visibility: hidden; }
+}
