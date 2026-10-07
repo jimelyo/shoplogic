@@ -697,6 +697,7 @@ const pt = {
   "updPendingToast": "Há uma versão nova disponível: Configuração → Aparência → Atualização",
   "updState_downloaded": "atualização descarregada",
   "updApply": "Instalar agora",
+  "updBannerHint": "Nova versão disponível no GitHub",
   "lockAfterMinutes": "Bloqueio automático (min)",
   "lockAfterHint": "Minutos de inatividade antes de bloquear o ecrã · 0 = desativado",
   "securityNote": "A sessão fica guardada neste navegador. Com o bloqueio ativo, quem usar este dispositivo precisará da palavra-passe.",

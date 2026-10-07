@@ -59,6 +59,8 @@ function setupUpdater() {
   if (!app.isPackaged) return; // No updates in dev; vite reloads are enough.
   autoUpdater.autoDownload = false;
   autoUpdater.allowDowngrade = false;
+  // Suggest (not force) the update: the UI shows a banner with one button.
+  autoUpdater.autoInstallOnAppQuit = true;
 
   ipcMain.handle('updater:state', () => ({
     supported: true,
@@ -74,10 +76,10 @@ function setupUpdater() {
   ipcMain.handle('updater:install', () => { autoUpdater.quitAndInstall(); });
 
   autoUpdater.on('checking-for-update', () => send('updater:state-changed', { state: 'checking' }));
-  autoUpdater.on('update-available', () => send('updater:state-changed', { state: 'updateReady' }));
+  autoUpdater.on('update-available', (i) => send('updater:state-changed', { state: 'updateReady', version: i?.version }));
   autoUpdater.on('update-not-available', () => send('updater:state-changed', { state: 'idle' }));
   autoUpdater.on('download-progress', (p) => { progress = p; send('updater:state-changed', { state: 'downloading', progress: p }); });
-  autoUpdater.on('update-downloaded', () => { downloading = false; send('updater:state-changed', { state: 'installReady' }); });
+  autoUpdater.on('update-downloaded', (i) => { downloading = false; send('updater:state-changed', { state: 'installReady', version: i?.version }); });
   autoUpdater.on('error', (e) => send('updater:state-changed', { state: 'error', message: String(e) }));
 
   // Poll every 30 min and once on start (network willing).

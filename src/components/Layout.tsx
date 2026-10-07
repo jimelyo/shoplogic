@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLiveQuery } from 'dexie-react-hooks';
 import {
@@ -15,6 +15,34 @@ import { logAction } from '../lib/audit';
 import { LanguageSelector } from './shared/LanguageSelector';
 import { RoleBadge } from './shared/RolePermissions';
 import { ChangePassword } from './ChangePassword';
+import { onUpdate, applyUpdate, APP_VERSION } from '../lib/update';
+import type { UpdateSnapshot } from '../lib/update';
+
+/** Version number shown at the bottom of the sidebar. */
+function VersionBadge() {
+  return <div className="px-3 pb-2 text-center text-[10px] text-sl-sidebar-muted">v{APP_VERSION}</div>;
+}
+
+/** Floating banner suggesting the new version when the updater finds one. */
+function UpdateBanner() {
+  const { t } = useTranslation();
+  const [snap, setSnap] = useState<UpdateSnapshot | null>(null);
+  useEffect(() => onUpdate(setSnap), []);
+  if (!snap || (snap.state !== 'updateReady' && snap.state !== 'downloaded')) return null;
+  return (
+    <div className="fixed bottom-4 end-4 z-50 flex items-center gap-3 rounded-xl border border-primary/40 bg-sl-card px-4 py-3 shadow-xl shadow-primary/10 animate-slide-up">
+      <span className="text-lg">🚀</span>
+      <div className="min-w-0">
+        <div className="text-sm font-bold text-sl-text">{t('settings.updReady')}</div>
+        <div className="text-[11px] text-sl-muted">v{APP_VERSION} → v{snap.newVersion ?? '?'} · {t('settings.updBannerHint')}</div>
+      </div>
+      <button type="button" onClick={() => applyUpdate()}
+        className="shrink-0 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white shadow-md shadow-primary/30 hover:bg-primary-hover active:scale-95">
+        {t('settings.updApply')}
+      </button>
+    </div>
+  );
+}
 
 const NAV_ICONS: Record<NavSection, typeof Bell> = {
   dashboard: LayoutDashboard, pos: ShoppingCart, cash: Banknote, inventory: Package, stock: Boxes, repairs: Wrench, clients: Users, providers: Truck,
@@ -128,8 +156,7 @@ export function Layout({ children }: { children: ReactNode }) {
         })}
       </nav>
       <div className="border-t border-sl-sidebar-border p-3">
-        <div className="flex items-center gap-3 rounded-xl bg-sl-sidebar-hover p-2.5">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-sky-500 font-bold text-white">{user.name.charAt(0).toUpperCase()}</div>
+        <div className="flex items-center gap-3 rounded-xl bg-sl-sidebar-hover p-2.5">          <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-sky-500 font-bold text-white">{user.name.charAt(0).toUpperCase()}</div>
           <div className="min-w-0 flex-1">
             <div className="truncate text-sm font-semibold">{user.name}</div>
             <RoleBadge role={user.role} />
@@ -146,6 +173,7 @@ export function Layout({ children }: { children: ReactNode }) {
             <button type="button" onClick={doLogout} title={t('auth.logout')} className="rounded-lg p-1.5 text-sl-sidebar-muted hover:bg-red-500/15 hover:text-red-500"><LogOut className="size-4 rtl-flip" /></button>
           </div>
         </div>
+        <VersionBadge />
       </div>
     </aside>
   );
@@ -177,6 +205,7 @@ export function Layout({ children }: { children: ReactNode }) {
         </header>
         <main className="min-w-0 flex-1 p-3 sm:p-6">{children}</main>
       </div>
+      <UpdateBanner />
       <ChangePassword open={pwOpen} onClose={() => setPwOpen(false)} />
     </div>
   );

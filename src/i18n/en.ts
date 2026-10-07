@@ -697,6 +697,7 @@ const en = {
   "updPendingToast": "A new version is available: Settings → Appearance → Updates",
   "updState_downloaded": "update downloaded",
   "updApply": "Install now",
+  "updBannerHint": "New version available on GitHub",
   "lockAfterMinutes": "Auto-lock (min)",
   "lockAfterHint": "Idle minutes before the screen locks · 0 = disabled",
   "securityNote": "The session is stored in this browser. With auto-lock on, anyone using this device will need the password.",

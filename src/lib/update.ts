@@ -22,7 +22,7 @@ interface DesktopBridge {
   applyUpdate: () => Promise<unknown>;
   installUpdate: () => Promise<unknown>;
   setAutoDownload: (enabled: boolean) => Promise<unknown>;
-  onStateChange: (cb: (p: { state: string; progress?: { percent: number } | null }) => void) => () => void;
+  onStateChange: (cb: (p: StateEvent) => void) => () => void;
 }
 
 declare global {
@@ -42,7 +42,12 @@ export interface UpdateSnapshot {
   autoInstall: boolean;
   /** False when service workers are unavailable (or the SW failed to register). */
   supported: boolean;
+  /** Version of the pending update, when known (desktop updater reports it). */
+  newVersion?: string | null;
 }
+
+/** Running app version: injected by Vite from package.json. */
+export const APP_VERSION: string = import.meta.env.VITE_APP_VERSION ?? '';
 
 const LAST_CHECK_KEY = 'sl_update_last_check';
 const INTERVAL_KEY = 'sl_update_interval';
@@ -77,6 +82,8 @@ function setState(state: UpdateState) {
   emit();
 }
 
+interface StateEvent { state: string; version?: string | null; progress?: { percent: number } | null }
+
 function toast(type: 'success' | 'error' | 'info' | 'warning', key: string) {
   useStore.getState().addToast(type, i18n.t(key));
 }
@@ -103,8 +110,10 @@ export const updatePrefs = {
     snapshot = { ...snapshot, autoInstall };
     localStorage.setItem(AUTO_KEY, autoInstall ? '1' : '0');
     if (desktop) void desktop.setAutoDownload(autoInstall);
-    // Entering auto mode applies a pending update right away.
-    if (autoInstall && (snapshot.state === 'updateReady' || snapshot.state === 'downloaded')) { void applyUpdate(); return; }
+    // Desktop: auto mode pre-downloads; the banner suggests installing.
+    if (desktop) { if (autoInstall && snapshot.state === 'updateReady') void desktop.applyUpdate().catch(() => undefined); emit(); return; }
+    // Web/PWA: install+reload immediately when the worker is waiting.
+    if (autoInstall && snapshot.state === 'updateReady') { void applyUpdate(); return; }
     emit();
   },
 };
@@ -212,21 +221,26 @@ export async function initUpdateSystem(): Promise<void> {
     return;
   }
   if (snapshot.intervalSeconds > 0) armTimer();
-}
-
-/** Desktop (Electron) branch: electron-updater reports through the bridge. */
+}  /** Desktop (Electron) branch: electron-updater reports through the bridge. */
 async function initDesktopUpdater(): Promise<void> {
   const bridge = window.shoplogicDesktop!;
   snapshot = { ...snapshot, supported: true };
   emit();
   void bridge.setAutoDownload(snapshot.autoInstall).catch(() => undefined);
   bridge.onStateChange((p) => {
+    const v = p.version ?? null;
+    const withVersion = (s: UpdateState): UpdateSnapshot => ({ ...snapshot, state: s, newVersion: v });
     switch (p.state) {
       case 'checking': setState('checking'); break;
-      case 'updateReady': setState('updateReady'); if (snapshot.autoInstall) applyUpdate(); break;
+      // Suggest, never force: the banner + toast invite the user to click.
+      case 'updateReady':
+        snapshot = withVersion('updateReady'); emit();
+        toast('info', 'settings.updPendingToast');
+        if (snapshot.autoInstall) void bridge.applyUpdate().catch(() => undefined); // Pre-download only.
+        break;
       case 'downloading': setState('checking'); break;
-      case 'installReady': setState('downloaded'); if (snapshot.autoInstall) { void bridge.installUpdate().catch(() => undefined); setState('installing'); } break;
-      case 'idle': setState('idle'); break;
+      case 'installReady': snapshot = withVersion('downloaded'); emit(); break;
+      case 'idle': setState('idle'); snapshot = { ...snapshot, newVersion: null }; emit(); break;
       case 'error': setState('idle'); break;
     }
   });
