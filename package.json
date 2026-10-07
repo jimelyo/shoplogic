@@ -13,7 +13,8 @@
     "check:i18n": "node scripts/check-locales.mjs",
     "preview": "vite preview",
     "start": "electron .",
-    "dist": "npm run build && electron-builder --win"
+    "icon": "node scripts/make-icon.mjs",
+    "dist": "npm run icon && npm run build && electron-builder --win --x64 --arm64"
   },
   "dependencies": {
     "chart.js": "^4.5.1",
@@ -42,6 +43,7 @@
     "fake-indexeddb": "^6.2.5",
     "jsdom": "^29.1.1",
     "oxlint": "^1.81.0",
+    "sharp": "^0.35.5",
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.2",
     "vite": "^8.3.0",
@@ -50,14 +52,19 @@
   "build": {
     "appId": "com.shoplogic.pro",
     "productName": "ShopLogic Pro",
-    "directories": { "output": "release" },
-    "files": ["dist/**", "electron/**"],
+    "directories": {
+      "output": "release"
+    },    "files": ["dist/**", "electron/**"],
+    "icon": "electron/icon.ico",
     "publish": [{ "provider": "github", "owner": "jimelyo", "repo": "shoplogic" }],
-    "win": { "target": [{ "target": "nsis", "arch": ["x64"] }] },
+    "win": {
+      "icon": "electron/icon.ico",
+      "target": [{ "target": "nsis", "arch": ["x64", "arm64"] }]
+    },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "artifactName": "ShopLogic-Setup-${version}.${ext}",
+      "artifactName": "ShopLogic-Setup-${version}-${arch}.${ext}",
       "createDesktopShortcut": true,
       "shortcutName": "ShopLogic Pro"
     }
