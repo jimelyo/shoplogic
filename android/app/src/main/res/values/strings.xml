@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">ShopLogic Pro</string>
+    <string name="title_activity_main">ShopLogic Pro</string>
+    <string name="package_name">com.jimelyo.shoplogic</string>
+    <string name="custom_url_scheme">com.jimelyo.shoplogic</string>
+</resources>

@@ -25,3 +25,15 @@ dev-server.log
 *.njsproj
 *.sln
 *.sw?
+
+# Android / Capacitor
+android/app/src/main/assets/public/
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+android/capacitor-cordova-android-plugins/
+android/app/src/main/res/drawable*/launcher-background.xml
+*.apk
+*.keystore
+!debug.keystore

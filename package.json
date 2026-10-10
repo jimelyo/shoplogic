@@ -17,6 +17,8 @@
     "dist": "npm run icon && npm run build && electron-builder --win --x64 --arm64"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/core": "^8.5.3",
     "chart.js": "^4.5.1",
     "date-fns": "^3.6.0",
     "dexie": "^3.2.7",
@@ -33,6 +35,7 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.5.3",
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
