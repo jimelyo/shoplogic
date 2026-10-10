@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next';
 import { useLiveQuery } from 'dexie-react-hooks';
 import {
-  Banknote, Bell, Boxes, ChartColumn, ClipboardList, FileText, KeyRound, LayoutDashboard, Lock as LockIcon, LogOut, Menu, Moon, Package, Settings, ShoppingCart, Sun, Truck, UserCog, Users, Wallet, Wrench, X, Zap, Check,
+  Banknote, Bell, Boxes, ChartColumn, ClipboardList, FileText, KeyRound, LayoutDashboard, Lock as LockIcon, LogOut, Menu, Moon, Package, Settings, ShoppingCart, Sun, Truck, UserCog, Users, Wallet, Wrench, X, Zap, Check, FilePlus2,
 } from 'lucide-react';
 import type { Accent, NavSection } from '../types';
 import { ACCENTS, ALL_MODULES } from '../types';
@@ -15,7 +15,7 @@ import { logAction } from '../lib/audit';
 import { LanguageSelector } from './shared/LanguageSelector';
 import { RoleBadge } from './shared/RolePermissions';
 import { ChangePassword } from './ChangePassword';
-import { onUpdate, applyUpdate, APP_VERSION } from '../lib/update';
+import { onUpdate, applyUpdate, APP_VERSION, isDismissed, dismissVersion } from '../lib/update';
 import type { UpdateSnapshot } from '../lib/update';
 
 /** Version number shown at the bottom of the sidebar. */
@@ -28,28 +28,37 @@ function UpdateBanner() {
   const { t } = useTranslation();
   const [snap, setSnap] = useState<UpdateSnapshot | null>(null);
   useEffect(() => onUpdate(setSnap), []);
-  if (!snap || (snap.state !== 'updateReady' && snap.state !== 'downloaded')) return null;
+  const pending = !!snap && (snap.state === 'updateReady' || snap.state === 'downloaded');
+  if (!snap || !pending || (isDismissed(snap.newVersion) && snap.state !== 'downloaded')) return null;
+  const downloading = snap.state === 'updateReady' && snap.downloadPercent != null;
   return (
     <div className="fixed bottom-4 end-4 z-50 flex items-center gap-3 rounded-xl border border-primary/40 bg-sl-card px-4 py-3 shadow-xl shadow-primary/10 animate-slide-up">
       <span className="text-lg">🚀</span>
       <div className="min-w-0">
         <div className="text-sm font-bold text-sl-text">{t('settings.updReady')}</div>
         <div className="text-[11px] text-sl-muted">v{APP_VERSION} → v{snap.newVersion ?? '?'} · {t('settings.updBannerHint')}</div>
+        {downloading && snap.downloadPercent != null && (
+          <div className="mt-1.5 h-1.5 w-40 overflow-hidden rounded-full bg-sl-hover">
+            <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${Math.round(snap.downloadPercent)}%` }} />
+          </div>
+        )}
       </div>
       <button type="button" onClick={() => applyUpdate()}
         className="shrink-0 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white shadow-md shadow-primary/30 hover:bg-primary-hover active:scale-95">
         {t('settings.updApply')}
       </button>
+      <button type="button" onClick={() => dismissVersion(snap.newVersion)} title={t('common.close')}
+        className="shrink-0 rounded p-1 text-sl-muted hover:text-sl-text" aria-label={t('common.close')}>✕</button>
     </div>
   );
 }
 
 const NAV_ICONS: Record<NavSection, typeof Bell> = {
-  dashboard: LayoutDashboard, pos: ShoppingCart, cash: Banknote, inventory: Package, stock: Boxes, repairs: Wrench, clients: Users, providers: Truck,
+  dashboard: LayoutDashboard, pos: ShoppingCart, cash: Banknote, inventory: Package, stock: Boxes, repairs: Wrench, quotes: FilePlus2, clients: Users, providers: Truck,
   purchases: ClipboardList, expenses: Wallet, billing: FileText, reports: ChartColumn, users: UserCog, notifications: Bell, automations: Zap, settings: Settings,
 };
 const NAV_GROUPS: { key: string; items: NavSection[] }[] = [
-  { key: 'nav.groupMain', items: ['dashboard', 'pos', 'cash', 'inventory', 'stock', 'repairs'] },
+  { key: 'nav.groupMain', items: ['dashboard', 'pos', 'cash', 'inventory', 'stock', 'repairs', 'quotes'] },
   { key: 'nav.groupManagement', items: ['clients', 'providers', 'purchases', 'expenses', 'billing', 'reports'] },
   { key: 'nav.groupSystem', items: ['users', 'notifications', 'automations', 'settings'] },
 ];

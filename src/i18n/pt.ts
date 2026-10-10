@@ -20,6 +20,7 @@ const pt = {
   "name": "Nome",
   "noAccess": "Sem acesso",
   "noAccessHint": "Não tem permissões para este módulo.",
+  "enable": "Ativar",
   "noData": "Sem dados",
   "noResults": "Sem resultados",
   "notes": "Notas",
@@ -51,6 +52,34 @@ const pt = {
   "integer": "Deve ser um número inteiro",
   "minItems": "Adicione pelo menos um artigo",
   "duplicate": "Já existe um registo com este valor"
+ },
+ "quotes": {
+  "subtitle": "Orçamentos que se convertem em venda ou reparação com um clique",
+  "new": "Novo orçamento",
+  "number": "Nº",
+  "kind": "Tipo",
+  "kindSale": "Venda",
+  "kindRepair": "Reparação",
+  "items": "Linhas",
+  "expiresAt": "Válido até",
+  "validUntil": "Válido até",
+  "docTitle": "ORÇAMENTO",
+  "footerNote": "Orçamento indicativo · validez conforme a data indicada",
+  "searchPlaceholder": "Pesquisar por número, cliente, telefone ou dispositivo…",
+  "created": "Orçamento {{number}} criado",
+  "convertSale": "Converter em venda",
+  "convertRepair": "Converter em reparação",
+  "convertedSale": "Venda {{ticket}} criada a partir do orçamento",
+  "convertedRepair": "Reparação {{ticket}} criada a partir do orçamento",
+  "noStockFor": "Stock insuficiente para: {{names}}"
+ },
+ "quoteStatus": {
+  "draft": "Rascunho",
+  "sent": "Enviado",
+  "accepted": "Aceito",
+  "rejected": "Recusado",
+  "expired": "Expirado",
+  "converted": "Convertido"
  },
  "auth": {
   "email": "Email",
@@ -98,6 +127,7 @@ const pt = {
   "inventory": "Inventário",
   "stock": "Movimentos",
   "repairs": "Reparações",
+  "quotes": "Orçamentos",
   "clients": "Clientes",
   "providers": "Fornecedores",
   "purchases": "Encomendas",
@@ -302,7 +332,12 @@ const pt = {
   "checkout": "Cobrar",
   "ticket": "Talão",
   "saleDone": "Venda {{ticket}} concluída",
-  "noMoreStock": "Não há mais stock de {{name}}"
+  "noMoreStock": "Não há mais stock de {{name}}",
+  "splitPayment": "Pagamento dividido (vários métodos)",
+  "addPaymentLine": "Adicionar método de pagamento",
+  "splitSumPaid": "Reparto",
+  "splitSumWarn": "O reparto deve cobrir o total exato com valores maiores que zero",
+  "shortcuts": "Atalhos: F1 pesquisar · F2 cobrar · F3 ler código · F4 esvaziar"
  },
  "inventory": {
   "subtitle": "Produtos, categorias e níveis de stock",
@@ -698,6 +733,8 @@ const pt = {
   "updState_downloaded": "atualização descarregada",
   "updApply": "Instalar agora",
   "updBannerHint": "Nova versão disponível no GitHub",
+  "exportCsv": "CSV",
+  "exportCsvHint": "Exporta {{table}} para CSV (Excel)",
   "lockAfterMinutes": "Bloqueio automático (min)",
   "lockAfterHint": "Minutos de inatividade antes de bloquear o ecrã · 0 = desativado",
   "securityNote": "A sessão fica guardada neste navegador. Com o bloqueio ativo, quem usar este dispositivo precisará da palavra-passe.",

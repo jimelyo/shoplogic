@@ -1,6 +1,12 @@
 // ShopLogic Pro service worker — network-first so updates are always visible, cache fallback for offline use.
-const CACHE = 'shoplogic-v1';
-self.addEventListener('install', (e) => { self.skipWaiting(); e.waitUntil(caches.open(CACHE).then((c) => c.addAll(['/', '/manifest.json', '/icon.svg']).catch(() => undefined))); });
+// Vite rewrites the ASSET list at build time (vite.config.ts imports this file as a transform).
+const CACHE = 'shoplogic-v2';
+const ASSETS = self.__SL_PRECACHE_ASSETS || ['/', '/manifest.json', '/icon.svg'];
+
+self.addEventListener('install', (e) => {
+  self.skipWaiting();
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS).catch(() => undefined)));
+});
 self.addEventListener('activate', (e) => {
   e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim()));
 });

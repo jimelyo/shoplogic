@@ -20,6 +20,7 @@ const es = {
   "name": "Nombre",
   "noAccess": "Sin acceso",
   "noAccessHint": "No tienes permisos para este módulo.",
+  "enable": "Activar",
   "noData": "Sin datos",
   "noResults": "No hay resultados",
   "notes": "Notas",
@@ -51,6 +52,34 @@ const es = {
   "integer": "Debe ser un número entero",
   "minItems": "Añade al menos un artículo",
   "duplicate": "Ya existe un registro con este valor"
+ },
+ "quotes": {
+  "subtitle": "Presupuestos que se convierten en venta o reparación con un clic",
+  "new": "Nuevo presupuesto",
+  "number": "Nº",
+  "kind": "Tipo",
+  "kindSale": "Venta",
+  "kindRepair": "Reparación",
+  "items": "Líneas",
+  "expiresAt": "Válido hasta",
+  "validUntil": "Válido hasta",
+  "docTitle": "PRESUPUESTO",
+  "footerNote": "Presupuesto orientativo · validez según fecha indicada",
+  "searchPlaceholder": "Buscar por número, cliente, teléfono o dispositivo…",
+  "created": "Presupuesto {{number}} creado",
+  "convertSale": "Convertir en venta",
+  "convertRepair": "Convertir en reparación",
+  "convertedSale": "Venta {{ticket}} creada desde el presupuesto",
+  "convertedRepair": "Reparación {{ticket}} creada desde el presupuesto",
+  "noStockFor": "Sin stock suficiente para: {{names}}"
+ },
+ "quoteStatus": {
+  "draft": "Borrador",
+  "sent": "Enviado",
+  "accepted": "Aceptado",
+  "rejected": "Rechazado",
+  "expired": "Caducado",
+  "converted": "Convertido"
  },
  "auth": {
   "email": "Email",
@@ -98,6 +127,7 @@ const es = {
   "inventory": "Inventario",
   "stock": "Movimientos",
   "repairs": "Reparaciones",
+  "quotes": "Presupuestos",
   "clients": "Clientes",
   "providers": "Proveedores",
   "purchases": "Pedidos",
@@ -302,7 +332,12 @@ const es = {
   "checkout": "Cobrar",
   "ticket": "Ticket",
   "saleDone": "Venta {{ticket}} completada",
-  "noMoreStock": "No hay más stock de {{name}}"
+  "noMoreStock": "No hay más stock de {{name}}",
+  "splitPayment": "Pago dividido (varios medios)",
+  "addPaymentLine": "Añadir medio de pago",
+  "splitSumPaid": "Reparto",
+  "splitSumWarn": "El reparto debe cubrir el total exacto con importes mayores que cero",
+  "shortcuts": "Atajos: F1 buscar · F2 cobrar · F3 escanear · F4 vaciar"
  },
  "inventory": {
   "subtitle": "Productos, categorías y niveles de stock",
@@ -697,6 +732,8 @@ const es = {
   "updPendingToast": "Hay una versión nueva disponible: Configuración → Apariencia → Actualización",
   "updState_downloaded": "actualización descargada",
   "updApply": "Instalar ahora",
+  "exportCsv": "CSV",
+  "exportCsvHint": "Exporta {{table}} a CSV para Excel",
   "updBannerHint": "Nueva versión disponible en GitHub",
   "lockAfterMinutes": "Bloqueo automático (min)",
   "lockAfterHint": "Minutos de inactividad antes de bloquear la pantalla · 0 = desactivado",

@@ -1,7 +1,7 @@
 import Dexie, { type Table } from 'dexie';
 import type {
   AppNotification, AuditLog, Customer, Expense, Invoice, Product, Provider, PurchaseOrder, PurchaseOrderStatus,
-  CashSession, OutboxEntry, DailySnapshot, Repair, Sale, SaleReturn, Settings, StockMove, StockMoveType, User, PaymentMethod,
+  CashSession, OutboxEntry, DailySnapshot, Quote, Repair, Sale, SaleReturn, Settings, StockMove, StockMoveType, User, PaymentMethod,
 } from '../types';
 import { DEFAULT_ROLE_PERMISSIONS } from '../types';
 import { DEFAULT_CATEGORIES } from '../data/categories';
@@ -28,6 +28,7 @@ export class ShopDB extends Dexie {
   returns!: Table<SaleReturn, number>;
   outbox!: Table<OutboxEntry, number>;
   snapshots!: Table<DailySnapshot, number>;
+  quotes!: Table<Quote, number>;
 
   constructor() {
     super('shoplogic_pro');
@@ -63,6 +64,9 @@ export class ShopDB extends Dexie {
     this.version(7).stores({
       repairs: '++id, ticketNumber, status, dateIn, customerName, imei, customerId',
     });
+    this.version(8).stores({
+      quotes: '++id, number, status, date, customerId, kind',
+    });
   }
 }
 
@@ -70,7 +74,7 @@ export const db = new ShopDB();
 
 export const TABLE_NAMES = [
   'products', 'sales', 'repairs', 'customers', 'providers', 'expenses', 'invoices', 'users', 'logs', 'notifications', 'settings',
-  'purchaseOrders', 'stockMoves', 'cashSessions', 'returns', 'outbox',
+  'purchaseOrders', 'stockMoves', 'cashSessions', 'returns', 'outbox', 'quotes',
 ] as const;
 export type TableName = (typeof TABLE_NAMES)[number];
 

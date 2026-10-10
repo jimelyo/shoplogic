@@ -44,6 +44,8 @@ export interface UpdateSnapshot {
   supported: boolean;
   /** Version of the pending update, when known (desktop updater reports it). */
   newVersion?: string | null;
+  /** 0–100 desktop download progress while downloading; `null` otherwise. */
+  downloadPercent?: number | null;
 }
 
 /** Running app version: injected by Vite from package.json. */
@@ -52,6 +54,8 @@ export const APP_VERSION: string = import.meta.env.VITE_APP_VERSION ?? '';
 const LAST_CHECK_KEY = 'sl_update_last_check';
 const INTERVAL_KEY = 'sl_update_interval';
 const AUTO_KEY = 'sl_update_auto';
+/** A dismissed pending update is not nagged again until a different version shows up. */
+const DISMISS_PREFIX = 'sl_update_dismissed_';
 const HOUR = 3_600;
 const DAY = 24 * HOUR;
 
@@ -179,6 +183,25 @@ function armTimer() {
   }, ms);
 }
 
+/** True when the user closed the banner for this exact released version. */
+export function isDismissed(v: string | null | undefined): boolean {
+  if (!v) return false;
+  return localStorage.getItem(DISMISS_PREFIX + v) === '1';
+}
+
+/** Remembers the dismissal until a newer version comes along. */
+export function dismissVersion(v: string | null | undefined): void {
+  if (!v) return;
+  localStorage.setItem(DISMISS_PREFIX + v, '1');
+  // Avoid clutter: earlier dismissals for older versions are no longer needed.
+  const stale: string[] = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i)!;
+    if (k.startsWith(DISMISS_PREFIX) && k !== DISMISS_PREFIX + v) stale.push(k);
+  }
+  stale.forEach((k) => localStorage.removeItem(k));
+}
+
 /** Label keys for the interval picker (keeps the wordy option names in i18n). */
 export const INTERVAL_OPTIONS: { seconds: number; label: string }[] = [
   { seconds: 0, label: 'settings.updInterval_off' },
@@ -238,10 +261,13 @@ async function initDesktopUpdater(): Promise<void> {
         toast('info', 'settings.updPendingToast');
         if (snapshot.autoInstall) void bridge.applyUpdate().catch(() => undefined); // Pre-download only.
         break;
-      case 'downloading': setState('checking'); break;
-      case 'installReady': snapshot = withVersion('downloaded'); emit(); break;
-      case 'idle': setState('idle'); snapshot = { ...snapshot, newVersion: null }; emit(); break;
-      case 'error': setState('idle'); break;
+      case 'downloading':
+        snapshot = { ...snapshot, state: 'checking', downloadPercent: p.progress?.percent ?? null };
+        emit();
+        break;
+      case 'installReady': snapshot = { ...snapshot, state: 'downloaded', downloadPercent: null, newVersion: v }; emit(); break;
+      case 'idle': setState('idle'); snapshot = { ...snapshot, newVersion: null, downloadPercent: null }; emit(); break;
+      case 'error': setState('idle'); snapshot = { ...snapshot, downloadPercent: null }; emit(); break;
     }
   });
   if (snapshot.intervalSeconds > 0) armTimer();

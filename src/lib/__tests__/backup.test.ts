@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { db, TABLE_NAMES } from '../../db/database';
-import { backupCounts, exportAll, importBackup, parseBackup, resetTables, tableCounts } from '../backup';
+import { backupCounts, exportAll, importBackup, parseBackup, resetTables, tableCounts, validateBackupRows, applyCredentialMask } from '../backup';
 
 const clearAll = async () => {
   await db.transaction('rw', db.tables, async () => {
@@ -66,6 +66,34 @@ describe('importBackup', () => {
   it('guarantees a settings row even when the backup has none', async () => {
     await importBackup({ products: [] });
     expect(await db.settings.count()).toBe(1);
+  });
+});
+
+describe('validateBackupRows / credential masking', () => {
+  const row = (extra: Record<string, unknown> = {}) => ({ name: 'x', price: 1, createdAt: '', ...extra });
+
+  it('accepts rows with the mandatory fields', () => {
+    expect(validateBackupRows({ products: [row()] }).ok).toBe(true);
+  });
+
+  it('rejects rows missing mandatory fields', () => {
+    const r = validateBackupRows({ products: [{ price: 1 }] });
+    expect(r.ok).toBe(false);
+    expect(r.errors.join(' ')).toContain('products[0].name');
+  });
+
+  it('masks channel credentials in snapshots', () => {
+    const data = { settings: [{ id: 1, channels: { whatsapp: { token: 'SECRET' }, email: { password: 'PW' } } }] };
+    const masked = JSON.parse(JSON.stringify(applyCredentialMask(data as never)));
+    expect(JSON.stringify(masked)).not.toContain('SECRET');
+    expect(JSON.stringify(masked)).toContain('•masked•');
+  });
+
+  it('rejects a corrupted row instead of importing garbage', async () => {
+    let failed = false;
+    try { await importBackup({ products: [{ price: 1 }] as never }); }
+    catch { failed = true; }
+    expect(failed).toBe(true);
   });
 });
 

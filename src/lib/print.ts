@@ -1,5 +1,5 @@
 import i18n from '../i18n';
-import type { Invoice, Repair, Sale, Settings } from '../types';
+import type { Invoice, Quote, Repair, Sale, Settings } from '../types';
 import { splitVat } from './calc';
 import { formatMoney, safeFormat } from './format';
 
@@ -92,6 +92,27 @@ export function repairReceiptHtml(r: Repair, s: Settings, t: T) {
   <tr class="tot"><td>${esc(t('tax.totalInc'))}</td><td class="r">${m(v.total)}</td></tr></table><hr>
   <div class="c muted">${esc(t('repairs.thanks'))}</div>
   <div class="c muted" style="margin-top:14px">______________________<br>${esc(t('repairs.signature'))}</div>`;
+}
+
+/** Ticket-style quote to hand (or send) to the customer. */
+export function quoteHtml(x: Quote, s: Settings, t: T) {
+  const lang = i18n.language;
+  const m = (n: number) => formatMoney(n, s, lang);
+  const v = splitVat(x.total, s.taxRate);
+  const rows = x.items.map((i) => `<tr><td>${i.quantity} x ${esc(i.name)}</td><td class="r">${m(i.price * i.quantity)}</td></tr>`).join('');
+  return `${ticketCss(s.ticketPrinter?.width ?? '80mm')}${storeHeader(s, t)}
+  <div class="c b">${esc(t('quotes.docTitle'))}</div>
+  <div class="c b" style="font-size:16px">${esc(x.number)}</div><hr>
+  <div><span class="b">${esc(t('common.date'))}:</span> ${safeFormat(x.date, 'dd/MM/yyyy')}
+  ${x.expiresAt ? `<br><span class="b">${esc(t('quotes.validUntil'))}:</span> ${safeFormat(x.expiresAt, 'dd/MM/yyyy')}` : ''}
+  <br><span class="b">${esc(t('common.customer'))}:</span> ${esc(x.customerName)}${x.customerPhone ? `<br>${esc(x.customerPhone)}` : ''}
+  ${x.device ? `<br><span class="b">${esc(t('repairs.device'))}:</span> ${esc(x.device)}${x.imei ? ` · IMEI ${esc(x.imei)}` : ''}` : ''}</div><hr>
+  <table>${rows}</table><hr>
+  <table><tr><td>${esc(t('tax.base'))}</td><td class="r">${m(v.base)}</td></tr>
+  <tr><td>${esc(t('tax.vat'))} (${s.taxRate}%)</td><td class="r">${m(v.vat)}</td></tr>
+  <tr class="tot"><td>${esc(t('tax.totalInc'))}</td><td class="r">${m(v.total)}</td></tr></table><hr>
+  ${x.notes ? `<div class="muted">${esc(x.notes)}</div><hr>` : ''}
+  <div class="c muted">${esc(t('quotes.footerNote'))}</div>`;
 }
 
 export function invoiceHtml(inv: Invoice, s: Settings, t: T, brand = '#4f46e5') {

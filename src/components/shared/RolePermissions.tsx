@@ -9,7 +9,7 @@ import { Button } from './Forms';
 
 export const ROLE_COLORS: Record<Role, BadgeColor> = { admin: 'red', manager: 'blue', technician: 'amber', cashier: 'green' };
 export const MODULE_ICONS: Record<NavSection, string> = {
-  dashboard: '📊', pos: '🛒', cash: '💵', inventory: '📦', stock: '📜', repairs: '🔧', clients: '👥', providers: '🚚', purchases: '📥',
+  dashboard: '📊', pos: '🛒', cash: '💵', inventory: '📦', stock: '📜', repairs: '🔧', quotes: '📋', clients: '👥', providers: '🚚', purchases: '📥',
   expenses: '💸', billing: '📄', reports: '📈', users: '👤', notifications: '🔔', automations: '🤖', settings: '⚙️',
 };
 

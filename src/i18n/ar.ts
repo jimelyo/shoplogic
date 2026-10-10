@@ -20,6 +20,7 @@ const ar = {
   "name": "الاسم",
   "noAccess": "لا يوجد وصول",
   "noAccessHint": "ليست لديك صلاحيات لهذه الوحدة.",
+  "enable": "تشغيل",
   "noData": "لا توجد بيانات",
   "noResults": "لا توجد نتائج",
   "notes": "ملاحظات",
@@ -51,6 +52,34 @@ const ar = {
   "integer": "يجب أن يكون عددًا صحيحًا",
   "minItems": "أضف عنصرًا واحدًا على الأقل",
   "duplicate": "يوجد سجل بهذه القيمة بالفعل"
+ },
+ "quotes": {
+  "subtitle": "عروض تُحوَّل إلى بيع أو إصلاح بنقرة واحدة",
+  "new": "عرض سعر جديد",
+  "number": "الرقم",
+  "kind": "النوع",
+  "kindSale": "بيع",
+  "kindRepair": "إصلاح",
+  "items": "البنود",
+  "expiresAt": "صالح حتى",
+  "validUntil": "صالح حتى",
+  "docTitle": "عرض سعر",
+  "footerNote": "عرض سعري استرشادي · الصلاحية وفق التاريخ الموضح",
+  "searchPlaceholder": "ابحث بالرقم أو العميل أو الهاتف أو الجهاز…",
+  "created": "تم إنشاء عرض السعر {{number}}",
+  "convertSale": "تحويل إلى بيع",
+  "convertRepair": "تحويل إلى إصلاح",
+  "convertedSale": "تم إنشاء عملية البيع {{ticket}} من عرض السعر",
+  "convertedRepair": "تم إنشاء الإصلاح {{ticket}} من عرض السعر",
+  "noStockFor": "المخزون غير كافٍ لـ: {{names}}"
+ },
+ "quoteStatus": {
+  "draft": "مسودة",
+  "sent": "مُرسل",
+  "accepted": "مقبول",
+  "rejected": "مرفوض",
+  "expired": "منتهي",
+  "converted": "محوَّل"
  },
  "auth": {
   "email": "البريد الإلكتروني",
@@ -98,6 +127,7 @@ const ar = {
   "inventory": "المخزون",
   "stock": "حركات المخزون",
   "repairs": "الإصلاحات",
+  "quotes": "عروض الأسعار",
   "clients": "العملاء",
   "providers": "الموردون",
   "purchases": "طلبات الشراء",
@@ -302,7 +332,12 @@ const ar = {
   "checkout": "تحصيل",
   "ticket": "إيصال",
   "saleDone": "اكتملت عملية البيع {{ticket}}",
-  "noMoreStock": "لا يتوفر مخزون إضافي من {{name}}"
+  "noMoreStock": "لا يتوفر مخزون إضافي من {{name}}",
+  "splitPayment": "دفع مقسّم (عدة وسائل)",
+  "addPaymentLine": "إضافة وسيلة دفع",
+  "splitSumPaid": "التوزيع",
+  "splitSumWarn": "يجب أن يغطي التوزيع المجموع بالضبط بمبالغ أكبر من صفر",
+  "shortcuts": "الاختصارات: F1 بحث · F2 تحصيل · F3 مسح · F4 تفريغ"
  },
  "inventory": {
   "subtitle": "المنتجات والفئات ومستويات المخزون",
@@ -698,6 +733,8 @@ const ar = {
   "updState_downloaded": "تم تنزيل التحديث",
   "updApply": "التثبيت الآن",
   "updBannerHint": "إصدار جديد متاح على GitHub",
+  "exportCsv": "CSV",
+  "exportCsvHint": "تصدير {{table}} إلى CSV (Excel)",
   "lockAfterMinutes": "القفل التلقائي (دقائق)",
   "lockAfterHint": "دقائق الخمول قبل قفل الشاشة · 0 = معطل",
   "securityNote": "يتم حفظ الجلسة في هذا المتصفح. عند تفعيل القفل، سيحتاج من يستخدم هذا الجهاز إلى كلمة المرور.",

@@ -1,6 +1,8 @@
 export type NavSection =
-  | 'dashboard' | 'pos' | 'cash' | 'inventory' | 'stock' | 'repairs' | 'clients' | 'providers' | 'purchases' | 'expenses'
+  | 'dashboard' | 'pos' | 'cash' | 'inventory' | 'stock' | 'repairs' | 'quotes' | 'clients' | 'providers' | 'purchases' | 'expenses'
   | 'billing' | 'reports' | 'users' | 'notifications' | 'automations' | 'settings';
+/** State of a quote: open → accepted → converted to a sale or a repair, or rejected/expired. */
+export type QuoteStatus = 'draft' | 'sent' | 'accepted' | 'rejected' | 'expired' | 'converted';
 export type Role = 'admin' | 'manager' | 'technician' | 'cashier';
 export type PaymentMethod = 'cash' | 'card' | 'transfer' | 'other';
 export type RepairStatus = 'received' | 'diagnosis' | 'in_progress' | 'waiting_parts' | 'completed' | 'delivered' | 'cancelled';
@@ -17,11 +19,17 @@ export interface Product {
   cost: number; price: number; stock: number; minStock: number; description?: string; createdAt: string;
 }
 export interface SaleItem { productId: number; name: string; category: string; quantity: number; price: number; cost: number }
+/** One line of a split payment: method + amount covered by that method. */
+export interface SalePaymentLine { method: PaymentMethod; amount: number }
 export interface Sale {
   id?: number; ticketNumber: string; date: string; items: SaleItem[]; subtotal: number; tax: number; total: number;
   /** Cart-level discount applied at checkout, VAT included; `discountPercent` only when the % mode was used. */
   discount?: number; discountPercent?: number;
-  paymentMethod: PaymentMethod; customerId?: number; customerName?: string; userName?: string;
+  /** Primary method (also kept in `splitPayments[0]` when the customer paid several ways). */
+  paymentMethod: PaymentMethod;
+  /** When the customer paid with more than one method; absent for the common single-method sale. */
+  splitPayments?: SalePaymentLine[];
+  customerId?: number; customerName?: string; userName?: string;
 }
 export interface Repair {
   id?: number; ticketNumber: string; dateIn: string; dateOut?: string; customerName: string; customerPhone: string;
@@ -56,6 +64,25 @@ export interface PurchaseOrder {
   id?: number; number: string; providerId?: number; providerName: string; status: PurchaseOrderStatus;
   date: string; expectedDate?: string; receivedAt?: string; items: PurchaseOrderItem[]; total: number;
   notes?: string; createdAt: string;
+}
+
+/** One proposed sale/repair priced for the customer, reused when they accept it. */
+export interface Quote {
+  id?: number; number: string; date: string; expiresAt?: string;
+  customerName: string; customerPhone?: string; customerEmail?: string; customerId?: number;
+  device?: string; imei?: string;
+  kind: 'sale' | 'repair';
+  status: QuoteStatus;
+  /** Prere-drafted line for a prospective sale or repair item. */
+  items: { name: string; quantity: number; price: number }[];
+  estimatedCost?: number; /** for repairs */
+  problem?: string;       /** for repairs */
+  total: number;
+  notes?: string;
+  convertedToSaleId?: number;
+  convertedToRepairId?: number;
+  userName?: string;
+  createdAt: string;
 }
 
 /** One automatic daily backup of the whole database (`sys_daily_backup`). */
@@ -143,15 +170,20 @@ export interface AppNotification {
 export type { AppNotification as Notification };
 
 export const ALL_MODULES: NavSection[] = [
-  'dashboard', 'pos', 'cash', 'inventory', 'stock', 'repairs', 'clients', 'providers', 'purchases', 'expenses',
+  'dashboard', 'pos', 'cash', 'inventory', 'stock', 'repairs', 'quotes', 'clients', 'providers', 'purchases', 'expenses',
   'billing', 'reports', 'users', 'notifications', 'automations', 'settings',
 ];
 
+export const QUOTE_STATUSES: QuoteStatus[] = ['draft', 'sent', 'accepted', 'rejected', 'expired', 'converted'];
+export const QUOTE_STATUS_ICONS: Record<QuoteStatus, string> = {
+  draft: '📝', sent: '📤', accepted: '✅', rejected: '❌', expired: '⏰', converted: '🔁',
+};
+
 export const DEFAULT_ROLE_PERMISSIONS: Record<Role, NavSection[]> = {
   admin: [...ALL_MODULES],
-  manager: ['dashboard', 'pos', 'cash', 'inventory', 'stock', 'repairs', 'clients', 'providers', 'purchases', 'expenses', 'billing', 'reports', 'notifications', 'automations'],
-  technician: ['dashboard', 'inventory', 'stock', 'repairs', 'notifications'],
-  cashier: ['dashboard', 'pos', 'cash', 'clients', 'notifications'],
+  manager: ['dashboard', 'pos', 'cash', 'inventory', 'stock', 'repairs', 'quotes', 'clients', 'providers', 'purchases', 'expenses', 'billing', 'reports', 'notifications', 'automations'],
+  technician: ['dashboard', 'inventory', 'stock', 'repairs', 'quotes', 'notifications'],
+  cashier: ['dashboard', 'pos', 'cash', 'quotes', 'clients', 'notifications'],
 };
 /** Modules that a role can open but not modify */
 export const READ_ONLY_MODULES: Partial<Record<Role, NavSection[]>> = { technician: ['inventory'] };

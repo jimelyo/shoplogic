@@ -20,6 +20,7 @@ const zh = {
   "name": "名称",
   "noAccess": "无访问权限",
   "noAccessHint": "您没有此模块的权限。",
+  "enable": "开启",
   "noData": "暂无数据",
   "noResults": "无结果",
   "notes": "备注",
@@ -51,6 +52,34 @@ const zh = {
   "integer": "必须为整数",
   "minItems": "请至少添加一件商品",
   "duplicate": "已存在具有此值的记录"
+ },
+ "quotes": {
+  "subtitle": "报价可一键转换为销售或维修",
+  "new": "新建报价",
+  "number": "单号",
+  "kind": "类型",
+  "kindSale": "销售",
+  "kindRepair": "维修",
+  "items": "明细",
+  "expiresAt": "有效期至",
+  "validUntil": "有效期至",
+  "docTitle": "报价单",
+  "footerNote": "参考报价 · 以所示日期为准",
+  "searchPlaceholder": "按单号、客户、电话或设备搜索…",
+  "created": "报价 {{number}} 已创建",
+  "convertSale": "转换为销售",
+  "convertRepair": "转换为维修",
+  "convertedSale": "已从报价创建销售 {{ticket}}",
+  "convertedRepair": "已从报价创建维修 {{ticket}}",
+  "noStockFor": "库存不足：{{names}}"
+ },
+ "quoteStatus": {
+  "draft": "草稿",
+  "sent": "已发送",
+  "accepted": "已接受",
+  "rejected": "已拒绝",
+  "expired": "已过期",
+  "converted": "已转换"
  },
  "auth": {
   "email": "邮箱",
@@ -98,6 +127,7 @@ const zh = {
   "inventory": "库存",
   "stock": "库存流水",
   "repairs": "维修",
+  "quotes": "报价",
   "clients": "客户",
   "providers": "供应商",
   "purchases": "采购单",
@@ -302,7 +332,12 @@ const zh = {
   "checkout": "收款",
   "ticket": "小票",
   "saleDone": "销售 {{ticket}} 已完成",
-  "noMoreStock": "{{name}} 已无更多库存"
+  "noMoreStock": "{{name}} 已无更多库存",
+  "splitPayment": "拆分支付（多种方式）",
+  "addPaymentLine": "添加支付方式",
+  "splitSumPaid": "分摊",
+  "splitSumWarn": "分摊金额必须恰好等于总额且大于零",
+  "shortcuts": "快捷键：F1 搜索 · F2 收款 · F3 扫码 · F4 清空"
  },
  "inventory": {
   "subtitle": "商品、类别与库存水平",
@@ -698,6 +733,8 @@ const zh = {
   "updState_downloaded": "更新已下载",
   "updApply": "立即安装",
   "updBannerHint": "GitHub 上有新版本可用",
+  "exportCsv": "CSV",
+  "exportCsvHint": "将{{table}}导出为 CSV（Excel）",
   "lockAfterMinutes": "自动锁定（分钟）",
   "lockAfterHint": "无操作多少分钟后锁定屏幕 · 0 = 关闭",
   "securityNote": "会话保存在此浏览器中。启用自动锁定后，使用该设备的人需要输入密码。",

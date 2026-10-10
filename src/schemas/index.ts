@@ -69,6 +69,25 @@ export const purchaseOrderLineSchema = z.object({
   cost: money(),
 });
 
+export const quoteLineSchema = z.object({
+  name: req(),
+  quantity: z.coerce.number().int('validation.integer').min(1, 'validation.positive'),
+  price: money(),
+});
+
+export const quoteSchema = z.object({
+  customerName: req(2),
+  customerPhone: text(),
+  customerEmail: optEmail(),
+  kind: z.enum(['sale', 'repair']),
+  device: opt(),
+  imei: opt(),
+  problem: opt(),
+  expiresAt: z.string().optional().transform((v) => (v && v.trim() ? v : undefined)),
+  notes: opt(),
+  items: z.array(quoteLineSchema).min(1, 'validation.minItems'),
+});
+
 export const purchaseOrderSchema = z.object({
   providerId: z.coerce.number({ invalid_type_error: 'validation.required' }).int('validation.integer').positive('validation.required'),
   date: req(),

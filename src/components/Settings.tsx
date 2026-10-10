@@ -8,6 +8,7 @@ import { useFormat } from '../lib/format';
 import { logAction } from '../lib/audit';
 import { peekInvoiceNumber } from '../lib/invoices';
 import { backupCounts, downloadBackup, formatBytes, importBackup, parseBackup, resetTables, tableCounts, type BackupData } from '../lib/backup';
+import { exportTableCsv } from '../lib/csv';
 import type { Accent, Channels, ChannelId, ChannelStatus, EmailChannel, InvoiceNumbering, InvoiceStatus, MailProvider, NormalPrinterConfig, PaymentMethod, PrinterConfig, PrinterConnection, Settings as TSettings, WhatsAppChannel, WhatsAppMode } from '../types';
 import { ACCENTS, CURRENCIES, INVOICE_STATUSES, INVOICE_STATUS_ICONS, PAYMENT_METHODS } from '../types';
 import { DEFAULT_CHANNELS, MAIL_PRESETS, MAIL_PROVIDERS, TEMPLATE_PLACEHOLDERS, WHATSAPP_MODES } from '../data/channels';
@@ -383,7 +384,16 @@ function DataSection() {
         <SectionTitle>📤 {t('settings.export')}</SectionTitle>
         <p className="mb-3 text-sm text-sl-muted">{t('settings.exportHint')}</p>
         <p className="mb-3 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-300">🔐 {t('settings.channelsWarn')}</p>
-        <Button icon={<Download />} onClick={doExport}>{t('settings.exportJson')}</Button>
+        <div className="flex flex-wrap gap-2">
+          <Button icon={<Download />} onClick={doExport}>{t('settings.exportJson')}</Button>
+          {TABLE_NAMES.map((n) => (
+            <Button key={n} size="sm" variant="ghost" title={t('settings.exportCsvHint', { table: t(`tables.${n}`) })} onClick={async () => {
+              const c = await exportTableCsv(n);
+              await logAction('export', 'settings', `csv ${n} (${c})`);
+              toast.success(`${t('settings.exportCsv')} · ${t(`tables.${n}`)} (${c})`);
+            }}>{t('settings.exportCsv')} · {t(`tables.${n}`)}</Button>
+          ))}
+        </div>
         {lastExport && <p className="mt-2 text-xs text-sl-muted">✅ {lastExport.name} · <b>{formatBytes(lastExport.size)}</b></p>}
       </Card>
       <Card className="p-5">

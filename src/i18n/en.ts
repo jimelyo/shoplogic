@@ -20,6 +20,7 @@ const en = {
   "name": "Name",
   "noAccess": "No access",
   "noAccessHint": "You don't have permission to access this module.",
+  "enable": "On",
   "noData": "No data",
   "noResults": "No results",
   "notes": "Notes",
@@ -51,6 +52,34 @@ const en = {
   "integer": "Must be a whole number",
   "minItems": "Add at least one item",
   "duplicate": "A record with this value already exists"
+ },
+ "quotes": {
+  "subtitle": "Quotes that turn into a sale or a repair with one click",
+  "new": "New quote",
+  "number": "No.",
+  "kind": "Type",
+  "kindSale": "Sale",
+  "kindRepair": "Repair",
+  "items": "Lines",
+  "expiresAt": "Valid until",
+  "validUntil": "Valid until",
+  "docTitle": "QUOTE",
+  "footerNote": "Indicative quote · valid until the date shown",
+  "searchPlaceholder": "Search by number, customer, phone or device…",
+  "created": "Quote {{number}} created",
+  "convertSale": "Convert to sale",
+  "convertRepair": "Convert to repair",
+  "convertedSale": "Sale {{ticket}} created from the quote",
+  "convertedRepair": "Repair {{ticket}} created from the quote",
+  "noStockFor": "Not enough stock for: {{names}}"
+ },
+ "quoteStatus": {
+  "draft": "Draft",
+  "sent": "Sent",
+  "accepted": "Accepted",
+  "rejected": "Rejected",
+  "expired": "Expired",
+  "converted": "Converted"
  },
  "auth": {
   "email": "Email",
@@ -98,6 +127,7 @@ const en = {
   "inventory": "Inventory",
   "stock": "Stock ledger",
   "repairs": "Repairs",
+  "quotes": "Quotes",
   "clients": "Customers",
   "providers": "Suppliers",
   "purchases": "Purchases",
@@ -302,7 +332,12 @@ const en = {
   "checkout": "Checkout",
   "ticket": "Receipt",
   "saleDone": "Sale {{ticket}} completed",
-  "noMoreStock": "No more stock of {{name}}"
+  "noMoreStock": "No more stock of {{name}}",
+  "splitPayment": "Split payment (several methods)",
+  "addPaymentLine": "Add payment method",
+  "splitSumPaid": "Split",
+  "splitSumWarn": "The split must cover the exact total with amounts above zero",
+  "shortcuts": "Shortcuts: F1 search · F2 checkout · F3 scan · F4 clear"
  },
  "inventory": {
   "subtitle": "Products, categories and stock levels",
@@ -698,6 +733,8 @@ const en = {
   "updState_downloaded": "update downloaded",
   "updApply": "Install now",
   "updBannerHint": "New version available on GitHub",
+  "exportCsv": "CSV",
+  "exportCsvHint": "Export {{table}} to CSV for Excel",
   "lockAfterMinutes": "Auto-lock (min)",
   "lockAfterHint": "Idle minutes before the screen locks · 0 = disabled",
   "securityNote": "The session is stored in this browser. With auto-lock on, anyone using this device will need the password.",

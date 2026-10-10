@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { History, Mail, MessageCircle, Minus, Plus, Printer, ShoppingCart, Trash } from 'lucide-react';
@@ -15,7 +15,7 @@ import { generateNotifications } from '../lib/notifications';
 import { printHtml, saleTicketHtml } from '../lib/print';
 import { DEFAULT_CATEGORIES, categoryLabel } from '../data/categories';
 import { DEFAULT_AUTOMATIONS } from '../data/automations';
-import type { ChannelId, PaymentMethod, Product, Sale } from '../types';
+import type { ChannelId, PaymentMethod, Product, Sale, SalePaymentLine } from '../types';
 import { PAYMENT_METHODS } from '../types';
 import { PageHeader } from './shared/PageHeader';
 import { Badge, Card, EmptyState, Pill, SearchInput, ViewToggle, useViewMode } from './shared/UI';
@@ -39,6 +39,9 @@ export function POS() {
   const [view, setView] = useViewMode('pos');
   const [customerId, setCustomerId] = useState<string>('');
   const [payment, setPayment] = useState<PaymentMethod>('cash');
+  /** Split payment lines; enabled as soon as a second method gets an amount. */
+  const [splitOn, setSplitOn] = useState(false);
+  const [splitLines, setSplitLines] = useState<SalePaymentLine[]>([{ method: 'cash', amount: 0 }]);
   const [discMode, setDiscMode] = useState<'percent' | 'amount'>('percent');
   const [discValue, setDiscValue] = useState('');
   const [busy, setBusy] = useState(false);
@@ -46,6 +49,9 @@ export function POS() {
   const [history, setHistory] = useState(false);
   const [ticket, setTicket] = useState<Sale | null>(null);
   const cats = s.categories?.length ? s.categories : DEFAULT_CATEGORIES;
+  const searchRef = useRef<HTMLInputElement>(null);
+  /** Lets F2 hit the latest checkout closure without resubscribing listeners. */
+  const checkoutRef = useRef<() => Promise<void> | void>(() => {});
 
   const list = useMemo(() => (products ?? []).filter((p) => (cat === 'all' || p.category === cat) && matches(q, p.name, p.barcode, p.imei)), [products, q, cat]);
   const total = round2(cartItems.reduce((a, i) => a + i.product.price * i.quantity, 0));
@@ -75,6 +81,13 @@ export function POS() {
   const units = cartItems.reduce((a, i) => a + i.quantity, 0);
   const catOf = (id: string) => cats.find((c) => c.id === id);
 
+  // --- Split payment ---------------------------------------------------------
+  const splitSum = round2(splitLines.reduce((a, l) => a + (Number(l.amount) || 0), 0));
+  const splitOk = !splitOn || (splitSum === finalTotal && splitLines.every((l) => (Number(l.amount) || 0) > 0));
+  const setSplitLine = (idx: number, patch: Partial<SalePaymentLine>) =>
+    setSplitLines((ls) => ls.map((l, i) => (i === idx ? { ...l, ...patch } : l)));
+  const effMethod: PaymentMethod = splitOn ? (splitLines[0]?.method ?? 'cash') : payment;
+
   const add = (p: Product) => {
     if (p.stock <= 0) return;
     if (!addToCart(p)) toast.warning(t('pos.noMoreStock', { name: p.name }));
@@ -95,8 +108,9 @@ export function POS() {
   };
 
   const checkout = async () => {
-    if (!cartItems.length) return;
+    if (!cartItems.length || !splitOk) return;
     setBusy(true);
+    checkoutRef.current = checkout;
     try {
       const customer = customerId ? customers?.find((c) => String(c.id) === customerId) : undefined;
       const loyaltyOn = s.automations?.sal_loyalty_points !== false;
@@ -121,7 +135,9 @@ export function POS() {
           items: cartItems.map((i) => ({ productId: i.product.id!, name: i.product.name, category: i.product.category, quantity: i.quantity, price: i.product.price, cost: i.product.cost })),
           subtotal: vat.base, tax: vat.vat, total: finalTotal,
           discount: disc || undefined, discountPercent: discPct,
-          paymentMethod: payment, customerId: customer?.id, customerName: customer?.name, userName: user?.name,
+          paymentMethod: payment,
+          splitPayments: splitOn && splitLines.length > 1 ? splitLines.map((l) => ({ method: l.method, amount: round2(Number(l.amount) || 0) })) : undefined,
+          customerId: customer?.id, customerName: customer?.name, userName: user?.name,
         };
         sale.id = await db.sales.add(sale);
         if (customer) {
@@ -134,7 +150,7 @@ export function POS() {
         }
         return sale;
       });
-      await logAction('sale', 'pos', `${sale.ticketNumber} · ${f.money(sale.total)} · ${t(`payment.${payment}`)}${disc ? ` · ${t('pos.discount')} −${f.money(disc)}` : ''}`);
+      await logAction('sale', 'pos', `${sale.ticketNumber} · ${f.money(sale.total)} · ${splitOn ? splitLines.map((l) => `${t(`payment.${l.method}`)} ${f.money(Number(l.amount) || 0)}`).join(' + ') : t(`payment.${effMethod}`)}${disc ? ` · ${t('pos.discount')} −${f.money(disc)}` : ''}`);
       clearCart();
       setCustomerId('');
       setDiscValue('');
@@ -166,6 +182,19 @@ export function POS() {
     }
   };
 
+  // Counter shortcuts: F1 focuses search, F2 captures, F3 opens the scanner,
+  // F4 empties the cart — so the counter can work without a mouse.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'F1') { e.preventDefault(); searchRef.current?.focus(); }
+      else if (e.key === 'F2') { e.preventDefault(); if (cartItems.length) void checkout(); }
+      else if (e.key === 'F3') { e.preventDefault(); setScanning(true); }
+      else if (e.key === 'F4') { e.preventDefault(); if (cartItems.length) { clearCart(); setDiscValue(''); } }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  });
+
   if (!products || !customers) return <LoadingPage />;
 
   const stockBadge = (p: Product) => (
@@ -182,7 +211,7 @@ export function POS() {
         <div className="min-w-0 space-y-3">
           <div className="flex items-start gap-2">
             <div className="min-w-0 flex-1" onKeyDown={(e) => { if (e.key === 'Enter') onSearchEnter(); }}>
-              <SearchInput value={q} onChange={setQ} placeholder={t('pos.searchPlaceholder')} className="[&_input]:h-11" autoFocus />
+              <SearchInput inputRef={searchRef} value={q} onChange={setQ} placeholder={t('pos.searchPlaceholder')} className="[&_input]:h-11" autoFocus />
             </div>
             <ScanButton onClick={() => setScanning(true)} className="h-11 w-11" />
           </div>
@@ -299,7 +328,37 @@ export function POS() {
               <div className="flex justify-between text-sl-muted"><span>{t('tax.vatIncluded')} ({s.taxRate}%)</span><span>{f.money(vat.vat)}</span></div>
               <div className="flex justify-between border-t border-sl-border pt-1.5 text-lg font-extrabold text-sl-text"><span>{t('tax.totalWithVat')}</span><span className="text-primary">{f.money(total)}</span></div>
             </div>
-            <Button size="lg" variant="success" className="w-full" disabled={!cartItems.length} loading={busy} onClick={checkout}>💳 {t('pos.checkout')} · {f.money(finalTotal)}</Button>
+            <button type="button" onClick={() => { setSplitOn((v) => !v); if (!splitOn) setSplitLines([{ method: payment, amount: finalTotal }]); }}
+              className="mb-2 flex w-full items-center justify-between rounded-lg border border-sl-border px-3 py-2 text-xs font-semibold text-sl-muted hover:border-primary/40">
+              <span>🧾 {t('pos.splitPayment')}</span>
+              <span className={splitOn ? 'text-primary' : ''}>{splitOn ? '✓ ' : ''}{t('common.enable')}</span>
+            </button>
+            {splitOn && (
+              <div className="mb-2 space-y-2 rounded-lg border border-sl-border bg-sl-hover/40 p-2">
+                {splitLines.map((l, idx) => (
+                  <div key={idx} className="flex items-center gap-1.5">
+                    <select value={l.method} onChange={(e) => setSplitLine(idx, { method: e.target.value as PaymentMethod })}
+                      className="h-8 min-w-0 flex-1 rounded-md border border-sl-border bg-sl-input px-2 text-xs text-sl-text outline-none focus:border-primary">
+                      {PAYMENT_METHODS.map((m) => <option key={m.id} value={m.id}>{m.icon} {t(`payment.${m.id}`)}</option>)}
+                    </select>
+                    <input type="number" step="0.01" min="0" value={l.amount || ''} placeholder="0.00"
+                      onChange={(e) => setSplitLine(idx, { amount: Number(e.target.value) || 0 })}
+                      className="h-8 w-24 rounded-md border border-sl-border bg-sl-input px-2 text-xs text-sl-text outline-none focus:border-primary" />
+                    {splitLines.length > 1 && (
+                      <button type="button" className="text-sl-muted hover:text-red-500" onClick={() => setSplitLines((ls) => ls.filter((_, i) => i !== idx))}>✕</button>
+                    )}
+                  </div>
+                ))}
+                <div className="flex items-center justify-between text-[11px]">
+                  <button type="button" className="font-semibold text-primary" onClick={() => setSplitLines((ls) => [...ls, { method: 'card', amount: 0 }])}>+ {t('pos.addPaymentLine')}</button>
+                  <span className={splitOk ? 'text-sl-muted' : 'font-bold text-amber-600 dark:text-amber-400'}>
+                    {t('pos.splitSumPaid')}: <b className="text-sl-text">{f.money(splitSum)}</b> / {f.money(finalTotal)}
+                  </span>
+                </div>
+              </div>
+            )}
+            {!splitOk && <p className="mb-1 text-[11px] font-semibold text-amber-600 dark:text-amber-400">⚠️ {t('pos.splitSumWarn')}</p>}
+            <Button size="lg" variant="success" className="w-full" disabled={!cartItems.length || !splitOk} loading={busy} onClick={checkout}>💳 {t('pos.checkout')} · {f.money(finalTotal)}</Button>
           </div>
         </Card>
       </div>
@@ -333,7 +392,7 @@ export function TicketPreview({ sale }: { sale: Sale }) {
       <div>{t('pos.ticket')}: <b>{sale.ticketNumber}</b></div>
       <div>{t('common.date')}: {f.dateTime(sale.date)}</div>
       {sale.customerName && <div>{t('common.customer')}: {sale.customerName}</div>}
-      <div>{t('pos.paymentMethod')}: {t(`payment.${sale.paymentMethod}`)}</div>
+      <div>{t('pos.paymentMethod')}: {sale.splitPayments?.length ? sale.splitPayments.map((l) => `${t(`payment.${l.method}`)} ${f.money(l.amount)}`).join(' + ') : t(`payment.${sale.paymentMethod}`)}</div>
       <hr className="my-2 border-dashed border-slate-400" />
       {sale.items.map((i, idx) => (
         <div key={idx} className="flex justify-between gap-2"><span className="truncate">{i.quantity} x {i.name}</span><span>{f.money(i.price * i.quantity)}</span></div>

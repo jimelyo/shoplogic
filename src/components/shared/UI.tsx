@@ -36,12 +36,13 @@ export function ViewToggle({ value, onChange }: { value: ViewMode; onChange: (m:
   );
 }
 
-export function SearchInput({ value, onChange, placeholder, className = '', autoFocus = false }: { value: string; onChange: (v: string) => void; placeholder?: string; className?: string; autoFocus?: boolean }) {
+export function SearchInput({ value, onChange, placeholder, className = '', autoFocus = false, inputRef }: { value: string; onChange: (v: string) => void; placeholder?: string; className?: string; autoFocus?: boolean; inputRef?: React.Ref<HTMLInputElement> }) {
   const { t } = useTranslation();
   return (
     <div className={`relative min-w-[180px] flex-1 ${className}`}>
       <Search className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-sl-muted" />
       <input
+        ref={inputRef}
         value={value}
         autoFocus={autoFocus}
         onChange={(e) => onChange(e.target.value)}
