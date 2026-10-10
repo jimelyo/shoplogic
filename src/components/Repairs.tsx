@@ -75,18 +75,26 @@ export function Repairs() {
   };
   const automationOn = (id: string) => (s.automations?.[id] ?? DEFAULT_AUTOMATIONS[id]) === true;
   /**
-   * The `wa_repair_ready` / `em_repair_completed` automations send the notice as
-   * soon as the repair is completed. The manual prompt only appears when some
-   * ready channel was not auto-sent (relay missing or automation switched off).
+   * Stage notifications: every repair status change can alert the customer
+   * through WhatsApp and/or email when its automation is on. The two original
+   * automations (ready/completed) keep their ids; the new per-stage ones map
+   * each status to a channel+automation pair.
    */
-  const notifyCompleted = async (r: Repair) => {
+  const STAGE_AUTOMATIONS: Partial<Record<RepairStatus, { wa?: string; em?: string }>> = {
+    received: { wa: 'wa_repair_received' },
+    in_progress: { wa: 'wa_repair_inprogress', em: 'em_repair_inprogress' },
+    waiting_parts: { wa: 'wa_repair_delayed', em: 'em_repair_delayed' },
+    completed: { wa: 'wa_repair_ready', em: 'em_repair_completed' },
+  };
+  const notifyStage = async (r: Repair, status: RepairStatus) => {
+    const stage = STAGE_AUTOMATIONS[status] ?? {};
     const wants: ChannelId[] = [];
-    if (automationOn('wa_repair_ready') && canSendWa && r.customerPhone) wants.push('whatsapp');
-    if (automationOn('em_repair_completed') && canSendMail && r.customerEmail) wants.push('email');
+    if (stage.wa && automationOn(stage.wa) && canSendWa && r.customerPhone) wants.push('whatsapp');
+    if (stage.em && automationOn(stage.em) && canSendMail && r.customerEmail) wants.push('email');
     let relayed = 0;
     for (const id of wants) {
-      const outcome = await dispatchMessage(s.channels!, s.storeName, id, buildTarget(r, id));
-      await logAction('send', 'repairs', `${r.ticketNumber} · ${id} · auto · ${outcome}`);
+      const outcome = await dispatchMessage(s.channels!, s.storeName, id, buildTarget({ ...r, status }, id));
+      await logAction('send', 'repairs', `${r.ticketNumber} · ${id} · stage:${status} · ${outcome}`);
       if (outcome === 'relay') relayed += 1;
       else if (outcome === 'failed') toast.warning(t('channels.sendQueued'));
     }
@@ -95,8 +103,10 @@ export function Repairs() {
       return;
     }
     if (relayed > 0) toast.success(t('channels.autoSent'));
-    setNotify(r);
+    setNotify({ ...r, status });
   };
+  /** Completion keeps its historical wrapper (same flow as notifyStage). */
+  const notifyCompleted = (r: Repair) => notifyStage(r, 'completed');
   const setActive = useStore((x) => x.setActiveModule);
   const goToChannels = () => { localStorage.setItem('sl_settings_section', 'channels'); setActive('settings'); setNotify(null); };
   const canNotifyWa = (r: Repair | null) => canSendWa && !!r?.customerPhone;
@@ -188,10 +198,16 @@ export function Repairs() {
     await logAction('status_change', 'repairs', `${r.ticketNumber}: ${t(`repairStatus.${r.status}`)} → ${t(`repairStatus.${st}`)}`);
     toast.success(`${r.ticketNumber} → ${t(`repairStatus.${st}`)}`);
     if (st === 'delivered') await maybeInvoice({ ...r, ...patch });
-    if (st === 'completed' && r.status !== 'completed') {
+    const isCompletion = st === 'completed' && r.status !== 'completed';
+    if (isCompletion) {
       // The detail modal would sit underneath the prompt, so close it and hand over to the notice.
       setDetail(null);
       await notifyCompleted({ ...r, ...patch });
+    } else if (STAGE_AUTOMATIONS[st] && r.status !== st) {
+      // Any other stage with a configured automation notifies the customer too
+      // (recibido / en proceso / esperando piezas) via WhatsApp or email.
+      await notifyStage({ ...r, ...patch }, st);
+      if (detail?.id === r.id) setDetail({ ...r, ...patch });
     } else if (detail?.id === r.id) setDetail({ ...r, ...patch });
   };
   const remove = async (r: Repair) => {

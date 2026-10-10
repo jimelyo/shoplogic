@@ -8,9 +8,12 @@ export const AUTOMATION_GROUP_ICONS: Record<AutomationGroup, string> = {
 export const AUTOMATIONS: AutomationDef[] = [
   { id: 'wa_repair_ready', group: 'whatsapp', icon: '✅' },
   { id: 'wa_repair_received', group: 'whatsapp', icon: '📥' },
+  { id: 'wa_repair_inprogress', group: 'whatsapp', icon: '🛠️' },
   { id: 'wa_repair_delayed', group: 'whatsapp', icon: '⏰' },
   { id: 'wa_purchase_receipt', group: 'whatsapp', icon: '🧾' },
   { id: 'em_repair_completed', group: 'email', icon: '🔧' },
+  { id: 'em_repair_inprogress', group: 'email', icon: '🛠️' },
+  { id: 'em_repair_delayed', group: 'email', icon: '⏰' },
   { id: 'em_stock_critical', group: 'email', icon: '🚨' },
   { id: 'em_daily_summary', group: 'email', icon: '📊' },
   { id: 'inv_stock_alert', group: 'inventory', icon: '⚠️' },
@@ -36,7 +39,7 @@ export const AUTOMATIONS: AutomationDef[] = [
  * inv_auto_order, sal_whatsapp_receipt, bil_overdue_alert + sys_daily_backup).
  */
 export const PLANNED_AUTOMATIONS = new Set([
-  'wa_repair_received', 'wa_repair_delayed', 'wa_purchase_receipt',
+  'wa_purchase_receipt',
   'em_stock_critical', 'em_daily_summary',
   'inv_stock_notification', 'inv_price_alert',
   'cli_birthday_discount', 'bil_pending_reminder', 'bil_tax_report',
