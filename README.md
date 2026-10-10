@@ -1,5 +1,9 @@
 # 📱 ShopLogic Pro
 
+<p align="center">
+  <img src="public/icon-512.png" width="128" alt="ShopLogic Pro">
+</p>
+
 **ERP + TPV completo para tiendas de telefonía y accesorios** — ventas, cajas, inventario con trazabilidad, taller de reparaciones, facturación, reportes y automatizaciones de mensajería. Funciona 100% local (tus datos nunca salen de tu equipo) y se actualiza sola desde GitHub Releases.
 
 [![Release](https://img.shields.io/github/v/release/jimelyo/shoplogic)](https://github.com/jimelyo/shoplogic/releases)
@@ -58,10 +62,16 @@
 - Resumen financiero (ingresos, gastos, balance) y exportación **PDF de cualquier informe**.
 
 ### 🤖 Automatizaciones y mensajería
-- Automatizaciones configurables: recibos por WhatsApp, aviso de reparación lista, email de reparación completada, resumen diario, backup diario…
+- **Avisos por etapa del taller**: cada cambio de estado de una reparación puede notificar al cliente automáticamente:
+  - 📥 Recibido → WhatsApp
+  - 🛠️ En proceso → WhatsApp + Email
+  - ⏰ Esperando piezas → WhatsApp + Email
+  - ✅ Lista / Completada → WhatsApp + Email (resumen con coste final)
+- Automatizaciones configurables adicionales: recibos de venta por WhatsApp, resumen diario, backup diario, alertas de stock y facturas vencidas…
 - **WhatsApp** en dos modos: enlace directo `wa.me` (sin servidor) o **Cloud API** oficial.
 - **Email** con presets de Gmail/Outlook/SMTP genérico.
 - Cola de envío (outbox) con reintentos al reiniciar si el servidor relay no estaba disponible.
+- Todo el uso queda registrado en la auditoría (quién envió qué y cuándo).
 
 ### ⚙️ Configuración y datos
 - Multiples monedas (EUR, USD, GBP, MXN, ARS, COP, CLP, BRL, CNY, MAD), IVA configurable.- Marca propia: nombre de la app, logo, datos fiscales del comercio en tickets/PDF.
@@ -73,7 +83,7 @@
 - Auditoría: registro de acciones (login, ventas, modificaciones, envíos, impresiones) con usuario y fecha.
 
 ### 🔄 Auto-actualizaciones
-- **Escritorio (Electron)**: consulta GitHub Releases al arrancar y cada 30 min; descarga en segundo plano con **descarga diferencial** y sugiere la instalación con un banner no intrusivo (descartable por versión); instalación al cerrar la app.
+- **Escritorio (Electron)**: consulta GitHub Releases al arrancar y cada 30 min; descarga en segundo plano con **descarga diferencial** (blockmaps), progreso visible y banner descartable por versión; la instalación se aplica al cerrar la app con **un solo UAC** (instalador one-click, sin asistente).
 - **PWA (navegador)**: service worker detecta la nueva versión y la aplica al recargar (automático si lo activas en Apariencia → Actualización).
 - **Offline real**: el service worker precachea todos los assets — funciona sin conexión desde la primera visita.
 
@@ -133,7 +143,7 @@ npm run check:i18n   # comprueba 5 locales con llaves idénticas
 - **Frontend**: React 19 + TypeScript + Tailwind CSS 4 + Zustand.
 - **Datos**: Dexie (IndexedDB) con transacciones atómicas; modelos tipados en `src/types`.
 - **Escritorio**: Electron 44 + electron-updater con Releases de GitHub.
-- **Testing**: Vitest + fake-indexeddb (78 tests).
+- **Testing**: Vitest + fake-indexeddb (78 tests), incluidos tests de backups y credenciales.
 
 ### Estructura
 ```
@@ -141,7 +151,7 @@ src/
 ├── components/    # 25+ módulos UI (POS, Cash, Inventory, Repairs, Quotes, Billing, Reports…)
 ├── lib/           # lógica core: calc, stock, invoices, cash, messaging, backup, csv, update…
 ├── db/            # esquema Dexie + datos demo
-├── i18n/          # es, en, pt, zh, ar (869 claves sincronizadas)
+├── i18n/          # es, en, pt, zh, ar (873 claves sincronizadas)
 ├── schemas/       # validación Zod de todos los formularios
 └── types/         # modelos tipados del dominio
 electron/          # proceso principal, preload y updater
@@ -149,6 +159,17 @@ public/            # service worker + manifest
 ```
 
 ---
+
+## 🗺️ Historial de releases
+
+| Versión | Novedades principales |
+|---|---|
+| **v1.0.6** | Avisos por etapa del taller (recibido/en proceso/esperando piezas) en WhatsApp + email · icono regenerado |
+| **v1.0.5** | Nuevo icono corporativo (teléfono + llave + gráfico) en instalador, ventana y PWA |
+| **v1.0.4** | Instalador one-click (auto-update con un solo UAC) · README completo |
+| **v1.0.3** | Presupuestos convertibles en venta/reparación · pagos divididos en TPV · atajos F1-F4 · CSV por tabla · credenciales enmascaradas en backups · PWA offline real |
+| **v1.0.2** | Versión visible en el sidebar · banner de actualización no forzada |
+| **v1.0.1** | Auto-update vía GitHub Releases con electron-updater |
 
 ## 📄 Licencia
 Proyecto privado. Todos los derechos reservados.
