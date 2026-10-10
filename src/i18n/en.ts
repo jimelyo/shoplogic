@@ -92,7 +92,6 @@ const en = {
   "subtitle": "Sign in to your account to continue",
   "tagline": "ERP · POS for phone and accessory shops",
   "title": "Welcome",
-  "demoHint": "Demo: admin@shoplogic.com / admin123 · also manager@, tecnico@ and cajero@ (password: role + 123)",
   "changePassword": "Change password",
   "currentPassword": "Current password",
   "newPassword": "New password",

@@ -1,7 +1,7 @@
 {
   "name": "shoplogic",
   "private": true,
-  "version": "1.0.6",
+  "version": "1.1.0",
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": {

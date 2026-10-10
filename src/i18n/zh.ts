@@ -92,7 +92,6 @@ const zh = {
   "subtitle": "请登录您的账户以继续",
   "tagline": "ERP · POS 系统，专为手机及配件店打造",
   "title": "欢迎",
-  "demoHint": "演示：admin@shoplogic.com / admin123 · 另有 manager@、tecnico@ 和 cajero@（密码：角色 + 123）",
   "changePassword": "修改密码",
   "currentPassword": "当前密码",
   "newPassword": "新密码",

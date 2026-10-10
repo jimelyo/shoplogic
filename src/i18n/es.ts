@@ -92,7 +92,6 @@ const es = {
   "subtitle": "Accede con tu cuenta para continuar",
   "tagline": "ERP · TPV para tiendas de telefonía y accesorios",
   "title": "Bienvenido",
-  "demoHint": "Demo: admin@shoplogic.com / admin123 · también manager@, tecnico@ y cajero@ (contraseña: rol + 123)",
   "changePassword": "Cambiar contraseña",
   "currentPassword": "Contraseña actual",
   "newPassword": "Nueva contraseña",

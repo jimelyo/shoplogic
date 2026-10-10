@@ -1,10 +1,10 @@
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { Lock, Mail } from 'lucide-react';
+import { Lock } from 'lucide-react';
 import { db } from '../db/database';
 import { useStore } from '../store/store';
-import { loginSchema, validateForm, type FormErrors } from '../schemas';
+import type { User } from '../types';
 import { hashPassword, verifyPassword } from '../lib/hash';
 import { logAction } from '../lib/audit';
 import { Button, Input } from './shared/Forms';
@@ -12,39 +12,43 @@ import { LanguageSelector } from './shared/LanguageSelector';
 import { ThemeMenu } from './Layout';
 import { firstAccessible } from '../lib/permissions';
 import { appNameOf, BrandMark } from './shared/Brand';
+import { ROLE_ICONS } from '../types';
+import { useFormat } from '../lib/format';
 
 export function Login() {
   const { t } = useTranslation();
+  const f = useFormat();
   const settings = useLiveQuery(() => db.settings.toCollection().first(), []);
+  /** Active users, sorted alphabetically — the picker's source of truth. */
+  const users = useLiveQuery(() =>
+    db.users.filter((u) => u.isActive).sortBy('name'), [],
+  ) as User[] | undefined;
   const setCurrentUser = useStore((s) => s.setCurrentUser);
   const setActiveModule = useStore((s) => s.setActiveModule);
-  const [form, setForm] = useState({ email: '', password: '' });
-  const [errors, setErrors] = useState<FormErrors>({});
+  /** Which user account is selected for sign-in (`null` until one is picked). */
+  const [selected, setSelected] = useState<User | null>(null);
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
+    if (!selected) return;
     setError('');
-    const r = validateForm(loginSchema, form);
-    setErrors(r.errors);
-    if (!r.success) return;
+    if (!password) { setError(t('validation.required')); return; }
     setLoading(true);
     try {
-      const user = await db.users.where('email').equalsIgnoreCase(r.data.email).first();
-      if (!user) { setError(t('auth.invalid')); return; }
-      const check = await verifyPassword(user.password, r.data.password);
+      const check = await verifyPassword(selected.password, password);
       if (!check.ok) { setError(t('auth.invalid')); return; }
-      if (!user.isActive) { setError(t('auth.inactive')); return; }
       const lastLogin = new Date().toISOString();
       // Upgrade hashes written by older versions once the password is known to be right.
-      const patch = check.needsRehash ? { lastLogin, password: await hashPassword(r.data.password) } : { lastLogin };
-      await db.users.update(user.id!, patch);
-      const session = { id: user.id!, name: user.name, email: user.email, role: user.role, permissions: user.permissions };
+      const patch = check.needsRehash ? { lastLogin, password: await hashPassword(password) } : { lastLogin };
+      await db.users.update(selected.id!, patch);
+      const session = { id: selected.id!, name: selected.name, email: selected.email, role: selected.role, permissions: selected.permissions };
       setCurrentUser(session);
       const first = firstAccessible(session);
       if (first) setActiveModule(first === 'dashboard' || !session.permissions.includes(useStore.getState().activeModule) ? first : useStore.getState().activeModule);
-      await logAction('login', 'auth', user.email);
+      await logAction('login', 'auth', selected.email);
     } finally {
       setLoading(false);
     }
@@ -62,17 +66,45 @@ export function Login() {
           <p className="mt-1 text-sm text-sl-muted">{t('auth.tagline')}</p>
         </div>
         <form onSubmit={submit} noValidate className="space-y-4 rounded-2xl border border-sl-border bg-sl-card p-6 shadow-xl">
-          <div>
-            <h2 className="text-lg font-bold text-sl-text">{t('auth.title')}</h2>
-            <p className="text-sm text-sl-muted">{t('auth.subtitle')}</p>
-          </div>
-          <Input label={t('auth.email')} type="email" autoComplete="username" icon={<Mail />} placeholder="admin@shoplogic.com"
-            value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} error={errors.email} />
-          <Input label={t('auth.password')} type="password" autoComplete="current-password" icon={<Lock />} placeholder="••••••••"
-            value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} error={errors.password} />
-          {error && <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-600 dark:text-red-300">❌ {error}</div>}
-          <Button type="submit" size="lg" className="w-full" loading={loading}>{t('auth.login')}</Button>
-          <p className="rounded-lg bg-sl-hover px-3 py-2 text-center text-[11px] text-sl-muted">{t('auth.demoHint')}</p>
+          {!users ? null : selected ? (
+            <>
+              <div className="flex items-center gap-3">
+                <button type="button" onClick={() => { setSelected(null); setPassword(''); setError(''); }}
+                  title={t('common.close')}
+                  className="rounded-lg p-2 text-sl-muted hover:bg-sl-hover hover:text-sl-text"> ←</button>
+                <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-fuchsia-500 text-lg font-bold text-white shadow-lg shadow-primary/25">
+                  {selected.name.charAt(0).toUpperCase()}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-base font-bold text-sl-text">{selected.name}</div>
+                  <div className="text-xs text-sl-muted">{ROLE_ICONS[selected.role]} {t(`roles.${selected.role}`)}</div>
+                </div>
+              </div>
+              <Input label={t('auth.password')} type="password" autoComplete="current-password" autoFocus icon={<Lock />} placeholder="••••••••"
+                value={password} onChange={(e) => setPassword(e.target.value)} error={error} />
+              {error && <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-600 dark:text-red-300">❌ {error}</div>}
+              <Button type="submit" size="lg" className="w-full" loading={loading}>{t('auth.login')}</Button>
+            </>
+          ) : (
+            <>
+              <div>
+                <h2 className="text-lg font-bold text-sl-text">{t('auth.title')}</h2>
+                <p className="text-sm text-sl-muted">{t('auth.subtitle')}</p>
+              </div>
+              <div className="grid max-h-[320px] grid-cols-2 gap-2 overflow-y-auto sm:grid-cols-3">
+                {users.filter((u) => u.isActive).map((u) => (
+                  <button key={u.id} type="button" onClick={() => { setSelected(u); setError(''); }}
+                    className="flex flex-col items-center gap-1.5 rounded-xl border border-sl-border bg-sl-card2 p-3 text-center hover:border-primary/50 hover:bg-primary/5 active:scale-95">
+                    <span className="flex size-11 items-center justify-center rounded-full bg-gradient-to-br from-primary to-fuchsia-500 text-base font-bold text-white shadow-md shadow-primary/20">
+                      {u.name.charAt(0).toUpperCase()}
+                    </span>
+                    <span className="w-full truncate text-xs font-semibold text-sl-text">{u.name.split(' ')[0]}</span>
+                    <span className="text-[10px] text-sl-muted">{ROLE_ICONS[u.role]} {t(`roles.${u.role}`)}</span>
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </form>
         <div className="mt-5 flex items-center justify-center gap-3 text-xs text-sl-muted">
           <span>🌍 {t('auth.language')}</span>

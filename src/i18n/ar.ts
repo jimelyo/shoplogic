@@ -92,7 +92,6 @@ const ar = {
   "subtitle": "سجّل الدخول بحسابك للمتابعة",
   "tagline": "ERP · نقطة بيع لمتاجر الهواتف والإكسسوارات",
   "title": "مرحبًا بك",
-  "demoHint": "تجريبي: admin@shoplogic.com / admin123 · وأيضًا manager@ وtecnico@ وcajero@ (كلمة المرور: الدور + 123)",
   "changePassword": "تغيير كلمة المرور",
   "currentPassword": "كلمة المرور الحالية",
   "newPassword": "كلمة المرور الجديدة",

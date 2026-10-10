@@ -92,7 +92,6 @@ const pt = {
   "subtitle": "Aceda com a sua conta para continuar",
   "tagline": "ERP · POS para lojas de telemóveis e acessórios",
   "title": "Bem-vindo",
-  "demoHint": "Demo: admin@shoplogic.com / admin123 · também manager@, tecnico@ e cajero@ (palavra-passe: função + 123)",
   "changePassword": "Alterar palavra-passe",
   "currentPassword": "Palavra-passe atual",
   "newPassword": "Nova palavra-passe",
