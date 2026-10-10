@@ -141,7 +141,7 @@ src/
 ├── components/    # 25+ módulos UI (POS, Cash, Inventory, Repairs, Quotes, Billing, Reports…)
 ├── lib/           # lógica core: calc, stock, invoices, cash, messaging, backup, csv, update…
 ├── db/            # esquema Dexie + datos demo
-├── i18n/          # es, en, pt, zh, ar (829 claves sincronizadas)
+├── i18n/          # es, en, pt, zh, ar (869 claves sincronizadas)
 ├── schemas/       # validación Zod de todos los formularios
 └── types/         # modelos tipados del dominio
 electron/          # proceso principal, preload y updater
