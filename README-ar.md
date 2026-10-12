@@ -12,7 +12,7 @@
 
 [![الإصدار](https://img.shields.io/github/v/release/jimelyo/shoplogic)](https://github.com/jimelyo/shoplogic/releases/latest)
 [![المنصة](https://img.shields.io/badge/Windows-x64%20%7C%20arm64-blue)](https://github.com/jimelyo/shoplogic/releases/latest)
-[![أندرويد](https://img.shields.io/badge/Android-APK%20v1.1.0-green)](https://github.com/jimelyo/shoplogic/releases/tag/v1.1.0-android)
+[![أندرويد](https://img.shields.io/badge/Android-APK%20v1.2.0-green)](https://github.com/jimelyo/shoplogic/releases/tag/v1.2.0)
 [![اللغات](https://img.shields.io/badge/اللغات-5%20·%20RTL%20عربي-purple)](#-اللغات)
 [![الترخيص](https://img.shields.io/badge/استخدام-خاص-informational)]()
 
@@ -123,7 +123,7 @@
 ## 🚀 التثبيت
 
 ### 📱 أندرويد
-1. نزّل **`shoplogic-pro-v1.1.0-android.apk`** من [الإصدار v1.1.0-android](https://github.com/jimelyo/shoplogic/releases/tag/v1.1.0-android).
+1. نزّل **`shoplogic-pro-v1.2.0-android.apk`** من [الإصدار v1.2.0](https://github.com/jimelyo/shoplogic/releases/tag/v1.2.0) (نفس مفتاح التوقيع v1.1.0: يُثبَّت مباشرة فوقه).
 2. اسمح بـ **تثبيت تطبيقات من مصادر غير معروفة** لمتصفحك/مدير الملفات (الإعدادات → الأمان) أول مرة.
 3. افتح ملف APK وثبّته. يتطلب **أندرويد 6.0+ (API 23+)**. لا أذونات سوى الإنترنت: البيانات تعيش في IndexedDB داخل التطبيق، محلية 100%.
 
@@ -207,8 +207,8 @@ public/            # service worker + manifest
 
 | الإصدار | أهم الجديد |
 |---|---|
-| **v1.1.0** (ويندوز) | دخول باختيار المستخدم + كلمة المرور · إزالة تنبيه الديمو · Latest حالي |
-| **v1.1.0-android** | أول بناء أندرويد أصلي (Capacitor 8، APK موقّعة، API 23+) |
+| **v1.2.0** (ويندوز + أندرويد) | **بحث شامل Ctrl+K** · **نسخة خارجية مجدولة** · **Veri\*factu (إسبانيا)** ببصمات SHA-256 مترابطة · فهارس Dexie للكتالوجات الكبيرة · سير عمل CI للإصدارات |
+| **v1.1.0** (ويندوز) | دخول باختيار المستخدم + كلمة المرور · إزالة تنبيه الديمو |
 | **v1.0.6** | تنبيهات مراحل الورشة (مُستلم/قيد العمل/انتظار قطع) عبر WhatsApp + بريد · أيقونة مُعاد توليدها |
 | **v1.0.5** | أيقونة مؤسسية جديدة (هاتف + مفتاح + رسم بياني) في المثبّت والنافذة وPWA |
 | **v1.0.4** | مثبّت بنقرة واحدة (تحديث تلقائي بـ UAC واحد) · README كامل |

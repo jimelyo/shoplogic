@@ -10,7 +10,7 @@
 
 [![Release](https://img.shields.io/github/v/release/jimelyo/shoplogic)](https://github.com/jimelyo/shoplogic/releases/latest)
 [![Plataforma](https://img.shields.io/badge/Windows-x64%20%7C%20arm64-blue)](https://github.com/jimelyo/shoplogic/releases/latest)
-[![Android](https://img.shields.io/badge/Android-APK%20v1.1.0-green)](https://github.com/jimelyo/shoplogic/releases/tag/v1.1.0-android)
+[![Android](https://img.shields.io/badge/Android-APK%20v1.2.0-green)](https://github.com/jimelyo/shoplogic/releases/tag/v1.2.0)
 [![Idiomas](https://img.shields.io/badge/idiomas-5%20·%20RTL%20árabe-purple)](#-idiomas)
 [![Licença](https://img.shields.io/badge/uso-privado-informational)]()
 
@@ -121,7 +121,7 @@ A app está **100% traduzida em 5 idiomas** (~872 chaves sincronizadas, verifica
 ## 🚀 Instalação
 
 ### 📱 Android
-1. Transfira **`shoplogic-pro-v1.1.0-android.apk`** a partir de [Release v1.1.0-android](https://github.com/jimelyo/shoplogic/releases/tag/v1.1.0-android).
+1. Transfira **`shoplogic-pro-v1.2.0-android.apk`** a partir de [Release v1.2.0](https://github.com/jimelyo/shoplogic/releases/tag/v1.2.0) (mesma chave de assinatura da v1.1.0: instala-se diretamente por cima).
 2. Permita **instalar apps de fontes desconhecidas** para o seu navegador/gestor de ficheiros (Definições → Segurança) na primeira vez.
 3. Abra o APK e instale-a. Requer **Android 6.0+ (API 23+)**. Sem permissões para além de internet: os dados vivem no IndexedDB dentro da app, 100% locais.
 
@@ -205,8 +205,8 @@ public/            # service worker + manifest
 
 | Versão | Novidades principais |
 |---|---|
-| **v1.1.0** (Windows) | Login por seleção de utilizador + palavra-passe · aviso demo eliminado · Latest atual |
-| **v1.1.0-android** | Primeira build Android nativa (Capacitor 8, APK assinada, API 23+) |
+| **v1.2.0** (Windows + Android) | **Pesquisa global Ctrl+K** · **cópia externa agendada** · **Veri\*factu (Espanha)** com impressões SHA-256 encadeadas · índices Dexie para catálogos grandes · workflow de CI de releases |
+| **v1.1.0** (Windows) | Login por seleção de utilizador + palavra-passe · aviso demo eliminado |
 | **v1.0.6** | Avisos por etapa da oficina (recebido/em curso/à espera de peças) em WhatsApp + email · ícone regenerado |
 | **v1.0.5** | Novo ícone corporativo (telemóvel + chave + gráfico) no instalador, janela e PWA |
 | **v1.0.4** | Instalador one-click (auto-update com um único UAC) · README completo |

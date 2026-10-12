@@ -10,7 +10,7 @@
 
 [![Release](https://img.shields.io/github/v/release/jimelyo/shoplogic)](https://github.com/jimelyo/shoplogic/releases/latest)
 [![Plataforma](https://img.shields.io/badge/Windows-x64%20%7C%20arm64-blue)](https://github.com/jimelyo/shoplogic/releases/latest)
-[![Android](https://img.shields.io/badge/Android-APK%20v1.1.0-green)](https://github.com/jimelyo/shoplogic/releases/tag/v1.1.0-android)
+[![Android](https://img.shields.io/badge/Android-APK%20v1.2.0-green)](https://github.com/jimelyo/shoplogic/releases/tag/v1.2.0)
 [![Idiomas](https://img.shields.io/badge/idiomas-5%20·%20RTL%20árabe-purple)](#-idiomas)
 [![Licencia](https://img.shields.io/badge/uso-privado-informational)]()
 
@@ -122,7 +122,7 @@ La app está **100% traducida a 5 idiomas** (≈ 872 claves sincronizadas por `n
 ## 🚀 Instalación
 
 ### 📱 Android
-1. Descarga **`shoplogic-pro-v1.1.0-android.apk`** desde [Release v1.1.0-android](https://github.com/jimelyo/shoplogic/releases/tag/v1.1.0-android).
+1. Descarga **`shoplogic-pro-v1.2.0-android.apk`** desde [Release v1.2.0](https://github.com/jimelyo/shoplogic/releases/tag/v1.2.0) (misma firma que v1.1.0: se instala directamente encima).
 2. Permite **instalar apps de origen desconocido** para tu navegador/gestor de archivos (Ajustes → Seguridad) la primera vez.
 3. Abre el APK e instálala. Requiere **Android 6.0+ (API 23+)**. Sin permisos más allá de internet: los datos viven en IndexedDB dentro de la app, 100% locales.
 
@@ -204,10 +204,10 @@ public/            # service worker + manifest
 
 ## 🗺️ Historial de releases
 
-| Versión | Novedades principales |
+| Version | Novedades principales |
 |---|---|
-| **v1.1.0** (Windows) | Login por selección de usuario + contraseña · aviso demo eliminado · Latest actual |
-| **v1.1.0-android** | Primera build Android nativa (Capacitor 8, APK firmada, API 23+) |
+| **v1.2.0** (Windows + Android) | **Búsqueda global Ctrl+K** · **copia de seguridad externa programada** · **Veri\*factu (España)** con huellas SHA-256 encadenadas · índices Dexie para catálogos grandes · workflow de CI de releases |
+| **v1.1.0** (Windows) | Login por selección de usuario + contraseña · aviso demo eliminado |
 | **v1.0.6** | Avisos por etapa del taller (recibido/en proceso/esperando piezas) en WhatsApp + email · icono regenerado |
 | **v1.0.5** | Nuevo icono corporativo (teléfono + llave + gráfico) en instalador, ventana y PWA |
 | **v1.0.4** | Instalador one-click (auto-update con un solo UAC) · README completo |

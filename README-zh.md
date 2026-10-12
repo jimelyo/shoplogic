@@ -10,7 +10,7 @@
 
 [![Release](https://img.shields.io/github/v/release/jimelyo/shoplogic)](https://github.com/jimelyo/shoplogic/releases/latest)
 [![平台](https://img.shields.io/badge/Windows-x64%20%7C%20arm64-blue)](https://github.com/jimelyo/shoplogic/releases/latest)
-[![Android](https://img.shields.io/badge/Android-APK%20v1.1.0-green)](https://github.com/jimelyo/shoplogic/releases/tag/v1.1.0-android)
+[![Android](https://img.shields.io/badge/Android-APK%20v1.2.0-green)](https://github.com/jimelyo/shoplogic/releases/tag/v1.2.0)
 [![语言](https://img.shields.io/badge/语言-5%20·%20阿拉伯语%20RTL-purple)](#-语言)
 [![许可](https://img.shields.io/badge/使用-私人-informational)]()
 
@@ -121,7 +121,7 @@
 ## 🚀 安装
 
 ### 📱 Android
-1. 从 [Release v1.1.0-android](https://github.com/jimelyo/shoplogic/releases/tag/v1.1.0-android) 下载 **`shoplogic-pro-v1.1.0-android.apk`**。
+1. 从 [Release v1.2.0](https://github.com/jimelyo/shoplogic/releases/tag/v1.2.0) 下载 **`shoplogic-pro-v1.2.0-android.apk`**（与 v1.1.0 同签名密钥：直接覆盖安装）。
 2. 首次安装时，允许浏览器/文件管理器**安装未知来源应用**（设置 → 安全）。
 3. 打开 APK 安装。需要 **Android 6.0+（API 23+）**。除网络外无其他权限：数据保存在应用内的 IndexedDB，完全本地。
 
@@ -205,8 +205,8 @@ public/            # service worker + manifest
 
 | 版本 | 主要更新 |
 |---|---|
-| **v1.1.0**（Windows） | 登录改为用户选择 + 密码 · 移除演示提示 · 当前 Latest |
-| **v1.1.0-android** | 首个原生 Android 构建（Capacitor 8，签名 APK，API 23+） |
+| **v1.2.0**（Windows + Android） | **Ctrl+K 全局搜索** · **定时外部备份** · **Veri\*factu（西班牙）**SHA-256 链式指纹 · 大型目录 Dexie 索引 · 发布 CI 工作流 |
+| **v1.1.0**（Windows） | 登录改为用户选择 + 密码 · 移除演示提示 |
 | **v1.0.6** | 维修阶段通知（已接收/处理中/等待配件）通过 WhatsApp + 邮件 · 图标重新生成 |
 | **v1.0.5** | 新企业图标（手机 + 扳手 + 图表）应用于安装器、窗口和 PWA |
 | **v1.0.4** | 一键安装器（单次 UAC 自动更新）· 完整 README |

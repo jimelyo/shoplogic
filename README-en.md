@@ -10,7 +10,7 @@
 
 [![Release](https://img.shields.io/github/v/release/jimelyo/shoplogic)](https://github.com/jimelyo/shoplogic/releases/latest)
 [![Platform](https://img.shields.io/badge/Windows-x64%20%7C%20arm64-blue)](https://github.com/jimelyo/shoplogic/releases/latest)
-[![Android](https://img.shields.io/badge/Android-APK%20v1.1.0-green)](https://github.com/jimelyo/shoplogic/releases/tag/v1.1.0-android)
+[![Android](https://img.shields.io/badge/Android-APK%20v1.2.0-green)](https://github.com/jimelyo/shoplogic/releases/tag/v1.2.0)
 [![Languages](https://img.shields.io/badge/languages-5%20%C2%B7%20RTL%20Arabic-purple)](#-languages)
 [![License](https://img.shields.io/badge/use-private-informational)]()
 
@@ -121,7 +121,7 @@ The app is **fully translated into 5 languages** (~872 keys each, checked by `np
 ## 🚀 Installation
 
 ### 📱 Android
-1. Download **`shoplogic-pro-v1.1.0-android.apk`** from [Release v1.1.0-android](https://github.com/jimelyo/shoplogic/releases/tag/v1.1.0-android).
+1. Download **`shoplogic-pro-v1.2.0-android.apk`** from [Release v1.2.0](https://github.com/jimelyo/shoplogic/releases/tag/v1.2.0) (same signing key as v1.1.0: installs right on top).
 2. Allow **installing apps from unknown sources** for your browser/file manager (Settings → Security) the first time.
 3. Open the APK and install it. Requires **Android 6.0+ (API 23+)**. No permissions beyond internet: data lives in IndexedDB inside the app, 100% local.
 
@@ -205,8 +205,8 @@ public/            # service worker + manifest
 
 | Version | Main changes |
 |---|---|
-| **v1.1.0** (Windows) | Login by user selection + password · demo notice removed · current Latest |
-| **v1.1.0-android** | First native Android build (Capacitor 8, signed APK, API 23+) |
+| **v1.2.0** (Windows + Android) | **Ctrl+K global search** · **scheduled external backup** · **Veri\*factu (Spain)** with chained SHA-256 fingerprints · Dexie indexes for large catalogs · release CI workflow |
+| **v1.1.0** (Windows) | Login by user selection + password · demo notice removed |
 | **v1.0.6** | Workshop stage notifications (received/in progress/waiting for parts) on WhatsApp + email · regenerated icon |
 | **v1.0.5** | New corporate icon (phone + wrench + chart) on installer, window and PWA |
 | **v1.0.4** | One-click installer (single-UAC auto-update) · full README |
