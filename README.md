@@ -6,6 +6,8 @@
 
 **ERP + TPV completo para tiendas de telefonía y accesorios** — ventas, cajas, inventario con trazabilidad, taller de reparaciones, facturación, reportes y automatizaciones de mensajería. Funciona 100% local (tus datos nunca salen de tu equipo) y se actualiza sola desde GitHub Releases.
 
+> 🌍 **Idiomas / Languages / Idiomas / 语言 / اللغات**: [English](README-en.md) · [Português](README-pt.md) · [中文](README-zh.md) · [العربية](README-ar.md)
+
 [![Release](https://img.shields.io/github/v/release/jimelyo/shoplogic)](https://github.com/jimelyo/shoplogic/releases/latest)
 [![Plataforma](https://img.shields.io/badge/Windows-x64%20%7C%20arm64-blue)](https://github.com/jimelyo/shoplogic/releases/latest)
 [![Android](https://img.shields.io/badge/Android-APK%20v1.1.0-green)](https://github.com/jimelyo/shoplogic/releases/tag/v1.1.0-android)
