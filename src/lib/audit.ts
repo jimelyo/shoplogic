@@ -4,7 +4,7 @@ import { useStore } from '../store/store';
 export type AuditAction =
   | 'login' | 'logout' | 'create' | 'update' | 'delete' | 'sale' | 'status_change' | 'payment'
   | 'export' | 'import' | 'reset' | 'password_change' | 'toggle_on' | 'toggle_off' | 'activate' | 'deactivate' | 'print' | 'test' | 'send'
-  | 'open' | 'close' | 'refund';
+  | 'open' | 'close' | 'refund' | 'retry' | 'requeue';
 
 export async function logAction(action: AuditAction, module: string, details?: string): Promise<void> {
   const u = useStore.getState().currentUser;

@@ -162,7 +162,7 @@ export function Billing() {
     if (preview?.id === i.id) setPreview({ ...i, ...patch });
   };
   const print = (i: Invoice) => { printHtml(invoiceHtml(i, s, t, cssVar('--sl-primary', '#4f46e5')), i.number); logAction('print', 'billing', i.number); };
-  const pdf = (i: Invoice) => { invoicePdf(i, s); logAction('export', 'billing', `PDF ${i.number}`); };
+  const pdf = (i: Invoice) => { invoicePdf(i, s).catch((e) => console.error('PDF', e)); logAction('export', 'billing', `PDF ${i.number}`); };
 
   const origin = (i: Invoice) => i.saleId ? <Badge color="cyan">🧾 {t('billing.fromSale')}</Badge> : i.repairId ? <Badge color="purple">🔧 {t('billing.fromRepair')}</Badge> : <Badge color="slate">✍️ {t('billing.manual')}</Badge>;
   const actions = (i: Invoice) => (

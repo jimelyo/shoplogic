@@ -8,7 +8,10 @@ import { useFormat } from '../lib/format';
 import { logAction } from '../lib/audit';
 import { peekInvoiceNumber } from '../lib/invoices';
 import { backupCounts, downloadBackup, downloadFile, exportAll, externalBackupSupported, formatBytes, importBackup, parseBackup, pickExternalDir, resetTables, tableCounts, copyToExternal, type BackupData } from '../lib/backup';
-import { verifyChain, verifactuCsv } from '../lib/verifactu';
+import { verifyChain, verifactuCsv } from '../verifactu/audit';
+import { FiscalStatus, FiscalConfigFields } from './shared/FiscalStatus';
+import { VerifactuIncidents } from './shared/VerifactuIncidents';
+import { DEFAULT_FISCAL_CONFIG } from '../verifactu/service';
 import { exportTableCsv } from '../lib/csv';
 import type { Accent, Channels, ChannelId, ChannelStatus, EmailChannel, InvoiceNumbering, InvoiceStatus, MailProvider, NormalPrinterConfig, PaymentMethod, PrinterConfig, PrinterConnection, Settings as TSettings, WhatsAppChannel, WhatsAppMode } from '../types';
 import { ACCENTS, CURRENCIES, INVOICE_STATUSES, INVOICE_STATUS_ICONS, PAYMENT_METHODS } from '../types';
@@ -225,6 +228,10 @@ export function Settings() {
             <SectionTitle right={<Toggle checked={form.verifactu?.enabled ?? false} onChange={(v) => up({ verifactu: { ...(form.verifactu ?? {}), enabled: v } })} />}>🇪. {t('settings.verifactu')}</SectionTitle>
             <p className="mb-3 text-sm text-sl-muted">{t('settings.verifactuHint')}</p>
             <div className={`grid gap-3 md:grid-cols-2 ${(form.verifactu?.enabled ?? false) ? '' : 'pointer-events-none opacity-50'}`}>
+              <FiscalConfigFields
+                value={{ modality: form.verifactuConfig?.modality ?? 'verifactu', environment: form.verifactuConfig?.environment ?? 'test' }}
+                onChange={(v) => up({ verifactuConfig: { modality: v.modality, environment: v.environment, system: form.verifactuConfig?.system ?? DEFAULT_FISCAL_CONFIG.system } })}
+              />
               <Select label={t('settings.vfRegime')} value={form.verifactu?.regime ?? 'general'} onChange={(e) => up({ verifactu: { ...(form.verifactu ?? { enabled: true }), regime: e.target.value as 'general' | 'rebu' | 'special' } })}>
                 <option value="general">general</option>
                 <option value="rebu">REBU (bienes usados)</option>
@@ -245,6 +252,10 @@ export function Settings() {
                 <span className="text-[11px] text-sl-muted">{t('settings.vfChainNote')}</span>
               </div>
             </div>
+            {/* Estado de la cola de remisión AEAT (módulo VERI*FACTU v1.3.0). */}
+            {form.verifactu?.enabled && <FiscalStatus />}
+            {/* Incidencias: rechazados por la AEAT, errores de envío y reintentos. */}
+            {form.verifactu?.enabled && <div className="mt-4"><VerifactuIncidents /></div>}
           </div>
         </Card>
       )}

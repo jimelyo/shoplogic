@@ -1,8 +1,11 @@
 import { jsPDF } from 'jspdf';
+import QRCode from 'qrcode';
 import i18n from '../i18n';
 import type { Invoice, Settings } from '../types';
 import { hexToRgb, cssVar } from './colors';
 import { plainMoney, safeFormat } from './format';
+import { invoiceQrUrl } from '../verifactu/service';
+import { VERIFACTU_FRASE } from '../verifactu/fiscal-qr';
 
 type T = (k: string, o?: Record<string, unknown>) => string;
 
@@ -19,7 +22,7 @@ function brandRgb(s: Settings): [number, number, number] {
   return hexToRgb(cssVar('--sl-primary', '#4f46e5'));
 }
 
-export function invoicePdf(inv: Invoice, s: Settings) {
+export async function invoicePdf(inv: Invoice, s: Settings) {
   const t = pdfT();
   const doc = new jsPDF({ unit: 'mm', format: s.normalPrinter?.paper === 'Letter' ? 'letter' : 'a4' });
   const W = doc.internal.pageSize.getWidth();
@@ -27,6 +30,14 @@ export function invoicePdf(inv: Invoice, s: Settings) {
   const brand = brandRgb(s);
   const m = (n: number) => plainMoney(n, s);
   const M = 15;
+
+  // VERI*FACTU: QR reglamentario cuando la factura está registrada en la cadena
+  // (Orden HAC/1177/2024 art. 20.1: QR de 30×30 a 40×40 mm, nivel M, y leyenda).
+  const onChain = !!inv.verifHash && !!s.verifactu?.enabled;
+  let qrDataUrl: string | null = null;
+  if (onChain) {
+    try { qrDataUrl = await QRCode.toDataURL(invoiceQrUrl(inv, s), { width: 512, margin: 1, errorCorrectionLevel: 'M' }); } catch { qrDataUrl = null; }
+  }
 
   doc.setFillColor(...brand);
   doc.rect(0, 0, W, 34, 'F');
@@ -101,6 +112,17 @@ export function invoicePdf(inv: Invoice, s: Settings) {
   if (inv.paid > 0 && inv.paid < inv.total) {
     row(t('billing.paid'), m(inv.paid));
     row(t('billing.pending'), m(inv.total - inv.paid), true, [220, 38, 38]);
+  }
+  if (qrDataUrl) {
+    y += 4;
+    if (y + 42 > H - 18) { doc.addPage(); y = 20; }
+    const qrSide = 35; // mm — dentro del rango 30–40 mm (art. 21.1).
+    doc.addImage(qrDataUrl, 'PNG', M, y, qrSide, qrSide);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(30, 41, 59);
+    doc.text(latin(VERIFACTU_FRASE), M + qrSide + 4, y + 8);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(100, 116, 139);
+    doc.text(latin(`${inv.number} · huella ${inv.verifHash?.slice(0, 16)}…`), M + qrSide + 4, y + 14);
+    y += qrSide + 4;
   }
   if (inv.notes) {
     y += 4; doc.setTextColor(71, 85, 105); doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5);

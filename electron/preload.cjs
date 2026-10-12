@@ -15,6 +15,9 @@ contextBridge.exposeInMainWorld('shoplogicDesktop', {
   /** #11 external backup: write a UTF-8 text file into a subfolder of the user's Documents. */
   saveTextFile: (opts) => ipcRenderer.invoke('files:save-text', opts),
   pickBackupDir: () => ipcRenderer.invoke('files:pick-dir'),
+  /** VERI*FACTU: firma XAdES del registro (proceso main usa el .p12 local). */
+  verifactuSign: (xml) => ipcRenderer.invoke('verifactu:sign', xml),
+  verifactuSignerStatus: () => ipcRenderer.invoke('verifactu:signer-status'),
   onStateChange: (cb) => {
     const listener = (_e, payload) => cb(payload);
     ipcRenderer.on('updater:state-changed', listener);

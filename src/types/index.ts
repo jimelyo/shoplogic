@@ -119,6 +119,12 @@ export interface Invoice {
   verifTime?: string;      /** ISO instant of registry (fecha y hora de generación) */
   verifRegime?: 'general' | 'rebu' | 'special';   /** Régimen aplicado (veri*factu) */
   verifPrevHash?: string;   /** previous invoice's verifHash, for audit */
+  /** Estado de la remisión a la AEAT (estado de cola, ver src/verifactu/queue.ts). */
+  verifEnvio?: 'ready' | 'queued' | 'sending' | 'accepted' | 'accepted_with_errors' | 'rejected' | 'retry_pending';
+  /** CSV (Código Seguro de Verificación) cuando AEAT aceptó la factura. */
+  verifCSV?: string;
+  /** Última respuesta cruda de la AEAT para esta factura (trazabilidad). */
+  verifLastResponse?: string;
 }
 export interface ProductCategory { id: string; name: string; icon: string; color: string; isDefault?: boolean }
 export interface PrinterConfig {
@@ -164,6 +170,8 @@ export interface Settings {
   channels?: Channels;
   /** Veri*factu (Spain): subscribe each invoice into the chain-of-hash registry and export mode. */
   verifactu?: { enabled: boolean; regime?: 'general' | 'rebu' | 'special'; lastFingerprint?: string };
+  /** Fiscal configuration (VERI*FACTU-level): adds identity, env, system spec and sello parameters. */
+  verifactuConfig?: import('../verifactu/fiscal-types').FiscalConfiguration;
   /** Optional recurring off-disk backup folder name; when set, the daily snapshot also writes there. */
   externalBackup?: { enabled: boolean; dir?: string; lastAt?: string; lastSize?: number };
 }

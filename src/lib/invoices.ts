@@ -2,7 +2,7 @@ import { addDays } from 'date-fns';
 import { db, getSettings } from '../db/database';
 import type { Invoice, Repair, Sale, Settings } from '../types';
 import { computeInvoiceTotals, formatInvoiceNumber, isoDate, itemFromTotal } from './calc';
-import { registerInvoice } from './verifactu';
+import { emitAlta, emitAnulacion } from '../verifactu/service';
 
 export function peekInvoiceNumber(s: Settings, date = new Date()): string {
   let n = s.invoiceNextNumber || 1;
@@ -24,14 +24,48 @@ export async function nextInvoiceNumber(date = new Date()): Promise<string> {
   return number;
 }
 
-/** Register an invoice into the Veri*factu chain when the setting is on. */
+/**
+ * Veri*factu — registro de ALTA encadenado + cola de remisión.
+ *
+ * La factura SIEMPRE se persiste; si VERI*FACTU está activado, se le asignan
+ * los campos de huella (verifHash/verifPrevHash/verifTime) calculados por el
+ * servicio oficial (Orden HAC/1177/2024). El registro SOAP queda encolado.
+ * Si falla la emisión fiscal NO se pierde la factura: se guarda sin huella y
+ * el mensaje se deja en el log (estado pending visible en Settings).
+ */
 async function applyVerifactu(inv: Invoice, s: Settings): Promise<void> {
   if (!s.verifactu?.enabled) return;
-  const last = await db.invoices
-    .filter((i) => !!i.verifHash)
-    .last();
-  const fields = await registerInvoice(inv, last?.verifHash ?? '', s.verifactu.regime ?? 'general');
-  Object.assign(inv, fields);
+  try {
+    // Id temporal vacío antes de insertar; service usa id cuando existe.
+    const res = await emitAlta({ ...inv, id: inv.id }, s);
+    inv.verifHash = res.huella;
+    inv.verifPrevHash = res.huellaAnterior || undefined;
+    inv.verifTime = res.fechaHoraGen;
+    inv.verifEnvio = 'queued';
+  } catch (e) {
+    console.error('Veri*factu: no se pudo registrar la factura', inv.number, e);
+  }
+}
+
+/**
+ * Anula también la factura en Veri*factu (RegistroAnulacion encadenado) cuando
+ * la factura local se cancela HABIÉNDOSE emitido con huella. La factura local
+ * no se borra: se anula lógicamente.
+ */
+export async function cancelInvoiceWithVerifactu(inv: Invoice): Promise<boolean> {
+  const s = await getSettings();
+  if (!s.verifactu?.enabled || !inv.verifHash) {
+    // Sin huella (fuera de cadena) o sin fiscalidad: cancelación normal.
+    await db.invoices.update(inv.id!, { status: 'cancelled' });
+    return false;
+  }
+  try {
+    await emitAnulacion({ ...inv, id: inv.id }, s);
+  } catch (e) {
+    console.error('Veri*factu: no se pudo anular la factura', inv.number, e);
+  }
+  await db.invoices.update(inv.id!, { status: 'cancelled' });
+  return true;
 }
 
 export async function createInvoiceFromSale(sale: Sale): Promise<Invoice> {
@@ -57,8 +91,11 @@ export async function createInvoiceFromSale(sale: Sale): Promise<Invoice> {
     saleId: sale.id,
     createdAt: now.toISOString(),
   };
-  await applyVerifactu(inv, s);
   inv.id = await db.invoices.add(inv);
+  await applyVerifactu(inv, s);
+  if (inv.verifHash) {
+    await db.invoices.update(inv.id, { verifHash: inv.verifHash, verifPrevHash: inv.verifPrevHash, verifTime: inv.verifTime, verifEnvio: inv.verifEnvio });
+  }
   return inv;
 }
 
@@ -91,7 +128,10 @@ export async function createInvoiceFromRepair(repair: Repair, repairLabel = 'Rep
     repairId: repair.id,
     createdAt: now.toISOString(),
   };
-  await applyVerifactu(inv, s);
   inv.id = await db.invoices.add(inv);
+  await applyVerifactu(inv, s);
+  if (inv.verifHash) {
+    await db.invoices.update(inv.id, { verifHash: inv.verifHash, verifPrevHash: inv.verifPrevHash, verifTime: inv.verifTime, verifEnvio: inv.verifEnvio });
+  }
   return inv;
 }

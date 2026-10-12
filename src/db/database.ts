@@ -73,6 +73,10 @@ export class ShopDB extends Dexie {
       customers: '++id, name, phone, email, dni',
       invoices: '++id, number, date, status, saleId, repairId, customerName',
     });
+    // v10 (VERI*FACTU): persistent AEAT submission queue (see src/verifactu/queue.ts).
+    this.version(10).stores({
+      verifactuQueue: '++id, Huella, status, NumSerieFactura, invoiceId, createdAt, nextRetryAt',
+    });
   }
 }
 

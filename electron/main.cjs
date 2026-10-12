@@ -101,6 +101,29 @@ function send(channel, payload) {
   if (win && !win.isDestroyed()) win.webContents.send(channel, payload);
 }
 
+// --- VERI*FACTU signer (XAdES Enveloped, art. 14 Orden HAC/1177/2024) ---------
+// La firma digital exige Node (node-forge + xml-crypto): se hace aquí, en el
+// proceso main, leyendo el .p12 local que el operador instala; nunca por HTTP.
+// El renderer ve solo el resultado: XML firmado o error sin detalles sensibles.
+const signer = require('./verifactu-signer.cjs');
+
+ipcMain.handle('verifactu:signer-status', () => {
+  const cfg = signer.readSignerConfig(app.getPath('userData'));
+  return cfg ? { available: true, p12Path: cfg.p12Path, p12PasswordSet: !!cfg.p12Password }
+             : { available: false, hint: 'Falta userData/verifactu/signer.json con { p12Path, p12Password }' };
+});
+
+ipcMain.handle('verifactu:sign', (_e, xml) => {
+  if (typeof xml !== 'string' || !xml.startsWith('<')) return { ok: false, error: 'XML inválido' };
+  const cfg = signer.readSignerConfig(app.getPath('userData'));
+  if (!cfg) return { ok: false, error: 'Firmador no configurado (falta .p12 / signer.json)' };
+  try {
+    return { ok: true, signed: signer.signEnvelopeXml({ xml, p12Path: cfg.p12Path, p12Password: cfg.p12Password }) };
+  } catch (err) {
+    return { ok: false, error: `Firma fallida: ${(err && err.message) || String(err)}` };
+  }
+});
+
 // --- External backup (#11) ---------------------------------------------------
 // Writes the daily snapshot copy into a subfolder of Documents, inside a
 // sandboxed allow-list (only files named shoplogic-backup-*.json). No arbitrary
