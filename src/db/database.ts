@@ -67,6 +67,12 @@ export class ShopDB extends Dexie {
     this.version(8).stores({
       quotes: '++id, number, status, date, customerId, kind',
     });
+    this.version(9).stores({
+      // v9: heavier indexes for the global search (Ctrl+K) and larger catalogs.
+      products: '++id, name, category, barcode, imei, stock, description',
+      customers: '++id, name, phone, email, dni',
+      invoices: '++id, number, date, status, saleId, repairId, customerName',
+    });
   }
 }
 

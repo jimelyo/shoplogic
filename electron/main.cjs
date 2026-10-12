@@ -101,6 +101,30 @@ function send(channel, payload) {
   if (win && !win.isDestroyed()) win.webContents.send(channel, payload);
 }
 
+// --- External backup (#11) ---------------------------------------------------
+// Writes the daily snapshot copy into a subfolder of Documents, inside a
+// sandboxed allow-list (only files named shoplogic-backup-*.json). No arbitrary
+// file write: the renderer passes folder NAME + content, and the folder has to
+// exist under Documents.
+const fs = require('node:fs');
+const os = require('node:os');
+
+ipcMain.handle('files:save-text', (_e, { dir, name, content }) => {
+  if (typeof dir !== 'string' || typeof name !== 'string' || typeof content !== 'string') return 0;
+  if (!/^shoplogic-backup-.+\.json$/.test(name)) return 0; // allow-list
+  const safeDir = path.basename(dir);                       // no traversal
+  const target = path.join(os.homedir(), 'Documents', 'ShopLogic Backups', safeDir);
+  fs.mkdirSync(target, { recursive: true });
+  fs.writeFileSync(path.join(target, name), content, 'utf8');
+  return Buffer.byteLength(content, 'utf8');
+});
+
+ipcMain.handle('files:pick-dir', () => {
+  // Desktop keeps it simple: a well-known folder; a native dialog would add
+  // little and complicate the permission story.
+  return path.join('Documents', 'ShopLogic Backups');
+});
+
 app.whenReady().then(() => {
   createWindow();
   setupUpdater();

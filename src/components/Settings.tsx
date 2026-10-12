@@ -7,7 +7,8 @@ import { confirmDialog, toast, useStore } from '../store/store';
 import { useFormat } from '../lib/format';
 import { logAction } from '../lib/audit';
 import { peekInvoiceNumber } from '../lib/invoices';
-import { backupCounts, downloadBackup, formatBytes, importBackup, parseBackup, resetTables, tableCounts, type BackupData } from '../lib/backup';
+import { backupCounts, downloadBackup, downloadFile, exportAll, externalBackupSupported, formatBytes, importBackup, parseBackup, pickExternalDir, resetTables, tableCounts, copyToExternal, type BackupData } from '../lib/backup';
+import { verifyChain, verifactuCsv } from '../lib/verifactu';
 import { exportTableCsv } from '../lib/csv';
 import type { Accent, Channels, ChannelId, ChannelStatus, EmailChannel, InvoiceNumbering, InvoiceStatus, MailProvider, NormalPrinterConfig, PaymentMethod, PrinterConfig, PrinterConnection, Settings as TSettings, WhatsAppChannel, WhatsAppMode } from '../types';
 import { ACCENTS, CURRENCIES, INVOICE_STATUSES, INVOICE_STATUS_ICONS, PAYMENT_METHODS } from '../types';
@@ -220,6 +221,31 @@ export function Settings() {
             <Toggle checked={form.invoiceAutoGenerateOnDelivery} onChange={(v) => up({ invoiceAutoGenerateOnDelivery: v })} label={t('settings.autoInvoice')} description={t('settings.autoInvoiceHint')} />
             <Toggle checked={form.invoiceIncludeRepairDetail} onChange={(v) => up({ invoiceIncludeRepairDetail: v })} label={t('settings.repairDetail')} description={t('settings.repairDetailHint')} />
           </div>
+          <div className="mt-5 border-t border-sl-border pt-4">
+            <SectionTitle right={<Toggle checked={form.verifactu?.enabled ?? false} onChange={(v) => up({ verifactu: { ...(form.verifactu ?? {}), enabled: v } })} />}>🇪. {t('settings.verifactu')}</SectionTitle>
+            <p className="mb-3 text-sm text-sl-muted">{t('settings.verifactuHint')}</p>
+            <div className={`grid gap-3 md:grid-cols-2 ${(form.verifactu?.enabled ?? false) ? '' : 'pointer-events-none opacity-50'}`}>
+              <Select label={t('settings.vfRegime')} value={form.verifactu?.regime ?? 'general'} onChange={(e) => up({ verifactu: { ...(form.verifactu ?? { enabled: true }), regime: e.target.value as 'general' | 'rebu' | 'special' } })}>
+                <option value="general">general</option>
+                <option value="rebu">REBU (bienes usados)</option>
+                <option value="special">régimen especial</option>
+              </Select>
+              <div className="flex items-end gap-2">
+                <Button variant="outline" onClick={async () => {
+                  const all = await db.invoices.toArray();
+                  const broken = await verifyChain(all);
+                  if (broken) { toast.error(t('settings.vfBroken', { number: broken })); return; }
+                  const invs = all.filter((i) => i.verifHash);
+                  if (!invs.length) { toast.info(t('settings.vfEmpty')); return; }
+                  const s = await getSettings();
+                  downloadFile(verifactuCsv(invs, s), `verifactu-${new Date().toISOString().slice(0, 10)}.csv`, 'text/csv');
+                  await logAction('export', 'billing', `verifactu csv (${invs.length})`);
+                  toast.success(t('settings.vfOk', { n: invs.length }));
+                }}>🧾 {t('settings.vfExport')}</Button>
+                <span className="text-[11px] text-sl-muted">{t('settings.vfChainNote')}</span>
+              </div>
+            </div>
+          </div>
         </Card>
       )}
 
@@ -278,7 +304,7 @@ export function Settings() {
       )}
 
       {section === 'appearance' && <Appearance />}
-      {section === 'data' && <DataSection />}
+      {section === 'data' && <DataSection form={form} up={up} />}
       <ChangePassword open={pwOpen} onClose={() => setPwOpen(false)} />
     </div>
   );
@@ -323,7 +349,7 @@ function Appearance() {
   );
 }
 
-function DataSection() {
+function DataSection({ form, up }: { form: TSettings; up: (patch: Partial<TSettings>) => void }) {
   const { t } = useTranslation();
   const [counts, setCounts] = useState<Record<TableName, number> | null>(null);
   const [lastExport, setLastExport] = useState<{ name: string; size: number } | null>(null);
@@ -331,6 +357,8 @@ function DataSection() {
   const [importName, setImportName] = useState('');
   const [resetSel, setResetSel] = useState<TableName[]>([]);
   const [busy, setBusy] = useState(false);
+  const ext = form.externalBackup ?? { enabled: false };
+  const supported = externalBackupSupported();
   const fileRef = useRef<HTMLInputElement>(null);
   const refresh = () => tableCounts().then(setCounts);
   useEffect(() => { refresh(); }, []);
@@ -395,6 +423,37 @@ function DataSection() {
           ))}
         </div>
         {lastExport && <p className="mt-2 text-xs text-sl-muted">✅ {lastExport.name} · <b>{formatBytes(lastExport.size)}</b></p>}
+      </Card>
+      <Card className="p-5 lg:col-span-2">
+        <SectionTitle right={<Toggle checked={ext.enabled} onChange={(v) => up({ externalBackup: { ...(form.externalBackup ?? {}), enabled: v } })} disabled={!supported} />}>☁️ {t('settings.extBackup')}</SectionTitle>
+        <p className="mb-3 text-sm text-sl-muted">{supported ? t('settings.extBackupHint') : t('settings.extBackupUnsupported')}</p>
+        <div className={`grid gap-3 md:grid-cols-3 ${ext.enabled && supported ? '' : 'pointer-events-none opacity-50'}`}>
+          <div className="rounded-lg border border-sl-border bg-sl-card2 px-3 py-2 text-sm">
+            <div className="text-[10px] font-bold uppercase text-sl-muted">{t('settings.extBackupDir')}</div>
+            <div className="truncate font-semibold text-sl-text">{ext.dir || '—'}</div>
+          </div>
+          <div className="rounded-lg border border-sl-border bg-sl-card2 px-3 py-2 text-sm">
+            <div className="text-[10px] font-bold uppercase text-sl-muted">{t('settings.extBackupLast')}</div>
+            <div className="font-semibold text-sl-text">{ext.lastAt ? new Date(ext.lastAt).toLocaleString() : '—'}</div>
+          </div>
+          <div className="flex items-end gap-2">
+            <Button variant="outline" onClick={async () => {
+              const r = await pickExternalDir();
+              if (r) toast.success(`${t('settings.extBackupReady')} ${r.name}`);
+            }}>📁 {t('settings.extBackupPick')}</Button>
+            <Button variant="ghost" onClick={async () => {
+              const b = await exportAll('_external');
+              try {
+                let dir = ext.dir;
+                if (!dir) { const picked = await pickExternalDir(); dir = picked?.name; }
+                if (!dir) throw new Error('no-dir');
+                const written = await copyToExternal(dir, { date: new Date().toISOString().slice(0, 10), json: b.json, size: b.size });
+                up({ externalBackup: { ...(form.externalBackup ?? {}), enabled: true, dir, lastAt: new Date().toISOString(), lastSize: written } });
+                toast.success(`${t('settings.extBackupDone')} · ${formatBytes(written)}`);
+              } catch (e) { toast.error(String((e as Error).message)); }
+            }}>{t('settings.extBackupNow')}</Button>
+          </div>
+        </div>
       </Card>
       <Card className="p-5">
         <SectionTitle>📥 {t('settings.import')}</SectionTitle>

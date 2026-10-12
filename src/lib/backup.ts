@@ -168,5 +168,69 @@ export async function ensureDailySnapshot(): Promise<{ date: string; size: numbe
   const all = await db.snapshots.orderBy('date').reverse().primaryKeys();
   const stale = all.slice(MAX_SNAPSHOTS);
   if (stale.length) await db.snapshots.bulkDelete(stale);
+
+  // Opportunistic external copy (#11): when the user picked a folder, mirror the
+  // snapshot there once the destination has been granted on this session.
+  const ext = settings.externalBackup;
+  if (ext?.enabled && ext.dir) await copyToExternal(ext.dir, created);
   return { date: today, size };
+}
+
+/**
+ * External (#11) backup destination helpers.
+ *
+ * Browsers can only write into a directory the user explicitly picked with
+ * `showDirectoryPicker`; the handle cannot be persisted, so each app session
+ * must re-grant the folder once (the caller shows the natural UI prompt).
+ * In Electron the destination is re-created directly under the name the
+ * settings store.
+ */
+
+const EXTERNAL_FILE = (date: string) => `shoplogic-backup-${date}.json`;
+
+interface DesktopFiles {
+  saveTextFile: (opts: { dir: string; name: string; content: string }) => Promise<number>;
+  pickBackupDir: () => Promise<string>;
+}
+const desktopFiles: DesktopFiles | null =
+  typeof window !== 'undefined' ? ((window as { shoplogicDesktop?: DesktopFiles }).shoplogicDesktop ?? null) : null;
+
+export function externalBackupSupported(): boolean {
+  return Boolean(desktopFiles?.saveTextFile)
+    || typeof (globalThis as { showDirectoryPicker?: unknown }).showDirectoryPicker === 'function';
+}
+
+/** One mirror write into the chosen destination; returns bytes written. */
+export async function copyToExternal(dirName: string, snap: { date: string; json: string; size: number }): Promise<number> {
+  const name = EXTERNAL_FILE(snap.date);
+  // Desktop (Electron) writes through the sandboxed IPC bridge.
+  if (desktopFiles?.saveTextFile) return desktopFiles.saveTextFile({ dir: dirName, name, content: snap.json });
+  // PWA / browser path: reuse the directory handle the user granted this session.
+  const storage = (globalThis as { __SL_EXTERNAL_DIR__?: FileSystemDirectoryHandle }).__SL_EXTERNAL_DIR__;
+  if (!storage) throw new Error('no-directory-handle');
+  const file = await storage.getFileHandle(name, { create: true });
+  const w = await file.createWritable();
+  await w.write(snap.json);
+  await w.close();
+  return snap.size;
+}
+
+/** Activate the external destination: desktop uses a fixed Documents folder; PWA opens the native picker. */
+export async function pickExternalDir(): Promise<{ name: string } | null> {
+  if (desktopFiles?.pickBackupDir) {
+    const name = await desktopFiles.pickBackupDir();
+    await saveExternalDir(name);
+    return { name };
+  }
+  const picker = (globalThis as { showDirectoryPicker?: () => Promise<FileSystemDirectoryHandle> }).showDirectoryPicker;
+  if (!picker) return null;
+  const handle = await picker();
+  (globalThis as { __SL_EXTERNAL_DIR__?: FileSystemDirectoryHandle }).__SL_EXTERNAL_DIR__ = handle;
+  await saveExternalDir(handle.name);
+  return { name: handle.name };
+}
+
+async function saveExternalDir(dir: string): Promise<void> {
+  const s = await getSettings();
+  await db.settings.update(s.id!, { externalBackup: { ...(s.externalBackup ?? {}), enabled: true, dir } });
 }

@@ -2,6 +2,7 @@ import { addDays } from 'date-fns';
 import { db, getSettings } from '../db/database';
 import type { Invoice, Repair, Sale, Settings } from '../types';
 import { computeInvoiceTotals, formatInvoiceNumber, isoDate, itemFromTotal } from './calc';
+import { registerInvoice } from './verifactu';
 
 export function peekInvoiceNumber(s: Settings, date = new Date()): string {
   let n = s.invoiceNextNumber || 1;
@@ -21,6 +22,16 @@ export async function nextInvoiceNumber(date = new Date()): Promise<string> {
   }
   await db.settings.update(s.id!, { invoiceNextNumber: n + 1, invoiceLastYear: year });
   return number;
+}
+
+/** Register an invoice into the Veri*factu chain when the setting is on. */
+async function applyVerifactu(inv: Invoice, s: Settings): Promise<void> {
+  if (!s.verifactu?.enabled) return;
+  const last = await db.invoices
+    .filter((i) => !!i.verifHash)
+    .last();
+  const fields = await registerInvoice(inv, last?.verifHash ?? '', s.verifactu.regime ?? 'general');
+  Object.assign(inv, fields);
 }
 
 export async function createInvoiceFromSale(sale: Sale): Promise<Invoice> {
@@ -46,6 +57,7 @@ export async function createInvoiceFromSale(sale: Sale): Promise<Invoice> {
     saleId: sale.id,
     createdAt: now.toISOString(),
   };
+  await applyVerifactu(inv, s);
   inv.id = await db.invoices.add(inv);
   return inv;
 }
@@ -79,6 +91,7 @@ export async function createInvoiceFromRepair(repair: Repair, repairLabel = 'Rep
     repairId: repair.id,
     createdAt: now.toISOString(),
   };
+  await applyVerifactu(inv, s);
   inv.id = await db.invoices.add(inv);
   return inv;
 }

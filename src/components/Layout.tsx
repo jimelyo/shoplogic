@@ -15,6 +15,7 @@ import { logAction } from '../lib/audit';
 import { LanguageSelector } from './shared/LanguageSelector';
 import { RoleBadge } from './shared/RolePermissions';
 import { ChangePassword } from './ChangePassword';
+import { CommandPalette } from './CommandPalette';
 import { onUpdate, applyUpdate, APP_VERSION, isDismissed, dismissVersion } from '../lib/update';
 import type { UpdateSnapshot } from '../lib/update';
 
@@ -215,6 +216,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <main className="min-w-0 flex-1 p-3 sm:p-6">{children}</main>
       </div>
       <UpdateBanner />
+      <CommandPalette />
       <ChangePassword open={pwOpen} onClose={() => setPwOpen(false)} />
     </div>
   );

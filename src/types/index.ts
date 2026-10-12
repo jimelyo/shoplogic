@@ -114,6 +114,11 @@ export interface Invoice {
   id?: number; number: string; date: string; dueDate: string; customerName: string; customerDni: string;
   customerAddress: string; customerEmail: string; items: InvoiceItem[]; subtotal: number; totalTax: number; total: number;
   paid: number; status: InvoiceStatus; paymentMethod: PaymentMethod; notes?: string; saleId?: number; repairId?: number; createdAt: string;
+  /** Veri*factu (Spain) fingerprint fields, filled when the invoice is registered in the chain. */
+  verifHash?: string;       /** SHA-256 hex digest chaining previous fingerprints */
+  verifTime?: string;      /** ISO instant of registry (fecha y hora de generación) */
+  verifRegime?: 'general' | 'rebu' | 'special';   /** Régimen aplicado (veri*factu) */
+  verifPrevHash?: string;   /** previous invoice's verifHash, for audit */
 }
 export interface ProductCategory { id: string; name: string; icon: string; color: string; isDefault?: boolean }
 export interface PrinterConfig {
@@ -157,6 +162,10 @@ export interface Settings {
   categories?: ProductCategory[]; automations?: Record<string, boolean>;
   /** Delivery channels consumed by the `whatsapp` and `email` automations. */
   channels?: Channels;
+  /** Veri*factu (Spain): subscribe each invoice into the chain-of-hash registry and export mode. */
+  verifactu?: { enabled: boolean; regime?: 'general' | 'rebu' | 'special'; lastFingerprint?: string };
+  /** Optional recurring off-disk backup folder name; when set, the daily snapshot also writes there. */
+  externalBackup?: { enabled: boolean; dir?: string; lastAt?: string; lastSize?: number };
 }
 export interface User {
   id?: number; name: string; email: string; password: string; role: Role; permissions: NavSection[];

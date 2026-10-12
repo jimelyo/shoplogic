@@ -1,0 +1,105 @@
+name: Release (Windows + Android)
+
+# Builds and publishes the desktop installers and the signed APK whenever a
+# version tag (v*) is pushed. Desktop release is marked `latest`; Android is
+# attached to its own `-android` tag automatic twin when present.
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    name: Windows x64 + arm64
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Checks (i18n parity + lint + tests + build)
+        run: |
+          npm run check:i18n
+          npm run lint
+          npm test
+          npm run build
+
+      - name: Package (electron-builder, x64 + arm64)
+        env:
+          # Publication goes to this repo's releases via GitHub token.
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx electron-builder --win --x64 --arm64 --publish always
+
+  android:
+    name: Android APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'   # AGP is not Java-25-ready yet
+
+      - name: Decode signing keystore
+        env:
+          ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+        run: |
+          mkdir -p android/keystore
+          echo "$ANDROID_KEYSTORE_B64" | base64 --decode > android/keystore/release.jks
+
+      - name: Install web deps + build + cap sync
+        run: |
+          npm ci
+          npm run build
+          npx cap sync android
+
+      - name: Assemble signed release APK
+        env:
+          SL_KEYSTORE: ${{ github.workspace }}/android/keystore/release.jks
+          SL_KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+          SL_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          SL_KEY_PASS: ${{ secrets.ANDROID_KEY_PASS }}
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease
+
+      - name: Rename APK for the release asset
+        run: cp android/app/build/outputs/apk/release/app-release.apk shoplogic-pro-android.apk
+
+      - name: Create/attach to the Android release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${GITHUB_REF_NAME}-android"
+          gh release create "$TAG" shoplogic-pro-android.apk \
+            --title "${GITHUB_REF_NAME} — Android" \
+            --notes "Native Android build of ${GITHUB_REF_NAME} (Capacitor 8, signed with the release keystore)." \
+            --latest=false || \
+          gh release upload "$TAG" shoplogic-pro-android.apk --clobber
+
+  mark-desktop-latest:
+    name: Mark the desktop release as Latest
+    runs-on: ubuntu-latest
+    needs: [windows, android]
+    if: always() && needs.windows.result == 'success'
+    steps:
+      - uses: actions/checkout@v4
+      - env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release edit "$GITHUB_REF_NAME" --latest

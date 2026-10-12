@@ -12,6 +12,9 @@ contextBridge.exposeInMainWorld('shoplogicDesktop', {
   applyUpdate: () => ipcRenderer.invoke('updater:apply'),
   installUpdate: () => ipcRenderer.invoke('updater:install'),
   setAutoDownload: (enabled) => ipcRenderer.invoke('updater:set-auto', enabled),
+  /** #11 external backup: write a UTF-8 text file into a subfolder of the user's Documents. */
+  saveTextFile: (opts) => ipcRenderer.invoke('files:save-text', opts),
+  pickBackupDir: () => ipcRenderer.invoke('files:pick-dir'),
   onStateChange: (cb) => {
     const listener = (_e, payload) => cb(payload);
     ipcRenderer.on('updater:state-changed', listener);
