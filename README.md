@@ -55,6 +55,18 @@
 - Numeración configurable (secuencial, por fecha, por año o formato personalizado), serie y prefijos.
 - Estados (borrador, enviada, pagada, parcial, vencida, cancelada) con cobros parciales.
 - **PDF profesional** con marca de agua, copias normalizadas y ticket de ventas.
+- **QR reglamentario** en el PDF: URL oficial de cotejo de la AEAT (35 mm, nivel M) + leyenda oficial «Factura verificable en la sede electrónica de la AEAT».
+
+### 🇪🇸 Veri*factu — España (RD 1007/2023 · Orden HAC/1177/2024)
+Módulo fiscal completo conforme a los documentos técnicos oficiales de la AEAT:
+- **Huella SHA-256 oficial**: cadena `campo=valor&…` con el orden exacto del documento AEAT v0.1.2, UTF-8 y hex MAYÚSCULAS. Reproduce los **3 vectores de prueba oficiales** (alta inicial, alta encadenada y anulación encadenada).
+- **Encadenamiento registro a registro** (`chainAlta`/`chainAnulacion`) con sensibilidad integral a cualquier campo modificado.
+- **XML** de `RegistroAlta`/`RegistroAnulacion`/lote (≤ 1000 registros) según los esquemas `SuministroLR.xsd`/`SuministroInformacion.xsd`, validado contra el ejemplo oficial del doc. v1.0.3.
+- **SOAP** hacia los endpoints WSDL oficiales (preproducción `prewww1.aeat.es` / producción `www1.agenciatributaria.gob.es`) con parser de `RespuestaSuministro` (`Correcto` / `AceptadoConErrores` / `Incorrecto`) y detalle de errores por registro.
+- **Cola persistente y recuperable** tras reinicio: estados `PERSISTED → QUEUED → SENDING → ACCEPTED / ACCEPTED_WITH_ERRORS / REJECTED / RETRY_PENDING` con backoff 15 s → 1 min → 10 min → 1 h. La factura se persiste **siempre** (patrón outbox): si falla la emisión fiscal no se pierde ni se duplica.
+- **Firma XAdES-Enveloped** (ETSI EN 319 132) con xml-crypto + node-forge en el proceso main de Electron, cargando un certificado `.p12/.pfx` local (ver [guía paso a paso](#-verifactu--guía-paso-a-paso-certificado-aeat--envío-firmado)). La clave privada nunca sale del proceso main.
+- **Pantalla de incidencias** en Ajustes → Facturación: registros rechazados por la AEAT con **código y descripción del error**, reintentos individual y masivo, reencolado, descarte trazado en auditoría y copia de la respuesta XML. Los registros ya remitidos nunca se editan desde la UI.
+- **Panel de estado**: estado de la cola, auto-auditoría visual de la cadena y selector de modalidad (VERI*FACTU / NO VERI*FACTU) y entorno (pruebas/producción).
 
 ### 👥 Clientes, proveedores y compras
 - Ficha 360° del cliente: gasto total, visitas, puntos, historial de dispositivos por IMEI.
@@ -79,7 +91,7 @@
 
 ### 🌍 Idiomas
 
-La app está **100% traducida a 5 idiomas** (≈ 872 claves sincronizadas por `npm run check:i18n`) y disponible desde la pantalla de login y desde el menú lateral:
+La app está **100% traducida a 5 idiomas** (≈ 920 claves sincronizadas por `npm run check:i18n`) y disponible desde la pantalla de login y desde el menú lateral:
 
 | Código | Idioma | Bandera | RTL |
 |---|---|---|---|
@@ -114,6 +126,7 @@ La app está **100% traducida a 5 idiomas** (≈ 872 claves sincronizadas por `n
 - **100% local**: la base de datos vive en IndexedDB de tu navegador/equipo. Nada se envía a ningún servidor (los envíos de WhatsApp/email salen directamente de tu máquina o de tu propio relay).
 - Contraseñas con **PBKDF2-SHA256 (210.000 iteraciones)** + salt aleatorio por usuario, comparación en tiempo constante y upgrade automático de hashes antiguos.
 - Las **credenciales de mensajería quedan enmascaradas** en el snapshot diario on-disk; el backup manual completo las incluye solo si tú lo pides, avisado en la UI.
+- **Veri*factu**: el `.p12` del certificado AEAT se lee solo en el proceso main de Electron; la clave privada nunca llega al renderer ni viaja por la red. Sin firmador configurado la cola queda en `RETRY_PENDING` (nunca simula una aceptación).
 - Los backups importados se **validan fila a fila** antes de restaurar.
 - Electron con `contextIsolation` + sandbox y sin integración de Node en el renderer.
 
@@ -151,6 +164,68 @@ La app carga datos de demostración (productos móviles, clientes, reparaciones,
 
 ---
 
+## 🇪🇸 Veri*factu — Guía paso a paso (certificado AEAT + envío firmado)
+
+Paso a paso para instalar el certificado electrónico del obligado tributario y probar un envío firmado contra la **preproducción** de la AEAT.
+
+> Requisito previo: tener un **certificado electrónico cualificado** (o sello de empresa) del obligado (representante o AES) en formato `.p12`/`.pfx`, con su contraseña. Es el mismo certificado que se usa para otros trámites de la AEAT.
+
+### Paso 1 · Activar Veri*factu y elegir el entorno
+
+1. Abre la app: **Ajustes → Facturación → Veri*factu**.
+2. Modalidad: `VERI*FACTU`.
+3. Entorno: `Pruebas (preproducción)`. El SOAP se dirigirá a `prewww1.aeat.es` (producción es `www1.agenciatributaria.gob.es`).
+4. Guarda los cambios. Desde ahora, cada factura nueva (venta o reparación) se encola para emisión fiscal; las facturas históricas NO se re-registran.
+
+### Paso 2 · Copiar el certificado e instalarlo en `signer.json`
+
+La app (escritorio) firma cada envío XAdES-Enveloped leyendo un `.p12` local cuyo certificado y contraseña se declaran en:
+
+```
+<carpeta de datos de la app>/verifactu/signer.json   →  { "p12Path": "…", "p12Password": "…" }
+```
+
+1. Encuentra la carpeta de datos. En Windows es `%APPDATA%\shoplogic\verifactu\` (la misma para la app instalada y para `npm run start`). Créala si no existe:
+
+   ```bat
+   cd %APPDATA%\shoplogic && mkdir verifactu
+   ```
+
+2. Copia el `.p12` (p. ej. `certificado-aeat.p12`) dentro de esa carpeta. Si lo copias **junto a `signer.json`** puedes usar una ruta relativa — es lo más sencillo.
+
+3. Crea el fichero `signer.json` en esa carpeta con este contenido (con un editor de texto normal), y guarda:
+
+   ```json
+   {
+     "p12Path": "certificado-aeat.p12",
+     "p12Password": "LA-CONTRASEÑA-DEL-CERTIFICADO"
+   }
+   ```
+
+   Notas:
+   - `p12Path` también admite una ruta absoluta, p. ej. `"C:\\MiCarpeta\\certificado-aeat.p12"` (doble barra invertida en JSON).
+   - Si `signer.json` falta o el `.p12` no existe, los registros quedan en `RETRY_PENDING` y el panel de estado informa del motivo — nunca se finge aceptación.
+
+4. Reinicia la app (o vuelve a abrirla) y ve a **Ajustes → Facturación**: el panel de estado y la lista de incidencias muestran los registros encolados pasando de `QUEUED` → `SENDING` → `ACCEPTED` (o `REJECTED` con el detalle del error de la AEAT).
+
+### Paso 3 · Emitir una factura de prueba y verificar
+
+1. En el TPV, cobra una venta (o factura una reparación). Con Veri*factu activo, la factura se encadena y queda en la cola como `QUEUED`.
+2. La cola procesa cada registro: genera la huella SHA-256 oficial + encadenamiento + XML `RegistroAlta` + firma XAdES, y lo envía por SOAP al entorno seleccionado.
+3. Abre **Ajustes → Facturación**: en el panel aparecen los registros con su estado (`ACCEPTED` / `ACCEPTED_WITH_ERRORS` / `REJECTED` / `RETRY_PENDING`) y el contador de auto-auditoría `🔗 Cadena OK (N facturas)`.
+4. Si la AEAT devuelve `Incorrecto`/`AceptadoConErrores`, la lista de **incidencias** muestra el **código + descripción del error** y podrás reintentar o reencolar sin tocar XML ni huella.
+5. QR del cotejo AEAT: descarga o imprime la factura (PDF) — incluye el QR reglamentario y la leyenda oficial.
+
+### Paso 4 · Pasar a producción (solo cuando preproducción devuelva `Correcto`)
+
+1. Ajustes → Facturación → Veri*factu → Entorno: `Producción`.
+2. Verifica la **primera factura en producción** revisando el panel / incidencias.
+3. La declaración responsable del productor del SIF (NIF, nombre del sistema, versión, número de instalación) se completa en `settings.verifactuConfig.system` — la AEAT no homologa software; es un documento del productor que avala el cumplimiento del RD 1007/2023.
+
+> 🧪 La prueba real contra preproducción exige el certificado del operador — el módulo está probado con los vectores oficiales de la AEAT (huella, XML, QR) y con un `.p12` autofirmado en los 108 tests unitarios; solo el tráfico real con `prewww1.aeat.es` queda pendiente de verificar por el operador.
+
+---
+
 ## 🛠️ Desarrollo
 
 ```bash
@@ -182,20 +257,22 @@ cd android && ./gradlew assembleRelease      # APK firmada en app/build/outputs/
 - **Frontend**: React 19 + TypeScript + Tailwind CSS 4 + Zustand.
 - **Datos**: Dexie (IndexedDB) con transacciones atómicas; modelos tipados en `src/types`.
 - **Escritorio**: Electron 44 + electron-updater con Releases de GitHub.
+- **Fiscalidad**: módulo `src/verifactu/` (huella AEAT, encadenamiento, XML, SOAP, cola, QR) + firma XAdES en el proceso main (`xml-crypto` + `node-forge`).
 - **Móvil**: Capacitor 8 (`capacitor.config.ts` + proyecto `android/`), APK firmada con keystore vía variables de entorno.
 - **i18n**: i18next + react-i18next, 5 recursos tipados en `src/i18n` (es · en · pt · zh · ar con RTL).
-- **Testing**: Vitest + fake-indexeddb (78 tests), incluidos tests de backups y credenciales.
+- **Testing**: Vitest + fake-indexeddb (108 tests), incluidos tests de backups, credenciales, huella AEAT y firma XAdES.
 
 ### Estructura
 ```
 src/
 ├── components/    # 25+ módulos UI (POS, Cash, Inventory, Repairs, Quotes, Billing, Reports…)
+├── verifactu/     # Módulo fiscal Veri*factu: huella, cadena, XML, SOAP, cola, QR (+ tests)
 ├── lib/           # lógica core: calc, stock, invoices, cash, messaging, backup, csv, update…
 ├── db/            # esquema Dexie + datos demo
-├── i18n/          # es, en, pt, zh, ar (873 claves sincronizadas)
+├── i18n/          # es, en, pt, zh, ar (920 claves sincronizadas)
 ├── schemas/       # validación Zod de todos los formularios
 └── types/         # modelos tipados del dominio
-electron/          # proceso principal, preload y updater
+electron/          # proceso principal, preload, updater y firmador XAdES
 android/           # proyecto Android nativo (Capacitor, build Gradle firmada)
 public/            # service worker + manifest
 ```
@@ -206,6 +283,7 @@ public/            # service worker + manifest
 
 | Version | Novedades principales |
 |---|---|
+| **v1.3.0** (Windows) | **Veri\*factu completo (RD 1007/2023)**: huella SHA-256 oficial con vectores AEAT · encadenamiento · XML/SOAP SuministroLR · colo persistente con reintentos · QR reglamentario en PDF · pantalla de incidencias con errores AEAT · **firmador XAdES-Enveloped** con `.p12` local · [guía paso a paso](#-verifactu--guía-paso-a-paso-certificado-aeat--envío-firmado) |
 | **v1.2.0** (Windows + Android) | **Búsqueda global Ctrl+K** · **copia de seguridad externa programada** · **Veri\*factu (España)** con huellas SHA-256 encadenadas · índices Dexie para catálogos grandes · workflow de CI de releases |
 | **v1.1.0** (Windows) | Login por selección de usuario + contraseña · aviso demo eliminado |
 | **v1.0.6** | Avisos por etapa del taller (recibido/en proceso/esperando piezas) en WhatsApp + email · icono regenerado |

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { db } from '../../db/database';
 import { toast } from '../../store/store';
 import { logAction } from '../../lib/audit';
 import { Badge, Card, SectionTitle } from './UI';
@@ -32,7 +31,15 @@ export function VerifactuIncidents() {
     setAllCounts(counts);
   };
 
-  useEffect(() => { refresh().catch((e) => console.error(e)); }, []);
+  useEffect(() => {
+    let alive = true;
+    void (async () => {
+      await new Promise((r) => setTimeout(r, 0));
+      if (!alive) return;
+      await refresh().catch((e) => console.error(e));
+    })();
+    return () => { alive = false; };
+  }, []);
 
   const incidents = entries.filter((e) => REJECTED_STATES.has(e.status) || showAll);
 

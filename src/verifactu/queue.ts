@@ -112,7 +112,7 @@ export async function sendEntry(
   opts: { fetchImpl?: typeof fetch; timeoutMs?: number },
 ): Promise<SendEntryResult> {
   const { sendSoap } = await import('./aeat-soap');
-  const { SOAP_ENDPOINTS, isSoapFault, soapFaultMessage } = await import('./aeat-soap');
+  const { isSoapFault, soapFaultMessage } = await import('./aeat-soap');
   const env = localStorage.getItem('sl_verifactu_env') as 'test' | 'production' | null;
   const now = new Date().toISOString();
   try {

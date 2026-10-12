@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { toast } from '../../store/store';
 import { Button } from './Forms';
 import { getQueueTable } from '../../verifactu/queue';
 import { verifyChain } from '../../verifactu/audit';
@@ -22,7 +21,15 @@ export function FiscalStatus() {
     setAudited(audit.checked);
   };
 
-  useEffect(() => { refresh().catch(() => undefined); }, []);
+  useEffect(() => {
+    let alive = true;
+    void (async () => {
+      await new Promise((r) => setTimeout(r, 0));
+      if (!alive) return;
+      await refresh().catch(() => undefined);
+    })();
+    return () => { alive = false; };
+  }, []);
 
   return (
     <div className="mt-4 border-t border-sl-border pt-4">

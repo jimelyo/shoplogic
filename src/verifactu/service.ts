@@ -16,7 +16,6 @@
 import { db } from '../db/database';
 import type { Invoice, Settings } from '../types';
 import { chainAlta, chainAnulacion, officialMoney } from './fiscal-chain';
-import type { ChainResult } from './fiscal-chain';
 import { altaSoap, anulacionSoap } from './aeat-xml';
 import type { DesgloseDetalle, RegistroAlta, RegistroAnulacion, SistemaInformaticoSpec, AeatTipoFactura } from './fiscal-types';
 import { CLAVE_REGIMEN, CALIFICACION_OPERACION } from './fiscal-types';

@@ -1,6 +1,5 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import 'fake-indexeddb/auto';
-import Dexie from 'dexie';
 import { chainAlta, chainAnulacion } from '../fiscal-chain';
 import { AEAT_HUELLA_VECTORES } from '../fiscal-hash';
 

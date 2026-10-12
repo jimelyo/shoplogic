@@ -7,7 +7,7 @@
 
 import { describe, it, expect } from 'vitest';
 import {
-  hashStringAlta, hashStringAnulacion, huellaAlta, huellaAnulacion, sha256Upper,
+  hashStringAlta, huellaAlta, huellaAnulacion, sha256Upper,
   AEAT_HUELLA_VECTORES, money,
 } from '../fiscal-hash';
 
