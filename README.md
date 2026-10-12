@@ -6,8 +6,10 @@
 
 **ERP + TPV completo para tiendas de telefonía y accesorios** — ventas, cajas, inventario con trazabilidad, taller de reparaciones, facturación, reportes y automatizaciones de mensajería. Funciona 100% local (tus datos nunca salen de tu equipo) y se actualiza sola desde GitHub Releases.
 
-[![Release](https://img.shields.io/github/v/release/jimelyo/shoplogic)](https://github.com/jimelyo/shoplogic/releases)
+[![Release](https://img.shields.io/github/v/release/jimelyo/shoplogic)](https://github.com/jimelyo/shoplogic/releases/latest)
 [![Plataforma](https://img.shields.io/badge/Windows-x64%20%7C%20arm64-blue)](https://github.com/jimelyo/shoplogic/releases/latest)
+[![Android](https://img.shields.io/badge/Android-APK%20v1.1.0-green)](https://github.com/jimelyo/shoplogic/releases/tag/v1.1.0-android)
+[![Idiomas](https://img.shields.io/badge/idiomas-5%20·%20RTL%20árabe-purple)](#-idiomas)
 [![Licencia](https://img.shields.io/badge/uso-privado-informational)]()
 
 ---
@@ -73,6 +75,22 @@
 - Cola de envío (outbox) con reintentos al reiniciar si el servidor relay no estaba disponible.
 - Todo el uso queda registrado en la auditoría (quién envió qué y cuándo).
 
+### 🌍 Idiomas
+
+La app está **100% traducida a 5 idiomas** (≈ 872 claves sincronizadas por `npm run check:i18n`) y disponible desde la pantalla de login y desde el menú lateral:
+
+| Código | Idioma | Bandera | RTL |
+|---|---|---|---|
+| `es` | Español (por defecto) | 🇪🇸 | — |
+| `en` | English | 🇬🇧 | — |
+| `pt` | Português | 🇵🇹 | — |
+| `zh` | 中文 | 🇨🇳 | — |
+| `ar` | العربية | 🇸🇦 | ✓ **RTL completo** |
+
+- El idioma se guarda en `localStorage`(`sl_lang`) y persiste entre sesiones; el árabe cambia la dirección de la página (`dir=rtl`) y todos los estilos se adaptan con las utilidades lógicas de Tailwind (`ms-`, `me-`, `start-`, `end-`).
+- Los tickets, PDF de facturas, y mensajes automáticos de WhatsApp/email también respetan el idioma activo.
+- Fallback automático a español si falta una clave.
+
 ### ⚙️ Configuración y datos
 - Multiples monedas (EUR, USD, GBP, MXN, ARS, COP, CLP, BRL, CNY, MAD), IVA configurable.- Marca propia: nombre de la app, logo, datos fiscales del comercio en tickets/PDF.
 - 5 idiomas: **Español, English, Português, 中文, العربية** (con RTL para árabe).
@@ -100,6 +118,11 @@
 ---
 
 ## 🚀 Instalación
+
+### 📱 Android
+1. Descarga **`shoplogic-pro-v1.1.0-android.apk`** desde [Release v1.1.0-android](https://github.com/jimelyo/shoplogic/releases/tag/v1.1.0-android).
+2. Permite **instalar apps de origen desconocido** para tu navegador/gestor de archivos (Ajustes → Seguridad) la primera vez.
+3. Abre el APK e instálala. Requiere **Android 6.0+ (API 23+)**. Sin permisos más allá de internet: los datos viven en IndexedDB dentro de la app, 100% locales.
 
 ### Windows (recomendado — escritorio)
 1. Descarga el instalador para tu arquitectura desde [Releases](https://github.com/jimelyo/shoplogic/releases/latest):
@@ -139,10 +162,26 @@ npm run lint         # oxlint
 npm run check:i18n   # comprueba 5 locales con llaves idénticas
 ```
 
+### Build Android (Capacitor)
+
+Lleva un JDK 21 (el sistema Java 25 es aún incompatibles con AGP) y envuelve el build web en una shell nativa:
+
+```bash
+npm run build                    # build web a dist/
+npx cap sync android             # copia dist/ + plugins al proyecto Android
+export JAVA_HOME="$USERPROFILE/.jdks/jbr-21.0.11"     # JDK 21
+export ANDROID_HOME="$LOCALAPPDATA/Android/Sdk"       # Android SDK
+export SL_KEYSTORE="$USERPROFILE/.android/shoplogic-release.jks"  # keystore fuera del repo
+export SL_KEYSTORE_PASS=…; export SL_KEY_ALIAS=shoplogic; export SL_KEY_PASS=…
+cd android && ./gradlew assembleRelease      # APK firmada en app/build/outputs/apk/release/
+```
+
 ### Stack
 - **Frontend**: React 19 + TypeScript + Tailwind CSS 4 + Zustand.
 - **Datos**: Dexie (IndexedDB) con transacciones atómicas; modelos tipados en `src/types`.
 - **Escritorio**: Electron 44 + electron-updater con Releases de GitHub.
+- **Móvil**: Capacitor 8 (`capacitor.config.ts` + proyecto `android/`), APK firmada con keystore vía variables de entorno.
+- **i18n**: i18next + react-i18next, 5 recursos tipados en `src/i18n` (es · en · pt · zh · ar con RTL).
 - **Testing**: Vitest + fake-indexeddb (78 tests), incluidos tests de backups y credenciales.
 
 ### Estructura
@@ -155,6 +194,7 @@ src/
 ├── schemas/       # validación Zod de todos los formularios
 └── types/         # modelos tipados del dominio
 electron/          # proceso principal, preload y updater
+android/           # proyecto Android nativo (Capacitor, build Gradle firmada)
 public/            # service worker + manifest
 ```
 
@@ -164,6 +204,8 @@ public/            # service worker + manifest
 
 | Versión | Novedades principales |
 |---|---|
+| **v1.1.0** (Windows) | Login por selección de usuario + contraseña · aviso demo eliminado · Latest actual |
+| **v1.1.0-android** | Primera build Android nativa (Capacitor 8, APK firmada, API 23+) |
 | **v1.0.6** | Avisos por etapa del taller (recibido/en proceso/esperando piezas) en WhatsApp + email · icono regenerado |
 | **v1.0.5** | Nuevo icono corporativo (teléfono + llave + gráfico) en instalador, ventana y PWA |
 | **v1.0.4** | Instalador one-click (auto-update con un solo UAC) · README completo |
