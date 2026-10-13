@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.3.1 — Nueva identidad de logo (2026-10-13)
+
+### Cambios
+- **Logo nuevo 2026** (bolsa azul con teléfono, llave inglesa y gráfico) en la ventana de Electron,
+  el instalador NSIS, los `.exe`, el favicon/PWA (`icon-512.png`) y los 20 mipmaps del launcher Android.
+- Fuente canónica `assets/logo.png` (1024×1024 con transparencia) y pipeline `npm run icon` que
+  regenera todos los formatos derivados (ICO 6 tamaños, web 512, Android por densidad).
+- Eliminados los SVG vectoriales del icono anterior (`icon.svg`, `icons.svg`, `favicon.svg`) y todas
+  sus referencias (manifest PWA, precache del service worker, vite.config).
+
+### Correcciones
+- Lint limpio (0 warnings) en los ficheros nuevos del módulo Veri*factu.
+- README con la guía paso a paso del certificado AEAT (`.p12` → `signer.json` → preproducción).
+
 ## 1.3.0 — VERI*FACTU (2026-10-13)
 
 Módulo fiscal **VERI*FACTU** conforme al RD 1007/2023 y la Orden HAC/1177/2024,
