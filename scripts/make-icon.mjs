@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 /**
- * Genera electron/icon.ico a partir de public/icon.svg.
+ * Genera electron/icon.ico a partir de assets/logo.png (logo corporativo 2026,
+ * fuente cuadrada 1024x1024 con transparencia).
  *
- * Rasteriza el SVG a 6 tamaños con sharp y empaqueta los PNG dentro de un
+ * Rasteriza el PNG a 6 tamaños con sharp y empaqueta los PNG dentro de un
  * contenedor ICO (formato PNG-in-ICO, válido desde Windows Vista). El resultado
  * lo usan la ventana de Electron y electron-builder (instalador + .exe).
  *
@@ -17,12 +18,16 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SIZES = [256, 128, 64, 48, 32, 16];
 const OUT = path.join(ROOT, 'electron', 'icon.ico');
 
-const svg = fs.readFileSync(path.join(ROOT, 'public', 'icon.svg'));
+const src = path.join(ROOT, 'assets', 'logo.png');
+if (!fs.existsSync(src)) {
+  console.error(`✗ Falta ${path.relative(ROOT, src)} (logo fuente 1024x1024).`);
+  process.exit(1);
+}
 
 // Rasteriza cada tamaño.
 const pngs = [];
 for (const size of SIZES) {
-  const png = await sharp(svg, { density: 384 })
+  const png = await sharp(src)
     .resize(size, size)
     .png()
     .toBuffer();

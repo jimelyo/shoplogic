@@ -13,7 +13,7 @@ function precacheWorker(): Plugin {
     name: 'precache-sw',
     apply: 'build',
     generateBundle(_opts, bundle) {
-      const assets = ['/', '/manifest.json', '/icon.svg']
+      const assets = ['/', '/manifest.json', '/icon-512.png']
       for (const file of Object.keys(bundle)) assets.push('/' + file)
       this.emitFile({
         type: 'asset',
