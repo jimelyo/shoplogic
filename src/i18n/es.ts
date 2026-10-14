@@ -753,6 +753,7 @@ const es = {
   "s_locale": "Localización",
   "s_ticket": "Ticket",
   "s_billing": "Facturación",
+  "s_verifactu": "VERI*FACTU Companion",
   "s_channels": "Canales",
   "s_printers": "Impresoras",
   "s_appearance": "Apariencia",

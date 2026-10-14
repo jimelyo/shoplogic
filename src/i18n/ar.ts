@@ -753,6 +753,7 @@ const ar = {
   "s_locale": "الإعدادات المحلية",
   "s_ticket": "الإيصال",
   "s_billing": "الفوترة",
+  "s_verifactu": "VERI*FACTU Companion",
   "s_channels": "القنوات",
   "s_printers": "الطابعات",
   "s_appearance": "المظهر",

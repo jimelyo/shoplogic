@@ -753,6 +753,7 @@ const zh = {
   "s_locale": "本地化",
   "s_ticket": "小票",
   "s_billing": "开票",
+  "s_verifactu": "VERI*FACTU Companion",
   "s_channels": "渠道",
   "s_printers": "打印机",
   "s_appearance": "外观",

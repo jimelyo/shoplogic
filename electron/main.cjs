@@ -106,12 +106,25 @@ function send(channel, payload) {
 // proceso main, leyendo el .p12 local que el operador instala; nunca por HTTP.
 // El renderer ve solo el resultado: XML firmado o error sin detalles sensibles.
 const signer = require('./verifactu-signer.cjs');
+const companion = require('./verifactu-companion.cjs');
 
 ipcMain.handle('verifactu:signer-status', () => {
   const cfg = signer.readSignerConfig(app.getPath('userData'));
   return cfg ? { available: true, p12Path: cfg.p12Path, p12PasswordSet: !!cfg.p12Password }
              : { available: false, hint: 'Falta userData/verifactu/signer.json con { p12Path, p12Password }' };
 });
+
+// --- VERI*FACTU Companion (asistente de certificado + diagnóstico) -----------
+// La contraseña del .p12 viaja SOLO por IPC al main y muere aquí: no se guarda
+// en Dexie/localStorage ni se devuelve jamás al renderer.
+ipcMain.handle('verifactu:companion-pick-p12', (e) => companion.pickAndCopyP12(app.getPath('userData'), e.sender));
+ipcMain.handle('verifactu:companion-validate', (_e, password) => {
+  const cert = companion.certTargetPath(app.getPath('userData'));
+  return companion.describeP12(cert, password);
+});
+ipcMain.handle('verifactu:companion-install', (_e, password) => companion.installSignerConfig(app.getPath('userData'), password));
+ipcMain.handle('verifactu:signer-detail', () => companion.signerDetail(app.getPath('userData')));
+ipcMain.handle('verifactu:test-connection', (_e, environment) => companion.testConnection(environment));
 
 ipcMain.handle('verifactu:sign', (_e, xml) => {
   if (typeof xml !== 'string' || !xml.startsWith('<')) return { ok: false, error: 'XML inválido' };

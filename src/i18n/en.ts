@@ -753,6 +753,7 @@ const en = {
   "s_locale": "Localization",
   "s_ticket": "Receipt",
   "s_billing": "Billing",
+  "s_verifactu": "VERI*FACTU Companion",
   "s_channels": "Channels",
   "s_printers": "Printers",
   "s_appearance": "Appearance",

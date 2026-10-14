@@ -18,6 +18,14 @@ contextBridge.exposeInMainWorld('shoplogicDesktop', {
   /** VERI*FACTU: firma XAdES del registro (proceso main usa el .p12 local). */
   verifactuSign: (xml) => ipcRenderer.invoke('verifactu:sign', xml),
   verifactuSignerStatus: () => ipcRenderer.invoke('verifactu:signer-status'),
+  /** VERI*FACTU Companion — asistente de certificado y diagnóstico.
+   *  La contraseña del .p12 viaja SOLO por IPC al proceso main y muere ahí:
+   *  no se persiste en la interfaz y nunca vuelve al renderer. */
+  verifactuPickP12: () => ipcRenderer.invoke('verifactu:companion-pick-p12'),
+  verifactuValidateP12: (password) => ipcRenderer.invoke('verifactu:companion-validate', password),
+  verifactuInstallP12: (password) => ipcRenderer.invoke('verifactu:companion-install', password),
+  verifactuSignerDetail: () => ipcRenderer.invoke('verifactu:signer-detail'),
+  verifactuTestConnection: (environment) => ipcRenderer.invoke('verifactu:test-connection', environment),
   onStateChange: (cb) => {
     const listener = (_e, payload) => cb(payload);
     ipcRenderer.on('updater:state-changed', listener);

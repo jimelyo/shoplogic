@@ -1,4 +1,4 @@
-# 📱 ShopLogic Pro
+# 📱 ShopLogic Pro v1.3.2
 
 <p align="center">
   <img src="public/icon-512.png" width="128" alt="ShopLogic Pro">
@@ -91,7 +91,7 @@ Módulo fiscal completo conforme a los documentos técnicos oficiales de la AEAT
 
 ### 🌍 Idiomas
 
-La app está **100% traducida a 5 idiomas** (≈ 920 claves sincronizadas por `npm run check:i18n`) y disponible desde la pantalla de login y desde el menú lateral:
+La app está **100% traducida a 5 idiomas** (≈ 921 claves sincronizadas por `npm run check:i18n`) y disponible desde la pantalla de login y desde el menú lateral:
 
 | Código | Idioma | Bandera | RTL |
 |---|---|---|---|
@@ -140,9 +140,9 @@ La app está **100% traducida a 5 idiomas** (≈ 920 claves sincronizadas por `n
 3. Abre el APK e instálala. Requiere **Android 6.0+ (API 23+)**. Sin permisos más allá de internet: los datos viven en IndexedDB dentro de la app, 100% locales.
 
 ### Windows (recomendado — escritorio)
-1. Descarga el instalador para tu arquitectura desde [Releases](https://github.com/jimelyo/shoplogic/releases/latest):
-   - `ShopLogic-Setup-x.y.z-x64.exe` (Windows 10/11 x64)
-   - `ShopLogic-Setup-x.y.z-arm64.exe` (Windows on ARM)
+1. Descarga el **instalador v1.3.2** para tu arquitectura (x64 y ARM64 empaquetados en la misma release) desde [Releases](https://github.com/jimelyo/shoplogic/releases/latest):
+   - `ShopLogic-Setup-1.3.2-x64.exe` (Windows 10/11 x64)
+   - `ShopLogic-Setup-1.3.2-arm64.exe` (Windows on ARM)
 2. Ejecuta el instalador (instalación silenciosa con un solo UAC). El acceso directo queda en el escritorio.
 3. Las actualizaciones se descargan y aplican **automáticamente** a partir de ahí.
 
@@ -269,7 +269,7 @@ src/
 ├── verifactu/     # Módulo fiscal Veri*factu: huella, cadena, XML, SOAP, cola, QR (+ tests)
 ├── lib/           # lógica core: calc, stock, invoices, cash, messaging, backup, csv, update…
 ├── db/            # esquema Dexie + datos demo
-├── i18n/          # es, en, pt, zh, ar (920 claves sincronizadas)
+├── i18n/          # es, en, pt, zh, ar (921 claves sincronizadas)
 ├── schemas/       # validación Zod de todos los formularios
 └── types/         # modelos tipados del dominio
 electron/          # proceso principal, preload, updater y firmador XAdES
@@ -279,10 +279,38 @@ public/            # service worker + manifest
 
 ---
 
+## 📋 Novedades / Changelog (v1.3.2)
+
+### 🧙 VERI*FACTU Companion — nuevo módulo en Ajustes
+
+Asistente de instalación y gestión fiscal (complemento del módulo VERI*FACTU, sin duplicar lógica):
+
+- **🪪 Certificado (.p12) guiado**: selección del fichero, validación de la contraseña y
+  escritura segura de `%APPDATA%\ShopLogic Pro\verifactu\signer.json` (modo 0600). La contraseña
+  viaja solo por IPC al **proceso main** de Electron y nunca llega al renderer, al IndexedDB ni al
+  almacenamiento del navegador. Estados de caducidad con aviso preventivo (≤ 45 días).
+- **🩺 Diagnóstico fiscal**: monitor de la cola de remisión por estado (`PERSISTED` → `QUEUED` →
+  `SENDING` → `ACCEPTED` / `ACCEPTED_WITH_ERRORS` / `REJECTED` / `RETRY_PENDING`), auditoría del
+  encadenamiento de huellas y **prueba de conexión en tiempo real** a los endpoints WSDL de
+  preproducción (`prewww1.aeat.es`) o producción (`www1.agenciatributaria.gob.es`) con latencia.
+- **⚠️ Centro de incidencias**: visor de la respuesta XML SOAP de la AEAT (solo lectura) para
+  registros rechazados o aceptados con errores, con reintentos individual y masivo. Los registros
+  remitidos NUNCA se editan: la cadena local es inmutable.
+- **📜 Declaración responsable**: formulario del productor del SIF (art. 10.d de la Orden
+  HAC/1177/2024) con validaciones y exportación del documento imprimible HTML para firmar.
+- Pruebas unitarias nuevas (`companion.test.ts`, 17 tests) y 921 claves i18n sincronizadas en los
+  5 idiomas.
+
+### Empaquetado multi-arquitectura
+- Instaladores NSIS Windows **x64 y ARM64** (`ShopLogic-Setup-1.3.2-x64.exe` / `ShopLogic-Setup-1.3.2-arm64.exe`).
+
+---
+
 ## 🗺️ Historial de releases
 
 | Version | Novedades principales |
 |---|---|
+| **v1.3.2** (Windows x64 + ARM64) | **VERI*FACTU Companion**: asistente de certificado `.p12` con seguridad en el proceso main · diagnóstico de la cola AEAT + prueba de conexión · centro de incidencias con visor XML · declaración responsable exportable · empaquetado multi-arquitectura x64/ARM64 |
 | **v1.3.0** (Windows) | **Veri\*factu completo (RD 1007/2023)**: huella SHA-256 oficial con vectores AEAT · encadenamiento · XML/SOAP SuministroLR · colo persistente con reintentos · QR reglamentario en PDF · pantalla de incidencias con errores AEAT · **firmador XAdES-Enveloped** con `.p12` local · [guía paso a paso](#-verifactu--guía-paso-a-paso-certificado-aeat--envío-firmado) |
 | **v1.2.0** (Windows + Android) | **Búsqueda global Ctrl+K** · **copia de seguridad externa programada** · **Veri\*factu (España)** con huellas SHA-256 encadenadas · índices Dexie para catálogos grandes · workflow de CI de releases |
 | **v1.1.0** (Windows) | Login por selección de usuario + contraseña · aviso demo eliminado |

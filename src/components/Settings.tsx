@@ -11,6 +11,7 @@ import { backupCounts, downloadBackup, downloadFile, exportAll, externalBackupSu
 import { verifyChain, verifactuCsv } from '../verifactu/audit';
 import { FiscalStatus, FiscalConfigFields } from './shared/FiscalStatus';
 import { VerifactuIncidents } from './shared/VerifactuIncidents';
+import { VerifactuCompanion } from './shared/VerifactuCompanion';
 import { DEFAULT_FISCAL_CONFIG } from '../verifactu/service';
 import { exportTableCsv } from '../lib/csv';
 import type { Accent, Channels, ChannelId, ChannelStatus, EmailChannel, InvoiceNumbering, InvoiceStatus, MailProvider, NormalPrinterConfig, PaymentMethod, PrinterConfig, PrinterConnection, Settings as TSettings, WhatsAppChannel, WhatsAppMode } from '../types';
@@ -70,10 +71,10 @@ function UpdateCard() {
   );
 }
 
-type Section = 'store' | 'locale' | 'ticket' | 'billing' | 'security' | 'channels' | 'printers' | 'appearance' | 'data';
+type Section = 'store' | 'locale' | 'ticket' | 'billing' | 'security' | 'channels' | 'printers' | 'appearance' | 'data' | 'verifactu';
 const SECTIONS: { id: Section; icon: string }[] = [
   { id: 'store', icon: '🏪' }, { id: 'locale', icon: '🌍' }, { id: 'ticket', icon: '🧾' }, { id: 'billing', icon: '📄' },
-  { id: 'security', icon: '🔐' }, { id: 'channels', icon: '📡' }, { id: 'printers', icon: '🖨️' }, { id: 'appearance', icon: '🎨' }, { id: 'data', icon: '💾' },
+  { id: 'verifactu', icon: '🧙' }, { id: 'security', icon: '🔐' }, { id: 'channels', icon: '📡' }, { id: 'printers', icon: '🖨️' }, { id: 'appearance', icon: '🎨' }, { id: 'data', icon: '💾' },
 ];
 const CONNECTIONS: PrinterConnection[] = ['usb', 'network', 'bluetooth', 'system'];
 const DARK_BG: Record<Accent, string> = { default: '#0f172a', green: '#064e3b', red: '#7f1d1d', blue: '#1e3a5f', purple: '#3b0764', orange: '#7c2d12' };
@@ -259,6 +260,8 @@ export function Settings() {
           </div>
         </Card>
       )}
+
+      {section === 'verifactu' && <VerifactuCompanion form={form} up={up} />}
 
       {section === 'security' && (
         <Card className="p-5">

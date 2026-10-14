@@ -753,6 +753,7 @@ const pt = {
   "s_locale": "Localização",
   "s_ticket": "Talão",
   "s_billing": "Faturação",
+  "s_verifactu": "VERI*FACTU Companion",
   "s_channels": "Canais",
   "s_printers": "Impressoras",
   "s_appearance": "Aparência",

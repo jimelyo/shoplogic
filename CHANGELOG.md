@@ -1,5 +1,32 @@
 # Changelog
 
+## 1.3.2 — VERI*FACTU Companion + multi-arquitectura (2026-10-14)
+
+### Nuevo
+- **VERI*FACTU Companion** (Ajustes → 🧙): asistente guiado de instalación, configuración
+  automática, diagnóstico y resolución de incidencias fiscales
+  - 🪪 **Certificado `.p12`**: selección nativa, copia al almacén local (`cert.p12`),
+    validación de contraseña y escritura segura de `verifactu/signer.json` (0600) — todo en el
+    **proceso main** (`electron/verifactu-companion.cjs`); la contraseña nunca sale del main.
+  - 🩺 **Diagnóstico**: conteo de la cola por los 7 estados, auditoría de cadena de huellas y
+    prueba de conexión WSDL a preproducción/producción con latencia (sin CORS, vía main).
+  - ⚠️ **Incidencias**: visor XML SOAP de la AEAT para rechazados/aceptados con errores y
+    reintentos individual/masivo reutilizando la cola existente (sin editar huella ni XML).
+  - 📜 **Declaración responsable** del productor del SIF (art. 10.d Orden HAC/1177/2024) con
+    validaciones y exportación HTML imprimible (`src/verifactu/companion.ts`).
+- **Empaquetado multi-arquitectura**: instaladores NSIS Windows **x64 + ARM64**
+  (`ShopLogic-Setup-1.3.2-x64.exe` / `ShopLogic-Setup-1.3.2-arm64.exe`).
+
+### Cambios
+- Versión del proyecto a 1.3.2 en `package.json` (propagada a electron-builder y a la app vía
+  `VITE_APP_VERSION`/`app.getVersion()`).
+- README v1.3.2: título, sección de instalación con nombres de instaladores reales, nueva sección
+  «Novedades (v1.3.2)» e historial de releases; contador i18n actualizado a 921 claves.
+- IPC nuevos: `verifactu:companion-pick-p12`, `verifactu:companion-validate`,
+  `verifactu:companion-install`, `verifactu:signer-detail`, `verifactu:test-connection`.
+- 17 tests unitarios nuevos (`src/verifactu/__tests__/companion.test.ts`): estadísticas de la cola,
+  caducidad del certificado, validaciones art. 10.d y generador de declaración responsable.
+
 ## 1.3.1 — Nueva identidad de logo (2026-10-13)
 
 ### Cambios
