@@ -14,7 +14,7 @@ import { DEFAULT_AUTOMATIONS } from '../data/automations';
 import { DeviceHistory } from './DeviceHistory';
 import { REPAIR_STATUS_COLORS } from '../lib/colors';
 import { createInvoiceFromRepair } from '../lib/invoices';
-import { printHtml, repairReceiptHtml } from '../lib/print';
+import { printHtml, buildDoc, repairReceiptHtml } from '../lib/print';
 import { repairSchema, validateForm, type FormErrors } from '../schemas';
 import type { ChannelId, Repair, RepairStatus } from '../types';
 import { REPAIR_STATUSES, REPAIR_STATUS_ICONS } from '../types';
@@ -125,6 +125,8 @@ export function Repairs() {
   const [notify, setNotify] = useState<Repair | null>(null);
   const [device, setDevice] = useState('');
   const [sending, setSending] = useState(false);
+  /** Repair whose receipt is being previewed before printing. */
+  const [preview, setPreview] = useState<Repair | null>(null);
 
   const list = useMemo(() => (repairs ?? []).filter((r) => (status === 'all' || r.status === status) && matches(q, r.ticketNumber, r.customerName, r.customerPhone, r.device, r.imei, r.problem)), [repairs, q, status]);
   if (!repairs || !customers || !invoices) return <LoadingPage />;
@@ -185,6 +187,11 @@ export function Repairs() {
       rep.id = await db.repairs.add(rep);
       await logAction('create', 'repairs', `${rep.ticketNumber} · ${rep.device}`);
       toast.success(t('repairs.created', { ticket: rep.ticketNumber }));
+      // Offer the check-in ticket right away: the customer is still at the counter.
+      if (await confirmDialog(t('repairs.printTicketAsk'), { confirmLabel: t('repairs.printTicket'), title: rep.ticketNumber })) {
+        setPreview(rep);
+        logAction('print', 'repairs', rep.ticketNumber);
+      }
       if (rep.status === 'delivered') await maybeInvoice(rep);
     }
     setOpen(false);
@@ -217,6 +224,8 @@ export function Repairs() {
     toast.success(t('common.deleted'));
   };
   const print = (r: Repair) => { printHtml(repairReceiptHtml(r, s, t), r.ticketNumber); logAction('print', 'repairs', r.ticketNumber); };
+  /** The modal shows the exact document printHtml would send to the printer. */
+  const previewDoc = (r: Repair) => buildDoc(repairReceiptHtml(r, s, t), r.ticketNumber);
   const invoiced = (r: Repair) => invoices.some((i) => i.repairId === r.id);
 
   const vatLine = (n: number | undefined) => {
@@ -236,7 +245,7 @@ export function Repairs() {
   const rowActions = (r: Repair) => (
     <div className="flex justify-end gap-0.5">
       <IconButton title={t('common.view')} onClick={() => setDetail(r)}><Eye /></IconButton>
-      <IconButton title={t('repairs.printReceipt')} onClick={() => print(r)}><Printer /></IconButton>
+      <IconButton title={t('repairs.printReceipt')} onClick={() => setPreview(r)}><Printer /></IconButton>
       <IconButton title={t('common.edit')} tone="primary" onClick={() => openEdit(r)}><Pencil /></IconButton>
       <IconButton title={t('common.delete')} tone="danger" onClick={() => remove(r)}><Trash /></IconButton>
     </div>
@@ -343,9 +352,25 @@ export function Repairs() {
         </div>
       </Modal>
 
+      <Modal open={!!preview} onClose={() => setPreview(null)} size="md"
+        title={preview ? `👁️ ${t('repairs.previewTitle')} · ${preview.ticketNumber}` : ''}
+        footer={preview && <>
+          <Button variant="secondary" onClick={() => setPreview(null)}>{t('common.cancel')}</Button>
+          <Button icon={<Printer />} onClick={() => { const r = preview; setPreview(null); print(r); }}>{t('common.print')}</Button>
+        </>}>
+        {preview && (
+          <iframe
+            title={`${preview.ticketNumber} · ${t('repairs.previewTitle')}`}
+            srcDoc={previewDoc(preview)}
+            sandbox=""
+            className="mx-auto h-[60vh] w-full max-w-sm rounded-xl border border-sl-border bg-white"
+          />
+        )}
+      </Modal>
+
       <Modal open={!!detail} onClose={() => setDetail(null)} size="lg" title={detail ? `🔧 ${detail.ticketNumber} · ${detail.device}` : ''}
         footer={detail && <>
-          <Button variant="secondary" icon={<Printer />} onClick={() => print(detail)}>{t('repairs.printReceipt')}</Button>
+          <Button variant="secondary" icon={<Printer />} onClick={() => { const d = detail; setDetail(null); setPreview(d); }}>{t('repairs.printReceipt')}</Button>
           {canSendWa && !!detail.customerPhone && <Button variant="success" icon={<MessageCircle />} disabled={sending} loading={sending} onClick={() => { void sendMessage(detail, 'whatsapp'); }}>{t('channels.sendWhatsApp')}</Button>}
           {canSendMail && !!detail.customerEmail && <Button variant="secondary" icon={<Mail />} disabled={sending} loading={sending} onClick={() => { void sendMessage(detail, 'email'); }}>{t('channels.sendEmail')}</Button>}
           <Button variant="outline" icon={<Pencil />} onClick={() => { const d = detail; setDetail(null); openEdit(d); }}>{t('common.edit')}</Button>

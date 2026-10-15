@@ -8,9 +8,13 @@ type T = (k: string, o?: Record<string, unknown>) => string;
 export const esc = (s: unknown) =>
   String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
+/** Full standalone document for a printable receipt body — used by printHtml and by preview modals. */
+export function buildDoc(body: string, title: string) {
+  return `<!doctype html><html dir="${i18n.dir()}" lang="${i18n.language}"><head><meta charset="utf-8"><title>${esc(title)}</title></head><body>${body}</body></html>`;
+}
+
 export function printHtml(body: string, title = 'ShopLogic Pro') {
-  const dir = i18n.dir();
-  const doc = `<!doctype html><html dir="${dir}" lang="${i18n.language}"><head><meta charset="utf-8"><title>${esc(title)}</title></head><body>${body}</body></html>`;
+  const doc = buildDoc(body, title);
   let w: Window | null = null;
   try { w = window.open('', '_blank', 'width=900,height=760'); } catch { w = null; }
   if (w && w.document) {
@@ -47,11 +51,14 @@ const ticketCss = (width: string) => `<style>
 
 function storeHeader(s: Settings, t: T) {
   const tp = s.ticketPrinter;
+  // La cabecera sembrada por defecto no es un dato del operador: si sigue ahí
+  // (nunca la editó) se imprime el nombre real de la tienda, no el demo.
+  const header = !tp?.header || tp.header === 'ShopLogic Mobile Store' ? s.storeName : tp.header;
   const logo = s.logo
     ? `<div class="c"><img src="${s.logo}" alt="" style="max-width:26mm;max-height:20mm;object-fit:contain;margin:0 auto 2px"></div>`
     : (tp?.showLogo !== false ? '<div class="c logo">📱</div>' : '');
   return `${logo}
-  <h1 class="c">${esc(tp?.header || s.storeName)}</h1>
+  <h1 class="c">${esc(header || s.storeName)}</h1>
   <div class="c muted">${esc(t('settings.cif'))}: ${esc(s.cif)}<br>${esc(s.address)}<br>${esc(t('common.phone'))}: ${esc(s.phone)}</div><hr>`;
 }
 

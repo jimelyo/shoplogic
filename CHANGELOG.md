@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.3.3 — Tickets de reparación: impresión y vista previa (2026-10-16)
+
+### Nuevo
+- **Opción de imprimir el ticket al crear una reparación**: tras registrar una nueva
+  reparación se pregunta «¿Imprimir el ticket de entrada?» — pensado para cuando el
+  cliente sigue en el mostrador.
+- **Vista previa del ticket antes de imprimir** (modal con `iframe` aislado, sin
+  scripts): muestra exactamente el documento que saldrá por la impresora (mismo HTML
+  y CSS de ticket 58/80 mm). Se abre desde el diálogo de creación, desde el botón de
+  impresora de cada fila y desde «Imprimir resguardo» del detalle.
+
+### Correcciones
+- **Cabecera del ticket con el nombre de la tienda**: la cabecera impresa usaba
+  `ticketPrinter.header`, sembrada con el valor demo «ShopLogic Mobile Store» que no
+  se actualizaba al cambiar los datos de la tienda. Ahora:
+  - al imprimir, si la cabecera está vacía o sigue siendo el valor demo, se usa el
+    nombre real de la tienda (fail-safe sin migración);
+  - al guardar Ajustes, si cambió el nombre de tienda y la cabecera lo seguía
+    (vacía, nombre anterior o valor demo), se sincroniza automáticamente;
+  - la miniatura de vista previa en Ajustes → Impresoras usa el mismo criterio.
+- i18n: claves nuevas `repairs.printTicketAsk`, `repairs.printTicket` y
+  `repairs.previewTitle` en los 5 idiomas (924 claves idénticas).
+
 ## 1.3.2 — VERI*FACTU Companion + multi-arquitectura (2026-10-14)
 
 ### Nuevo

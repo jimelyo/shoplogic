@@ -37,3 +37,5 @@ android/app/src/main/res/drawable*/launcher-background.xml
 *.apk
 *.keystore
 !debug.keystore
+
+.vercel

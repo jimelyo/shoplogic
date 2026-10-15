@@ -120,6 +120,14 @@ export function Settings() {
       channels: cleanChannels(form.channels ?? DEFAULT_CHANNELS),
     };
     const s = await getSettings();
+    // El ticket imprime ticketPrinter.header (no storeName). Si ese encabezado
+    // seguía el nombre de la tienda (vacío, igual al anterior o el sembrado por
+    // defecto), se sincroniza con el nuevo nombre para no imprimir uno caducado.
+    const prevHeader = s.ticketPrinter?.header;
+    const headerFollows = !prevHeader || prevHeader === s.storeName || prevHeader === 'ShopLogic Mobile Store';
+    if (clean.storeName !== s.storeName && headerFollows) {
+      clean.ticketPrinter = { ...(clean.ticketPrinter ?? DEFAULT_SETTINGS.ticketPrinter!), header: clean.storeName };
+    }
     await db.settings.update(s.id!, clean);
     await logAction('update', 'settings', t(`settings.s_${section}`));
     setDirty(false);
@@ -189,7 +197,7 @@ export function Settings() {
           <div className="grid gap-4 md:grid-cols-[1fr_280px]">
             <TextArea label={t('settings.ticketFooter')} value={form.ticketFooter ?? ''} onChange={(e) => up({ ticketFooter: e.target.value })} rows={5} />
             <div className="rounded-lg border border-dashed border-slate-300 bg-white p-3 font-mono text-[11px] text-slate-800">
-              <div className="text-center font-bold">{tp.header || form.storeName}</div>
+              <div className="text-center font-bold">{(!tp.header || tp.header === 'ShopLogic Mobile Store') ? form.storeName : tp.header}</div>
               <div className="text-center text-slate-500">{form.cif} · {form.phone}</div>
               <div className="my-1 border-t border-dashed border-slate-400" />
               <div className="flex justify-between"><span>1 x Funda</span><span>19,99</span></div>
