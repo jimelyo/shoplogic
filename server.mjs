@@ -6,6 +6,11 @@ import { smtpSend } from './server/smtp.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 'dist');
 const PORT = Number(process.env.PORT || 8080);
+// Seguridad: por defecto el server solo escucha en localhost. Para exponerlo
+// en la LAN (p. ej. tablas en el navegador del móvil) hay que opt-in explícito:
+//   SHOPLGIC_BIND=0.0.0.0  y opcionalmente SHOPLGIC_RELAY_TOKEN=<secreto>
+const BIND_HOST = process.env.SHOPLGIC_BIND || '127.0.0.1';
+const RELAY_TOKEN = process.env.SHOPLGIC_RELAY_TOKEN || '';
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon', '.woff2': 'font/woff2', '.txt': 'text/plain; charset=utf-8' };
 let ready = false;
 
@@ -84,6 +89,18 @@ const server = http.createServer(async (req, res) => {
 
   if (url.pathname === '/api/send') {
     if (req.method !== 'POST') return json(res, 405, { ok: false, error: 'relay:method' });
+    // Same-origin defense: un POST simple (text/plain) desde otra página web no
+    // dispara preflight CORS, así que bloqueamos siempre que el Origin no
+    // coincida con este propio server. Browsers siempre envían Origin en cross-origin POST.
+    const origin = req.headers.origin;
+    if (origin) {
+      try {
+        const o = new URL(origin);
+        if (!o.host || o.host !== req.headers.host) return json(res, 403, { ok: false, error: 'relay:crossOrigin' });
+      } catch { return json(res, 403, { ok: false, error: 'relay:crossOrigin' }); }
+    }
+    // Secreto compartido opcional (activo con SHOPLGIC_RELAY_TOKEN).
+    if (RELAY_TOKEN && req.headers['x-shoplogic-token'] !== RELAY_TOKEN) return json(res, 403, { ok: false, error: 'relay:token' });
     try {
       const payload = await readJson(req);
       const result = await relaySend(payload);
@@ -105,7 +122,13 @@ const server = http.createServer(async (req, res) => {
   fs.createReadStream(file).pipe(res);
 });
 
-server.listen(PORT, '0.0.0.0', () => {
+server.listen(PORT, BIND_HOST, () => {
   ready = fs.existsSync(path.join(ROOT, 'index.html'));
-  console.log('ShopLogic Pro on', PORT, 'ready', ready, '· relay /api/send enabled');
+  console.log('ShopLogic Pro on', PORT, 'ready', ready, '· binding', BIND_HOST, '· relay /api/send enabled');
 });
+
+// Tests (src/lib/__tests__/relay-server.test.ts) controlan el arranque.
+export { server, BIND_HOST };
+export function closeServer() {
+  return new Promise((resolve) => server.close(resolve));
+}

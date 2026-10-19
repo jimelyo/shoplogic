@@ -109,6 +109,10 @@ export interface AltaEmissionResult {
  * construye el XML SOAP y lo encola. La factura NO se considera remitida:
  * queda PENDIENTE hasta que AEAT responda Correcto (ver queue.ts).
  *
+ * Para RECTIFICATIVAS (R1–R5) añade el TipoRectificativa y, si la factura
+ * referencia la original (invoice.rectifies), el bloque FacturasRectificadas
+ * (opcional según la AEAT; numero y fecha de expedición de la rectificada).
+ *
  * @param inv     factura ya persistida (inv.id definido)
  * @param s       configuración global del ERP
  */
@@ -129,9 +133,16 @@ export async function emitAlta(inv: Invoice, s: Settings): Promise<AltaEmissionR
     .sort((a, b) => (a.id ?? 0) - (b.id ?? 0))
     .map((i) => i.verifHash!).pop() ?? '';
 
-  const TipoFactura = tipoFacturaDe(inv);
+  const TipoFactura: AeatTipoFactura = inv.rectCode ?? tipoFacturaDe(inv);
   const CuotaTotal = officialMoney(inv.totalTax);
   const ImporteTotal = officialMoney(inv.total);
+
+  // FacturasRectificadas: referencia opcional de AEAT a la(s) factura(s)
+  // rectificada(s) — número de serie y fecha de expedición (dd-mm-aaaa).
+  const rectified = inv.rectifies ? await db.invoices.get(inv.rectifies) : undefined;
+  const FacturasRectificadas = rectified
+    ? [{ NumSerieFactura: rectified.number, FechaExpedicionFactura: toAeatDate(rectified.date) }]
+    : undefined;
 
   const chain = await chainAlta({
     IDEmisorFactura: s.cif,
@@ -159,6 +170,8 @@ export async function emitAlta(inv: Invoice, s: Settings): Promise<AltaEmissionR
     Desglose: desgloseDe(inv, s),
     CuotaTotal,
     ImporteTotal,
+    ...(FacturasRectificadas ? { FacturasRectificadas } : {}),
+    ...(inv.rectCode ? { TipoRectificativa: inv.rectMethod ?? 'I' } : {}),
     HuellaAnterior: chain.huellaAnterior || undefined,
     PrimerRegistro: chain.primerRegistro,
   };

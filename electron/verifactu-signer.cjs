@@ -76,8 +76,14 @@ function signEnvelopeXml({ xml, p12Path, p12Password }) {
   return sig.getSignedXml();
 }
 
-/** Lee (y hace absoluta la ruta del) userData/verifactu/signer.json. */
-function readSignerConfig(userDataDir) {
+/**
+ * Lee (y hace absoluta la ruta del) userData/verifactu/signer.json.
+ * El esquema nuevo cifra la contraseña con safeStorage (DPAPI/Keychain del
+ * usuario) y solo el proceso main puede descifrarla. Mantengo también el
+ * esquema viejo (texto claro) y ofrezco migración on-read: si safeStorage está
+ * disponible, reescribo el fichero cifrado la primera vez que se lee.
+ */
+function readSignerConfig(userDataDir, { migrateIfPossible = true } = {}) {
   const cfgPath = path.join(userDataDir, 'verifactu', 'signer.json');
   if (!fs.existsSync(cfgPath)) return null;
   try {
@@ -85,7 +91,32 @@ function readSignerConfig(userDataDir) {
     if (cfg.p12Path && !path.isAbsolute(cfg.p12Path)) {
       cfg.p12Path = path.join(path.dirname(cfgPath), cfg.p12Path);
     }
-    return fs.existsSync(cfg.p12Path || '') ? cfg : null;
+    // Esquema cifrado (safeStorage/DPAPI).
+    if (cfg.encScheme === 'safeStorage' && cfg.p12Encrypted) {
+      const { safeStorage } = require('electron');
+      if (!safeStorage.isEncryptionAvailable()) {
+        console.error('verifactu/signer: la cuenta del SO no puede descifrar signer.json');
+        return null;
+      }
+      cfg.p12Password = safeStorage.decryptString(Buffer.from(cfg.p12Encrypted, 'base64'));
+      delete cfg.p12Encrypted;
+    }
+    if (!fs.existsSync(cfg.p12Path || '')) return null;
+    // Migración silenciosa: texto claro → cifrado del SO.
+    if (migrateIfPossible && cfg.p12Password && !cfg.p12Encrypted) {
+      try {
+        const { safeStorage } = require('electron');
+        if (safeStorage.isEncryptionAvailable()) {
+          fs.writeFileSync(cfgPath, JSON.stringify({
+            p12Path: cfg.p12Path,
+            encScheme: 'safeStorage',
+            p12Encrypted: safeStorage.encryptString(cfg.p12Password).toString('base64'),
+          }, null, 2), { encoding: 'utf8', mode: 0o600 });
+          try { fs.chmodSync(cfgPath, 0o600); } catch { }
+        }
+      } catch (_m) { /* no bloquear los envíos por una migración fallida */ }
+    }
+    return cfg;
   } catch (e) {
     console.error('verifactu/signer: config inválida', e);
     return null;

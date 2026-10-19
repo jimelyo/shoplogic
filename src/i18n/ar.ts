@@ -41,7 +41,10 @@ const ar = {
   "view": "عرض",
   "cards": "بطاقات",
   "table": "جدول",
-  "details": "التفاصيل"
+  "details": "التفاصيل",
+  "reason": "السبب",
+  "year": "السنة",
+  "error": "خطأ"
  },
  "commandPalette": {
   "title": "بحث شامل",
@@ -111,7 +114,9 @@ const ar = {
   "sessionLockedHint": "أدخل كلمة المرور للمتابعة",
   "unlock": "فتح القفل",
   "unlocked": "تم فتح الجلسة",
-  "lockNow": "قفل الجلسة"
+  "lockNow": "قفل الجلسة",
+  "accountLocked": "الحساب مقفل مؤقتاً. حاول بعد {{time}}.",
+  "accountLockedNow": "محاولات فاشلة كثيرة. القفل {{time}}."
  },
  "scan": {
   "title": "ماسح الكاميرا",
@@ -146,7 +151,8 @@ const ar = {
   "auth": "الوصول",
   "groupMain": "الرئيسية",
   "groupManagement": "الإدارة",
-  "groupSystem": "النظام"
+  "groupSystem": "النظام",
+  "tradeins": "شراء المستعمل"
  },
  "theme": {
   "mode": "الوضع الأساسي",
@@ -175,7 +181,8 @@ const ar = {
   "create": "إضافة",
   "delete": "إزالة",
   "repair": "إصلاح",
-  "return": "استرجاع"
+  "return": "استرجاع",
+  "trade_in": "استرجاع (بيع الجهاز للمتجر)"
  },
  "purchases": {
   "subtitle": "طلبات الشراء من الموردين واستلام البضائع",
@@ -374,7 +381,8 @@ const ar = {
   "color": "اللون",
   "default": "افتراضية",
   "productsCount": "{{count}} منتج",
-  "categoryInUse": "لا يمكن الحذف: {{count}} منتج يستخدم هذه الفئة"
+  "categoryInUse": "لا يمكن الحذف: {{count}} منتج يستخدم هذه الفئة",
+  "imei": "IMEI"
  },
  "repairs": {
   "subtitle": "متابعة ورشة الإصلاح",
@@ -478,7 +486,22 @@ const ar = {
   "exceedsPending": "المبلغ يتجاوز المبلغ المعلّق ({{amount}})",
   "downloadPdf": "تنزيل PDF",
   "overdueDetected": "تم تمييز {{count}} فاتورة/فواتير كمتأخرة",
-  "searchPlaceholder": "ابحث بالرقم أو العميل أو الرقم الضريبي أو البريد الإلكتروني…"
+  "searchPlaceholder": "ابحث بالرقم أو العميل أو الرقم الضريبي أو البريد الإلكتروني…",
+  "rectify": "إصدار فاتورة تسوية",
+  "rectCreate": "إصدار التسوية",
+  "rectCode": "رمز AEAT",
+  "rectAmount": "المبلغ المُسوّى (شامل الضريبة)",
+  "rectHint": "تنشئ فاتورة تسوية من سلسلة R بالمبلغ المدخل (طريقة الفروقات، فرق سالب) وتُدرج في طابور Veri*factu إن كان مفعلاً. الفاتورة الأصلية لا تُعدّل.",
+  "rectExceeds": "لا يمكن أن تتجاوز التسوية مبلغ الفاتورة الأصلية ({{amount}})",
+  "rectCreated": "أُنشئت فاتورة التسوية {{number}} وأُدرجت في الطابور",
+  "rectReasonPlaceholder": "سبب التسوية (المادة 80 من قانون الضريبة)",
+  "rectNewTotal": "المبلغ الأصلي المتبقي",
+  "originalTotal": "الإجمالي الأصلي",
+  "rect_R1": "خطأ قانوني / المادة 80 من قانون الضريبة",
+  "rect_R2": "تخفيض الأساس لمعسول العميل",
+  "rect_R3": "إعسار / دين لا يُحصّل",
+  "rect_R4": "أسباب أخرى",
+  "rect_R5": "تسوية فاتورة مبسطة"
  },
  "reports": {
   "subtitle": "أنشئ التقارير وصدّرها بصيغة PDF أو CSV (Excel)",
@@ -512,7 +535,29 @@ const ar = {
   "repairsCount": "عدد الإصلاحات",
   "completed": "المكتملة",
   "repairRevenue": "إيرادات الإصلاحات",
-  "expensesCount": "عدد المصروفات"
+  "expensesCount": "عدد المصروفات",
+  "type_fiscal303": "ضريبة القيمة المضافة 303 (ربع سنوي)",
+  "type_fiscal347": "عمليات الغير 347",
+  "fiscalPeriod": "الفترة الضريبية",
+  "fiscalYearHint": "سنة التقرير",
+  "taxEstimateHint": "تقدير: تُحتسب الضريبة المدعومة بالسعر العام للمتجر (لا يوجد تفصيل ضريبي في المشتريات/المصروفات). راجعه قبل التقديم.",
+  "vatAccrued": "ضريبة مستحقة (مُحصّلة)",
+  "vatSupported": "ضريبة مدعومة (قابلة للخصم)",
+  "taxBase": "الوعاء الضريبي",
+  "taxQuota": "نسبة الضريبة",
+  "rate": "النسبة",
+  "taxResult": "نتيجة التسوية",
+  "taxDue": "للدفع",
+  "taxRefund": "للاسترداد",
+  "invoicesInPeriod": "فواتير الفترة",
+  "partnerType": "النوع",
+  "partner": "الطرف الثالث",
+  "partnerClients": "العملاء المُدرجون",
+  "partnerProviders": "المزودون المُدرجون",
+  "partnerTotal": "الأطراف القابلة للإقرار ({{year}})",
+  "partnerClient": "عميل",
+  "partnerProvider": "مزود",
+  "taxThreshold": "عتبة 347"
  },
  "users": {
   "subtitle": "المستخدمون وصلاحيات الوحدات وسجل التدقيق",
@@ -881,7 +926,17 @@ const ar = {
   "autoBackup": "تم تنزيل النسخة الاحتياطية التلقائية",
   "resetDone": "تمت إعادة تعيين الجداول",
   "currentState": "الحالة الحالية",
-  "totalRecords": "إجمالي السجلات"
+  "totalRecords": "إجمالي السجلات",
+  "tradeInMargin": "هامش الاسترجاع (%)",
+  "tradeInMarginHint": "الهامش المقترح فوق سعر الشراء عند إدراج جهاز مسترجع",
+  "encBackupTitle": "تشفير النسخة الاحتياطية (اختياري)",
+  "encBackupPassword": "كلمة مرور التشفير",
+  "encBackupPlaceholder": "اتركها فارغة للتصدير بدون تشفير",
+  "encBackupHint": "AES-256-GCM بمفتاح مشتق (PBKDF2 310k). إن فقدت كلمة المرور لن تُستعاد النسخة.",
+  "exportedEncrypted": "تم تصدير نسخة مشفرة",
+  "encryptedDetected": "الملف {{name}} مشفر. أدخل كلمة مروره للاستيراد.",
+  "wrongPassword": "كلمة المرور خاطئة: لم يُفكّ تشفير النسخة.",
+  "unlockAndImport": "فك التشفير والاستيراد"
  },
  "currency": {
   "EUR": "يورو",
@@ -1012,6 +1067,45 @@ const ar = {
   "invoices": "الفواتير",
   "noInvoices": "لا توجد فواتير مرتبطة",
   "returns": "المرتجعات"
+ },
+ "tradeins": {
+  "subtitle": "شراء الأجهزة المستعملة من العملاء مع تقييم وتتبع كامل للمخزون",
+  "new": "تقييم جهاز",
+  "quote": "تقييم",
+  "quoteHint": "أدخل بيانات الجهاز والسعر المتفق عليه. لا يتغير المخزون حتى الشراء.",
+  "count": "الأجهزة",
+  "invested": "مصروف الاسترجاع",
+  "stockValue": "قيمة إعادة البيع",
+  "margin": "الهامش",
+  "marginHint": "هامش البيع: {{margin}}%",
+  "searchPlaceholder": "ابحث بالرقم أو العميل أو الموديل أو IMEI…",
+  "empty": "لا توجد عمليات استرجاع",
+  "number": "رقم",
+  "device": "الموديل",
+  "buyPrice": "سعر الشراء",
+  "listPrice": "سعر البيع",
+  "condition": "الحالة",
+  "existingCustomer": "عميل موجود",
+  "walkIn": "— عميل جديد —",
+  "priceHint": "بيع مقترح: {{price}}",
+  "listHint": "عند الإدراج يُنشأ منتج بالمخزون بكمية 1 مع قيود مخزون «استرجاع».",
+  "listedToast": "أُضيف «{{name}}» إلى المخزون",
+  "imeiExists": "يوجد جهاز بنفس IMEI في المخزون مسبقاً",
+  "notPurchasable": "لم يعد يمكن إدراج هذا الجهاز",
+  "purchase": "شراء (الدفع للعميل)",
+  "purchaseConfirm": "تأكيد شراء {{number}} بمبلغ {{amount}}؟ يُدفع للعميل.",
+  "listCreate": "إدراج في المخزون",
+  "openProduct": "فتح في المخزون",
+  "cancelConfirm": "حذف التقييم {{name}}؟",
+  "alreadyListed": "مُدرج في المخزون بالفعل",
+  "status_quoted": "مُقيّم",
+  "status_purchased": "مشترى",
+  "status_listed": "مُدرج",
+  "status_cancelled": "ملغى",
+  "cond_A": "A · حالة جيدة",
+  "cond_B": "B · آثار استخدام",
+  "cond_C": "C · معطّل / قطع غيار",
+  "cond_spare": "للقطع"
  }
 };
 export default ar;

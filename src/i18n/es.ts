@@ -41,7 +41,10 @@ const es = {
   "view": "Ver",
   "cards": "Tarjetas",
   "table": "Tabla",
-  "details": "Detalles"
+  "details": "Detalles",
+  "reason": "Motivo",
+  "year": "Año",
+  "error": "Error"
  },
  "commandPalette": {
   "title": "Búsqueda global",
@@ -111,7 +114,9 @@ const es = {
   "sessionLockedHint": "Introduce tu contraseña para volver a trabajar",
   "unlock": "Desbloquear",
   "unlocked": "Sesión desbloqueada",
-  "lockNow": "Bloquear sesión"
+  "lockNow": "Bloquear sesión",
+  "accountLocked": "Cuenta bloqueada temporalmente. Inténtalo en {{time}}.",
+  "accountLockedNow": "Demasiados intentos fallidos. Cuenta bloqueada {{time}}."
  },
  "scan": {
   "title": "Escáner de cámara",
@@ -146,7 +151,8 @@ const es = {
   "auth": "Acceso",
   "groupMain": "Principal",
   "groupManagement": "Gestión",
-  "groupSystem": "Sistema"
+  "groupSystem": "Sistema",
+  "tradeins": "Compras 2ª mano"
  },
  "theme": {
   "mode": "Modo base",
@@ -175,7 +181,8 @@ const es = {
   "create": "Alta",
   "delete": "Baja",
   "repair": "Reparación",
-  "return": "Devolución"
+  "return": "Devolución",
+  "trade_in": "Trade-in (recompra)"
  },
  "purchases": {
   "subtitle": "Pedidos a proveedores y recepción de mercancía",
@@ -374,7 +381,8 @@ const es = {
   "color": "Color",
   "default": "Predeterminada",
   "productsCount": "{{count}} productos",
-  "categoryInUse": "No se puede eliminar: {{count}} producto(s) usan esta categoría"
+  "categoryInUse": "No se puede eliminar: {{count}} producto(s) usan esta categoría",
+  "imei": "IMEI"
  },
  "repairs": {
   "subtitle": "Seguimiento del taller de reparaciones",
@@ -478,7 +486,22 @@ const es = {
   "exceedsPending": "El importe supera el pendiente ({{amount}})",
   "downloadPdf": "Descargar PDF",
   "overdueDetected": "{{count}} factura(s) marcadas como vencidas",
-  "searchPlaceholder": "Buscar por número, cliente, CIF o email…"
+  "searchPlaceholder": "Buscar por número, cliente, CIF o email…",
+  "rectify": "Emitir rectificativa",
+  "rectCreate": "Emitir rectificativa",
+  "rectCode": "Código AEAT",
+  "rectAmount": "Importe a rectificar (IVA incl.)",
+  "rectHint": "Crea una factura rectificativa de la serie R por el importe indicado (método por diferencias, delta negativo) y la encola en Veri*factu si está activo. La factura original no se modifica.",
+  "rectExceeds": "La rectificación no puede superar el importe de la factura original ({{amount}})",
+  "rectCreated": "Rectificativa {{number}} creada y encolada",
+  "rectReasonPlaceholder": "Motivo de la rectificación (art. 80 LIVA)",
+  "rectNewTotal": "Importe original restante",
+  "originalTotal": "Total original",
+  "rect_R1": "Error fundado en derecho / art. 80 LIVA",
+  "rect_R2": "Reducción de base por concurso del cliente",
+  "rect_R3": "Insolvencia / crédito incobrable",
+  "rect_R4": "Otras causas",
+  "rect_R5": "Rectificación de factura simplificada"
  },
  "reports": {
   "subtitle": "Genera y exporta reportes en PDF o CSV (Excel)",
@@ -512,7 +535,29 @@ const es = {
   "repairsCount": "Nº reparaciones",
   "completed": "Completadas",
   "repairRevenue": "Ingresos de reparaciones",
-  "expensesCount": "Nº gastos"
+  "expensesCount": "Nº gastos",
+  "type_fiscal303": "IVA 303 (trimestral)",
+  "type_fiscal347": "Operaciones 347",
+  "fiscalPeriod": "Periodo fiscal",
+  "fiscalYearHint": "Ejercicio del informe",
+  "taxEstimateHint": "Estimación: el IVA soportado se calcula con el tipo general del comercio (sin desglose de IVA en compras/gastos). Revísalo antes de presentar el modelo.",
+  "vatAccrued": "IVA devengado (repercutido)",
+  "vatSupported": "IVA soportado (a deducir)",
+  "taxBase": "Base imponible",
+  "taxQuota": "Cuota",
+  "rate": "Tipo",
+  "taxResult": "Resultado liquidación",
+  "taxDue": "A ingresar",
+  "taxRefund": "A devolver",
+  "invoicesInPeriod": "Facturas del periodo",
+  "partnerType": "Tipo",
+  "partner": "Tercero",
+  "partnerClients": "Clientes incluidos",
+  "partnerProviders": "Proveedores incluidos",
+  "partnerTotal": "Terceros declarables ({{year}})",
+  "partnerClient": "Cliente",
+  "partnerProvider": "Proveedor",
+  "taxThreshold": "Umbral 347"
  },
  "users": {
   "subtitle": "Usuarios, permisos por módulo y auditoría",
@@ -881,7 +926,17 @@ const es = {
   "autoBackup": "Backup automático descargado",
   "resetDone": "Tablas reseteadas",
   "currentState": "Estado actual",
-  "totalRecords": "Registros totales"
+  "totalRecords": "Registros totales",
+  "tradeInMargin": "Margen de trade-in (%)",
+  "tradeInMarginHint": "Margen sugerido sobre el precio de compra al recomprar un terminal",
+  "encBackupTitle": "Cifrado del backup (opcional)",
+  "encBackupPassword": "Contraseña de cifrado",
+  "encBackupPlaceholder": "Déjalo vacío para exportar sin cifrar",
+  "encBackupHint": "AES-256-GCM con clave derivada (PBKDF2 310k). Si pierdes la contraseña, el backup no se puede recuperar.",
+  "exportedEncrypted": "Backup cifrado exportado",
+  "encryptedDetected": "El fichero {{name}} está cifrado. Introduce su contraseña para importarlo.",
+  "wrongPassword": "Contraseña incorrecta: el backup no se ha descifrado.",
+  "unlockAndImport": "Descifrar e importar"
  },
  "currency": {
   "EUR": "Euro",
@@ -1012,6 +1067,45 @@ const es = {
   "invoices": "Facturas",
   "noInvoices": "Sin facturas asociadas",
   "returns": "Devoluciones"
+ },
+ "tradeins": {
+  "subtitle": "Compras de 2ª mano: tasación, compra y alta al inventario con trazabilidad",
+  "new": "Tasar terminal",
+  "quote": "Tasar",
+  "quoteHint": "Anota los datos del terminal y el precio acordado. No mueve stock hasta la compra.",
+  "count": "Terminales",
+  "invested": "Gasto en recompras",
+  "stockValue": "Valor de reventa",
+  "margin": "Margen",
+  "marginHint": "Margen al vender: {{margin}}%",
+  "searchPlaceholder": "Buscar por número, cliente, modelo o IMEI…",
+  "empty": "Sin recompras registradas",
+  "number": "Nº",
+  "device": "Modelo",
+  "buyPrice": "Precio de compra",
+  "listPrice": "Precio de venta",
+  "condition": "Estado",
+  "existingCustomer": "Cliente existente",
+  "walkIn": "— Cliente nuevo —",
+  "priceHint": "Venta sugerida: {{price}}",
+  "listHint": "Al listar el terminal se crea un producto en el inventario con stock 1 y un movimiento «trade_in» en el historial.",
+  "listedToast": "«{{name}}» añadido al inventario",
+  "imeiExists": "Ya existe un terminal con ese IMEI en el inventario",
+  "notPurchasable": "Este terminal ya no se puede listar",
+  "purchase": "Comprar (pagar al cliente)",
+  "purchaseConfirm": "¿Confirmas la compra de {{number}} por {{amount}}? Se paga al cliente.",
+  "listCreate": "Listar en inventario",
+  "openProduct": "Ver en inventario",
+  "cancelConfirm": "¿Eliminar la tasación {{name}}?",
+  "alreadyListed": "Ya está en el inventario (listado)",
+  "status_quoted": "Tasado",
+  "status_purchased": "Comprado",
+  "status_listed": "Listado",
+  "status_cancelled": "Cancelado",
+  "cond_A": "A · buen estado",
+  "cond_B": "B · con marcas de uso",
+  "cond_C": "C · averiado / para piezas",
+  "cond_spare": "Para piezas"
  }
 };
 export default es;

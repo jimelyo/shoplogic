@@ -30,6 +30,7 @@ const Quotes = lazy(() => import('./components/Quotes').then((m) => ({ default: 
 const Clients = lazy(() => import('./components/Clients').then((m) => ({ default: m.Clients })));
 const Providers = lazy(() => import('./components/Providers').then((m) => ({ default: m.Providers })));
 const Purchases = lazy(() => import('./components/Purchases').then((m) => ({ default: m.Purchases })));
+const TradeIns = lazy(() => import('./components/TradeIns').then((m) => ({ default: m.TradeIns })));
 const Expenses = lazy(() => import('./components/Expenses').then((m) => ({ default: m.Expenses })));
 const Billing = lazy(() => import('./components/Billing').then((m) => ({ default: m.Billing })));
 const Reports = lazy(() => import('./components/Reports').then((m) => ({ default: m.Reports })));
@@ -49,6 +50,7 @@ const MODULES: Record<NavSection, ComponentType> = {
   clients: Clients,
   providers: Providers,
   purchases: Purchases,
+  tradeins: TradeIns,
   expenses: Expenses,
   billing: Billing,
   reports: Reports,

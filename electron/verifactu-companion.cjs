@@ -24,7 +24,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { dialog } = require('electron');
+const { dialog, safeStorage } = require('electron');
 const forge = require('node-forge');
 const signer = require('./verifactu-signer.cjs');
 
@@ -97,8 +97,10 @@ function describeP12(p12Path, p12Password) {
 
 /**
  * Paso 3: instala (o reescribe) userData/verifactu/signer.json con la
- * contraseña FIRMANDO en el main. El fichero queda en modo 0600 y NUNCA se
- * devuelve su contenido; el renderer solo recibe confirmación.
+ * contraseña del .p12 CIFRADA con safeStorage (DPAPI en Windows / Keychain en
+ * macOS): solo este proceso principal puede descifrarla. El fichero queda en
+ * modo 0600 y NUNCA se devuelve su contenido. Si la encriptación del SO no
+ * está disponible, escribe en claro (comportamiento anterior) con un aviso.
  */
 function installSignerConfig(userDataDir, p12Password) {
   const certPath = certTargetPath(userDataDir);
@@ -110,13 +112,27 @@ function installSignerConfig(userDataDir, p12Password) {
   const dir = companionDir(userDataDir);
   fs.mkdirSync(dir, { recursive: true });
   const cfgPath = signerConfigPath(userDataDir);
-  fs.writeFileSync(cfgPath, JSON.stringify({ p12Path: certPath, p12Password }, null, 2), { encoding: 'utf8', mode: 0o600 });
+
+  const record = { p12Path: certPath, encScheme: undefined, p12Encrypted: undefined };
+  let plaintextFallback = false;
+  try {
+    if (safeStorage.isEncryptionAvailable()) {
+      record.encScheme = 'safeStorage';
+      record.p12Encrypted = safeStorage.encryptString(p12Password).toString('base64');
+    } else {
+      plaintextFallback = true;
+    }
+  } catch { plaintextFallback = true; }
+  if (plaintextFallback) record.p12Password = p12Password; // retro-compatibilidad
+
+  fs.writeFileSync(cfgPath, JSON.stringify(record, null, 2), { encoding: 'utf8', mode: 0o600 });
   try { fs.chmodSync(cfgPath, 0o600); } catch { /* no-POSIX (Windows): perms informativas */ }
   return {
     ok: true,
     configPath: cfgPath,
     subjectCN: info.subjectCN,
     notAfter: info.notAfter,
+    encrypted: record.encScheme === 'safeStorage',
   };
 }
 
@@ -136,6 +152,9 @@ function signerDetail(userDataDir) {
       hint: 'Configura el certificado desde el asistente: se escribirá ' + cfgPath,
     };
   }
+  // Indica si signer.json ya está cifrado con safeStorage (DPAPI/Keychain).
+  let encrypted = false;
+  try { encrypted = JSON.parse(fs.readFileSync(cfgPath, 'utf8')).encScheme === 'safeStorage'; } catch { /* informativo */ }
   const info = describeP12(cfg.p12Path, cfg.p12Password);
   const daysLeft = info.ok ? daysUntil(info.notAfter) : null;
   return {
@@ -143,6 +162,7 @@ function signerDetail(userDataDir) {
     configPath: cfgPath,
     p12Path: cfg.p12Path,          // ruta, no contenido
     p12PasswordSet: !!cfg.p12Password,
+    encrypted,
     certCopied: fs.existsSync(cfg.p12Path),
     // info pública; sin clave, sin contraseña
     ...(info.ok ? { ...info, daysLeft } : { error: info.error }),

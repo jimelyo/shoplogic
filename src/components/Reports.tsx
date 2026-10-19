@@ -9,6 +9,7 @@ import { plainMoney, toDate, useFormat } from '../lib/format';
 import { round2, splitVat } from '../lib/calc';
 import { logAction } from '../lib/audit';
 import { downloadFile } from '../lib/backup';
+import { build303, build347, MODELO_347_THRESHOLD, QUARTERS, type Quarter } from '../lib/fiscal-reports';
 import { pdfT, tablePdf, type PdfColumn } from '../lib/pdf';
 import { DEFAULT_CATEGORIES, categoryLabel } from '../data/categories';
 import { PageHeader } from './shared/PageHeader';
@@ -17,10 +18,10 @@ import { Button } from './shared/Forms';
 import { LoadingPage } from './shared/Skeleton';
 import { DataTable } from './shared/SortableTable';
 
-type ReportType = 'sales' | 'balance' | 'repairs' | 'expenses' | 'inventory';
+type ReportType = 'sales' | 'balance' | 'repairs' | 'expenses' | 'inventory' | 'fiscal303' | 'fiscal347';
 type Period = 'week' | 'month' | 'year' | 'all';
 const TYPES: { id: ReportType; icon: string }[] = [
-  { id: 'sales', icon: '🧾' }, { id: 'balance', icon: '⚖️' }, { id: 'repairs', icon: '🔧' }, { id: 'expenses', icon: '💸' }, { id: 'inventory', icon: '📦' },
+  { id: 'sales', icon: '🧾' }, { id: 'balance', icon: '⚖️' }, { id: 'repairs', icon: '🔧' }, { id: 'expenses', icon: '💸' }, { id: 'inventory', icon: '📦' }, { id: 'fiscal303', icon: '🧮' }, { id: 'fiscal347', icon: '📇' },
 ];
 const PERIODS: Period[] = ['week', 'month', 'year', 'all'];
 
@@ -32,9 +33,13 @@ export function Reports() {
   const s = f.settings;
   const [type, setType] = useState<ReportType>('sales');
   const [period, setPeriod] = useState<Period>('month');
+  const isFiscal = type === 'fiscal303' || type === 'fiscal347';
+  const currentYear = new Date().getFullYear();
+  const [fiscalYear, setFiscalYear] = useState(currentYear);
+  const [quarter, setQuarter] = useState<Quarter>(Math.min(4, Math.floor(new Date().getMonth() / 3) + 1) as Quarter);
   const data = useLiveQuery(async () => {
-    const [sales, repairs, expenses, products, invoices] = await Promise.all([db.sales.toArray(), db.repairs.toArray(), db.expenses.toArray(), db.products.toArray(), db.invoices.toArray()]);
-    return { sales, repairs, expenses, products, invoices };
+    const [sales, repairs, expenses, products, invoices, purchaseOrders] = await Promise.all([db.sales.toArray(), db.repairs.toArray(), db.expenses.toArray(), db.products.toArray(), db.invoices.toArray(), db.purchaseOrders.toArray()]);
+    return { sales, repairs, expenses, products, invoices, purchaseOrders };
   }, []);
 
   const since = useMemo(() => {
@@ -96,18 +101,47 @@ export function Reports() {
           kpis: [[tt('inventory.totalProducts'), String(prods.length)], [tt('inventory.stockValue'), money(prods.reduce((a, p) => a + p.cost * p.stock, 0))], [tt('inventory.lowStock'), String(prods.filter((p) => p.stock <= p.minStock).length)]],
         };
       }
+      case 'fiscal303': {
+        const r = build303(fiscalYear, quarter, data.invoices, data.purchaseOrders, data.expenses, s.taxRate);
+        const rows: string[][] = [
+          ...r.accrued.map((l) => [tt('reports.vatAccrued'), money(l.rate) + '%', money(l.base), money(l.quota)]),
+          ...r.supported.map((l) => [tt('reports.vatSupported'), money(l.rate) + '%*', money(l.base), '-' + money(l.quota)]),
+        ];
+        return {
+          columns: [{ key: 'concept', label: tt('reports.concept'), weight: 2 }, { key: 'rate', label: tt('reports.rate'), align: 'right', weight: 0.6 }, { key: 'base', label: tt('reports.taxBase'), align: 'right' }, { key: 'quota', label: tt('reports.taxQuota'), align: 'right' }],
+          rows: [...rows, [tt('reports.taxResult'), tt('common.all'), '—', money(r.result)]],
+          kpis: [[tt('reports.vatAccrued'), money(r.totalAccrued)], [tt('reports.vatSupported'), money(r.totalSupported)], [r.result >= 0 ? tt('reports.taxDue') : tt('reports.taxRefund'), money(Math.abs(r.result))], [tt('reports.invoicesInPeriod'), String(r.invoiceCount)]],
+        };
+      }
+      case 'fiscal347': {
+        const r = build347(fiscalYear, data.invoices, data.purchaseOrders, s.taxRate);
+        const partner = (kind: 'client' | 'provider'): string[][] =>
+          (kind === 'client' ? r.clients : r.providers).map((p) => [
+            kind === 'client' ? tt('reports.partnerClient') : tt('reports.partnerProvider'),
+            `${p.name}${p.nif && p.nif !== '—' ? ` (${p.nif})` : ''}`,
+            money(p.quarters[0]), money(p.quarters[1]), money(p.quarters[2]), money(p.quarters[3]), money(p.total),
+          ]);
+        return {
+          columns: [{ key: 'kind', label: tt('reports.partnerType'), weight: 0.8 }, { key: 'partner', label: tt('reports.partner'), weight: 2.2 },
+            { key: 'q1', label: `T1·${fiscalYear}`, align: 'right' }, { key: 'q2', label: `T2·${fiscalYear}`, align: 'right' },
+            { key: 'q3', label: `T3·${fiscalYear}`, align: 'right' }, { key: 'q4', label: `T4·${fiscalYear}`, align: 'right' }, { key: 'total', label: tt('common.total'), align: 'right' }],
+          rows: [...partner('client'), ...partner('provider')],
+          kpis: [[tt('reports.partnerTotal', { year: fiscalYear }), String(r.clients.length + r.providers.length)], [tt('reports.partnerClients'), String(r.clients.length)], [tt('reports.partnerProviders'), String(r.providers.length)], [tt('reports.taxThreshold'), money(MODELO_347_THRESHOLD)]],
+        };
+      }
     }
   };
 
-  const report = useMemo(() => build(t, f.money), [data, type, period, t, f]);
+  const report = useMemo(() => build(t, f.money), [data, type, period, t, f, fiscalYear, quarter, s]);
   if (!data || !report) return <LoadingPage />;
 
-  const fileBase = `shoplogic_${type}_${period}_${new Date().toISOString().slice(0, 10)}`;
+  const fiscalTag = isFiscal ? `${String(quarter)}·${fiscalYear}` : '';
+  const fileBase = `shoplogic_${type}${fiscalTag ? `_${fiscalTag}` : ''}_${new Date().toISOString().slice(0, 10)}`;
   const exportPdf = () => {
     const pt = pdfT();
     const r = build(pt, (n) => plainMoney(n, s))!;
-    tablePdf({ title: `${pt('reports.report')}: ${pt(`reports.type_${type}`)}`, subtitle: pt(`reports.period_${period}`), columns: r.columns, rows: r.rows, kpis: r.kpis, filename: `${fileBase}.pdf`, settings: s });
-    logAction('export', 'reports', `PDF ${type} ${period}`);
+    tablePdf({ title: `${pt('reports.report')}: ${pt(`reports.type_${type}`)}`, subtitle: isFiscal ? `T${quarter} · ${fiscalYear}` : pt(`reports.period_${period}`), columns: r.columns, rows: r.rows, kpis: r.kpis, filename: `${fileBase}.pdf`, settings: s });
+    logAction('export', 'reports', `PDF ${type}${fiscalTag ? ` ${fiscalTag}` : ''} ${period}`);
     toast.success(t('reports.exported'));
   };
   const exportCsv = () => {
@@ -116,7 +150,7 @@ export function Reports() {
     const escCsv = (v: string) => `"${String(v).replace(/"/g, '""')}"`;
     const csv = '\uFEFF' + [r.columns.map((c) => escCsv(c.label)).join(';'), ...r.rows.map((row) => row.map(escCsv).join(';'))].join('\r\n');
     downloadFile(csv, `${fileBase}.csv`, 'text/csv;charset=utf-8');
-    logAction('export', 'reports', `CSV ${type} ${period}`);
+    logAction('export', 'reports', `CSV ${type}${fiscalTag ? ` ${fiscalTag}` : ''} ${period}`);
     toast.success(t('reports.exported'));
   };
 
@@ -147,12 +181,28 @@ export function Reports() {
           </div>
         </Card>
         <Card className="p-4">
-          <SectionTitle>📅 {t('reports.period')}</SectionTitle>
-          <div className="grid grid-cols-2 gap-2">
-            {PERIODS.map((p) => (
-              <button key={p} type="button" onClick={() => setPeriod(p)} className={`rounded-xl border p-3 text-sm font-semibold ${period === p ? 'border-primary bg-primary/10 text-primary' : 'border-sl-border text-sl-text hover:border-primary/40'}`}>{t(`reports.period_${p}`)}</button>
-            ))}
-          </div>
+          <SectionTitle>📅 {isFiscal ? t('reports.fiscalPeriod') : t('reports.period')}</SectionTitle>
+          {isFiscal ? (
+            <div className="space-y-3">
+              <div className="grid grid-cols-4 gap-2">
+                {QUARTERS.map((qt) => (
+                  <button key={qt} type="button" onClick={() => setQuarter(qt)} className={`rounded-xl border p-2.5 text-sm font-semibold ${quarter === qt ? 'border-primary bg-primary/10 text-primary' : 'border-sl-border text-sl-text hover:border-primary/40'}`}>T{qt}</button>
+                ))}
+              </div>
+              <div className="flex items-center gap-2">
+                <input type="number" min="2000" max="2100" step="1" className="rounded-lg border border-sl-border bg-sl-card px-3 py-2 text-sm font-semibold text-sl-text" value={fiscalYear}
+                  onChange={(e) => setFiscalYear(Math.max(2000, Math.min(2100, Number(e.target.value) || currentYear)))} aria-label={t('common.year')} />
+                <span className="text-xs text-sl-muted">{t('reports.fiscalYearHint')}</span>
+              </div>
+              <label className="block rounded-lg bg-amber-500/10 p-2 text-[11px] leading-4 text-amber-700 dark:text-amber-300">⚠️ {t('reports.taxEstimateHint')}</label>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-2">
+              {PERIODS.map((p) => (
+                <button key={p} type="button" onClick={() => setPeriod(p)} className={`rounded-xl border p-3 text-sm font-semibold ${period === p ? 'border-primary bg-primary/10 text-primary' : 'border-sl-border text-sl-text hover:border-primary/40'}`}>{t(`reports.period_${p}`)}</button>
+              ))}
+            </div>
+          )}
           <div className="mt-3 flex gap-2">
             <Button className="flex-1" icon={<Download />} onClick={exportPdf}>{t('reports.exportPdf')}</Button>
             <Button className="flex-1" variant="secondary" icon={<FileText />} onClick={exportCsv}>{t('reports.exportCsv')}</Button>
@@ -160,7 +210,7 @@ export function Reports() {
         </Card>
       </div>
       <Card className="p-4">
-        <SectionTitle right={<span className="text-xs text-sl-muted">{t('reports.rows', { count: report.rows.length })}</span>}>👁️ {t('reports.preview')}: {t(`reports.type_${type}`)} · {t(`reports.period_${period}`)}</SectionTitle>
+        <SectionTitle right={<span className="text-xs text-sl-muted">{t('reports.rows', { count: report.rows.length })}</span>}>👁️ {t('reports.preview')}: {t(`reports.type_${type}`)}{isFiscal ? ` · T${quarter} ${fiscalYear}` : ` · ${t(`reports.period_${period}`)}`}</SectionTitle>
         <div className="mb-3 grid grid-cols-2 gap-2 md:grid-cols-4">
           {report.kpis.map(([l, v]) => <div key={l} className="rounded-lg border border-sl-border bg-sl-card2 p-2.5"><div className="text-[10px] font-bold uppercase text-sl-muted">{l}</div><div className="font-bold text-sl-text">{v}</div></div>)}
         </div>

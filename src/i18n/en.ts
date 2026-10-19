@@ -41,7 +41,10 @@ const en = {
   "view": "View",
   "cards": "Cards",
   "table": "Table",
-  "details": "Details"
+  "details": "Details",
+  "reason": "Reason",
+  "year": "Year",
+  "error": "Error"
  },
  "commandPalette": {
   "title": "Global search",
@@ -111,7 +114,9 @@ const en = {
   "sessionLockedHint": "Enter your password to continue working",
   "unlock": "Unlock",
   "unlocked": "Session unlocked",
-  "lockNow": "Lock session"
+  "lockNow": "Lock session",
+  "accountLocked": "Account temporarily locked. Try again in {{time}}.",
+  "accountLockedNow": "Too many failed attempts. Account locked for {{time}}."
  },
  "scan": {
   "title": "Camera scanner",
@@ -146,7 +151,8 @@ const en = {
   "auth": "Access",
   "groupMain": "Main",
   "groupManagement": "Management",
-  "groupSystem": "System"
+  "groupSystem": "System",
+  "tradeins": "Second-hand buys"
  },
  "theme": {
   "mode": "Base mode",
@@ -175,7 +181,8 @@ const en = {
   "create": "Product added",
   "delete": "Product removed",
   "repair": "Repair",
-  "return": "Refund"
+  "return": "Refund",
+  "trade_in": "Trade-in (buy-back)"
  },
  "purchases": {
   "subtitle": "Supplier orders and goods receiving",
@@ -374,7 +381,8 @@ const en = {
   "color": "Color",
   "default": "Default",
   "productsCount": "{{count}} products",
-  "categoryInUse": "Cannot delete: {{count}} product(s) use this category"
+  "categoryInUse": "Cannot delete: {{count}} product(s) use this category",
+  "imei": "IMEI"
  },
  "repairs": {
   "subtitle": "Repair workshop tracking",
@@ -478,7 +486,22 @@ const en = {
   "exceedsPending": "The amount exceeds the pending balance ({{amount}})",
   "downloadPdf": "Download PDF",
   "overdueDetected": "{{count}} invoice(s) marked as overdue",
-  "searchPlaceholder": "Search by number, customer, Tax ID or email…"
+  "searchPlaceholder": "Search by number, customer, Tax ID or email…",
+  "rectify": "Issue rectifying invoice",
+  "rectCreate": "Issue rectificative",
+  "rectCode": "AEAT code",
+  "rectAmount": "Amount to rectify (VAT incl.)",
+  "rectHint": "Creates a series-R rectifying invoice for the entered amount (difference method, negative delta) and queues it for Veri*factu when active. The original invoice is never modified.",
+  "rectExceeds": "The rectification cannot exceed the original invoice amount ({{amount}})",
+  "rectCreated": "Rectificative {{number}} created and queued",
+  "rectReasonPlaceholder": "Rectification reason (VAT Act art. 80)",
+  "rectNewTotal": "Original amount remaining",
+  "originalTotal": "Original total",
+  "rect_R1": "Legal error / VAT Act art. 80",
+  "rect_R2": "Base reduction due to client insolvency",
+  "rect_R3": "Uncollectible receivable",
+  "rect_R4": "Other causes",
+  "rect_R5": "Rectification of a simplified invoice"
  },
  "reports": {
   "subtitle": "Generate and export reports as PDF or CSV (Excel)",
@@ -512,7 +535,29 @@ const en = {
   "repairsCount": "No. of repairs",
   "completed": "Completed",
   "repairRevenue": "Repair revenue",
-  "expensesCount": "No. of expenses"
+  "expensesCount": "No. of expenses",
+  "type_fiscal303": "VAT 303 (quarterly)",
+  "type_fiscal347": "347 third-party operations",
+  "fiscalPeriod": "Fiscal period",
+  "fiscalYearHint": "Report year",
+  "taxEstimateHint": "Estimate: supported VAT uses the store-wide rate (no VAT breakdown stored on purchases/expenses). Review before filing.",
+  "vatAccrued": "Accrued VAT (charged)",
+  "vatSupported": "Supported VAT (deductible)",
+  "taxBase": "Taxable base",
+  "taxQuota": "VAT quota",
+  "rate": "Rate",
+  "taxResult": "Settlement result",
+  "taxDue": "To pay",
+  "taxRefund": "To refund",
+  "invoicesInPeriod": "Invoices in period",
+  "partnerType": "Type",
+  "partner": "Third party",
+  "partnerClients": "Included clients",
+  "partnerProviders": "Included providers",
+  "partnerTotal": "Reportable partners ({{year}})",
+  "partnerClient": "Client",
+  "partnerProvider": "Provider",
+  "taxThreshold": "347 threshold"
  },
  "users": {
   "subtitle": "Users, module permissions and audit log",
@@ -881,7 +926,17 @@ const en = {
   "autoBackup": "Automatic backup downloaded",
   "resetDone": "Tables reset",
   "currentState": "Current status",
-  "totalRecords": "Total records"
+  "totalRecords": "Total records",
+  "tradeInMargin": "Trade-in margin (%)",
+  "tradeInMarginHint": "Suggested markup over the buy price when listing a traded-in device",
+  "encBackupTitle": "Backup encryption (optional)",
+  "encBackupPassword": "Encryption password",
+  "encBackupPlaceholder": "Leave empty to export unencrypted",
+  "encBackupHint": "AES-256-GCM with derived key (PBKDF2 310k). If you lose the password, the backup cannot be recovered.",
+  "exportedEncrypted": "Encrypted backup exported",
+  "encryptedDetected": "The file {{name}} is encrypted. Enter its password to import it.",
+  "wrongPassword": "Wrong password: the backup could not be decrypted.",
+  "unlockAndImport": "Unlock and import"
  },
  "currency": {
   "EUR": "Euro",
@@ -1012,6 +1067,45 @@ const en = {
   "invoices": "Invoices",
   "noInvoices": "No related invoices",
   "returns": "Returns"
+ },
+ "tradeins": {
+  "subtitle": "Buy used devices from customers with pricing and full stock traceability",
+  "new": "Quote device",
+  "quote": "Quote",
+  "quoteHint": "Record the device details and the agreed price. No stock moves until purchase.",
+  "count": "Devices",
+  "invested": "Spent on buy-backs",
+  "stockValue": "Resale value",
+  "margin": "Margin",
+  "marginHint": "Margin when selling: {{margin}}%",
+  "searchPlaceholder": "Search by number, customer, model or IMEI…",
+  "empty": "No buy-backs recorded",
+  "number": "No.",
+  "device": "Model",
+  "buyPrice": "Buy price",
+  "listPrice": "List price",
+  "condition": "Condition",
+  "existingCustomer": "Existing customer",
+  "walkIn": "— New customer —",
+  "priceHint": "Suggested sale: {{price}}",
+  "listHint": "Listing creates a product in the inventory with stock 1 and a “trade_in” stock-move entry.",
+  "listedToast": "“{{name}}” added to the inventory",
+  "imeiExists": "A unit with that IMEI is already in the inventory",
+  "notPurchasable": "This unit can no longer be listed",
+  "purchase": "Buy (pay the customer)",
+  "purchaseConfirm": "Confirm the purchase of {{number}} for {{amount}}? The customer gets paid.",
+  "listCreate": "List in inventory",
+  "openProduct": "Open in inventory",
+  "cancelConfirm": "Delete quote {{name}}?",
+  "alreadyListed": "Already listed in the inventory",
+  "status_quoted": "Quoted",
+  "status_purchased": "Purchased",
+  "status_listed": "Listed",
+  "status_cancelled": "Cancelled",
+  "cond_A": "A · good condition",
+  "cond_B": "B · visible wear",
+  "cond_C": "C · faulty / for parts",
+  "cond_spare": "For parts"
  }
 };
 export default en;

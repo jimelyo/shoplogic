@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next';
 import { useLiveQuery } from 'dexie-react-hooks';
 import {
-  Banknote, Bell, Boxes, ChartColumn, ClipboardList, FileText, KeyRound, LayoutDashboard, Lock as LockIcon, LogOut, Menu, Moon, Package, Settings, ShoppingCart, Sun, Truck, UserCog, Users, Wallet, Wrench, X, Zap, Check, FilePlus2,
+  Banknote, Bell, Boxes, ChartColumn, ClipboardList, FileText, KeyRound, LayoutDashboard, Lock as LockIcon, LogOut, Menu, Moon, Package, RefreshCcw, Settings, ShoppingCart, Sun, Truck, UserCog, Users, Wallet, Wrench, X, Zap, Check, FilePlus2,
 } from 'lucide-react';
 import type { Accent, NavSection } from '../types';
 import { ACCENTS, ALL_MODULES } from '../types';
@@ -55,11 +55,11 @@ function UpdateBanner() {
 }
 
 const NAV_ICONS: Record<NavSection, typeof Bell> = {
-  dashboard: LayoutDashboard, pos: ShoppingCart, cash: Banknote, inventory: Package, stock: Boxes, repairs: Wrench, quotes: FilePlus2, clients: Users, providers: Truck,
+  dashboard: LayoutDashboard, pos: ShoppingCart, cash: Banknote, inventory: Package, stock: Boxes, repairs: Wrench, quotes: FilePlus2, tradeins: RefreshCcw, clients: Users, providers: Truck,
   purchases: ClipboardList, expenses: Wallet, billing: FileText, reports: ChartColumn, users: UserCog, notifications: Bell, automations: Zap, settings: Settings,
 };
 const NAV_GROUPS: { key: string; items: NavSection[] }[] = [
-  { key: 'nav.groupMain', items: ['dashboard', 'pos', 'cash', 'inventory', 'stock', 'repairs', 'quotes'] },
+  { key: 'nav.groupMain', items: ['dashboard', 'pos', 'cash', 'inventory', 'stock', 'repairs', 'quotes', 'tradeins'] },
   { key: 'nav.groupManagement', items: ['clients', 'providers', 'purchases', 'expenses', 'billing', 'reports'] },
   { key: 'nav.groupSystem', items: ['users', 'notifications', 'automations', 'settings'] },
 ];

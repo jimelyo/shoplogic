@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { KeyRound, LogOut } from 'lucide-react';
 import { db } from '../db/database';
 import { verifyPassword } from '../lib/hash';
+import { failedAttemptFields, fmtLockRemaining, lockedRemainingMs, loginSuccessFields } from '../lib/guard';
 import { logAction } from '../lib/audit';
 import { toast, useStore } from '../store/store';
 import { Button, Input } from './shared/Forms';
@@ -24,8 +25,16 @@ export function LockScreen() {
     setBusy(true);
     try {
       const record = await db.users.get(user.id);
+      // misma guardia que el login: bloqueo temporal tras fallos repetidos
+      const remaining = lockedRemainingMs(record);
+      if (remaining > 0) { setError(t('auth.accountLocked', { time: fmtLockRemaining(remaining) })); return; }
       const check = await verifyPassword(record?.password ?? '', password);
-      if (!check.ok) { setError(t('auth.wrongPassword')); return; }
+      if (!check.ok) {
+        await db.users.update(user.id, failedAttemptFields(record ?? {}));
+        setError(t('auth.wrongPassword'));
+        return;
+      }
+      await db.users.update(user.id, loginSuccessFields());
       setPassword('');
       setLocked(false);
       await logAction('login', 'auth', `${user.email} · ${t('auth.unlocked')}`);

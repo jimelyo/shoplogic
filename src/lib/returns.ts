@@ -2,6 +2,7 @@ import { db, getSettings } from '../db/database';
 import { useStore } from '../store/store';
 import { round2 } from './calc';
 import { makeMove } from './stock';
+import { cancelInvoiceWithVerifactu, createRectifyingInvoice } from './invoices';
 import type { ReturnItem, Sale, SaleReturn } from '../types';
 
 const nowIso = () => new Date().toISOString();
@@ -27,16 +28,18 @@ export async function refundable(sale: Sale): Promise<Record<number, number>> {
 
 /**
  * Refunds lines of a sale in one transaction: stock comes back (with a `return`
- * ledger entry), loyalty points and lifetime spend are reversed, and the invoice
- * linked to the ticket is cancelled when everything was given back.
+ * ledger entry), loyalty points and lifetime spend are reversed, and the linked
+ * invoice is settled afterwards:
+ *  - full refund  → cancelled (nota de anulacion en Veri*factu si estaba en cadena);
+ *  - partial refund → rectificativa R1 por diferencias (delta negativo), si
+ *    el módulo fiscal está activo. Si no, queda la nota previa.
  */
 export async function createReturn(
   sale: Sale, lines: RefundLine[], reason?: string,
-): Promise<SaleReturn> {
-  const quantities = lines.filter((l) => l.quantity > 0);
+): Promise<SaleReturn> {  const quantities = lines.filter((l) => l.quantity > 0);
   if (!quantities.length) throw new Error('validation.minItems');
 
-  return db.transaction(
+  const res = await db.transaction(
     'rw', [db.products, db.stockMoves, db.customers, db.returns, db.invoices, db.sales],
     async () => {
       const stillRefundable = await refundable(sale);
@@ -82,19 +85,42 @@ export async function createReturn(
       }
 
       const invoice = sale.id ? await db.invoices.where('saleId').equals(sale.id).first() : undefined;
+      let fullyRefunded = false;
+      let rectDelta = 0;
       if (invoice) {
         const all = sale.id ? await db.returns.where('saleId').equals(sale.id).toArray() : [record];
         const returnedTotal = round2(all.reduce((a, r) => a + r.total, 0));
         const note = `${invoice.notes ? `${invoice.notes} · ` : ''}Devolución ${sale.ticketNumber}: ${round2(returnedTotal)}`;
         if (returnedTotal >= sale.total - 0.005) {
-          await db.invoices.update(invoice.id!, { status: 'cancelled', notes: note, paid: 0 });
+          fullyRefunded = true;
+          await db.invoices.update(invoice.id!, { notes: note, paid: 0 });
         } else {
+          rectDelta = -round2(returnedTotal); // delta correcto: la cifra fiscal la baja esta devolución
           await db.invoices.update(invoice.id!, { notes: note });
         }
         record.invoiceId = invoice.id;
       }
 
-      return record;
+      return { record, invoiceId: invoice?.id, fullyRefunded, rectDelta };
     },
   );
+
+  // Temporalización fiscal FUERA de la transacción: crear una rectificativa toca
+  // `settings` y `verifactuQueue`, tablas ajenas al scope transaccional de arriba.
+  if (res.invoiceId) {
+    const inv = await db.invoices.get(res.invoiceId);
+    if (inv) {
+      const s = await getSettings();
+      if (!res.fullyRefunded && s.verifactu?.enabled && inv.verifHash && res.rectDelta < 0) {
+        try {
+          await createRectifyingInvoice(inv, res.rectDelta, reason || 'Devolución parcial', 'R1');
+        } catch (e) {
+          console.error('Devolución parcial: no se pudo emitir la rectificativa', e);
+        }
+      } else if (res.fullyRefunded) {
+        await cancelInvoiceWithVerifactu(inv);
+      }
+    }
+  }
+  return res.record;
 }

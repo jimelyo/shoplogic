@@ -41,7 +41,10 @@ const zh = {
   "view": "查看",
   "cards": "卡片",
   "table": "表格",
-  "details": "详情"
+  "details": "详情",
+  "reason": "原因",
+  "year": "年份",
+  "error": "错误"
  },
  "commandPalette": {
   "title": "全局搜索",
@@ -111,7 +114,9 @@ const zh = {
   "sessionLockedHint": "请输入密码以继续操作",
   "unlock": "解锁",
   "unlocked": "会话已解锁",
-  "lockNow": "锁定会话"
+  "lockNow": "锁定会话",
+  "accountLocked": "账号已临时锁定，请在 {{time}} 后重试。",
+  "accountLockedNow": "失败次数过多，账号已锁定 {{time}}。"
  },
  "scan": {
   "title": "相机扫描",
@@ -146,7 +151,8 @@ const zh = {
   "auth": "访问",
   "groupMain": "主要",
   "groupManagement": "管理",
-  "groupSystem": "系统"
+  "groupSystem": "系统",
+  "tradeins": "二手收购"
  },
  "theme": {
   "mode": "基础模式",
@@ -175,7 +181,8 @@ const zh = {
   "create": "新增",
   "delete": "删除",
   "repair": "维修",
-  "return": "退货"
+  "return": "退货",
+  "trade_in": "以旧换新（回收）"
  },
  "purchases": {
   "subtitle": "向供应商下单与收货管理",
@@ -374,7 +381,8 @@ const zh = {
   "color": "颜色",
   "default": "默认",
   "productsCount": "{{count}} 件商品",
-  "categoryInUse": "无法删除：有 {{count}} 件商品正在使用此类别"
+  "categoryInUse": "无法删除：有 {{count}} 件商品正在使用此类别",
+  "imei": "IMEI"
  },
  "repairs": {
   "subtitle": "维修车间进度跟踪",
@@ -478,7 +486,22 @@ const zh = {
   "exceedsPending": "金额超过待付金额（{{amount}}）",
   "downloadPdf": "下载 PDF",
   "overdueDetected": "{{count}} 张发票已标记为逾期",
-  "searchPlaceholder": "按编号、客户、税号或邮箱搜索…"
+  "searchPlaceholder": "按编号、客户、税号或邮箱搜索…",
+  "rectify": "开具冲红发票",
+  "rectCreate": "开具冲红",
+  "rectCode": "AEAT 代码",
+  "rectAmount": "待冲销金额（含税）",
+  "rectHint": "按输入金额创建 R 系列冲红发票（差额法，负增量），并在 Veri*factu 启用时入队申报。原发票不做任何修改。",
+  "rectExceeds": "冲销金额不能超过原发票金额（{{amount}}）",
+  "rectCreated": "冲红发票 {{number}} 已创建并入队",
+  "rectReasonPlaceholder": "冲销原因（增值税法第 80 条）",
+  "rectNewTotal": "原金额剩余",
+  "originalTotal": "原总额",
+  "rect_R1": "有法律依据的错误 / 增值税法第 80 条",
+  "rect_R2": "因客户破产调减计税基础",
+  "rect_R3": "破产 / 坏账",
+  "rect_R4": "其他原因",
+  "rect_R5": "简易发票冲红"
  },
  "reports": {
   "subtitle": "生成并导出 PDF 或 CSV（Excel）报表",
@@ -512,7 +535,29 @@ const zh = {
   "repairsCount": "维修数量",
   "completed": "已完成",
   "repairRevenue": "维修收入",
-  "expensesCount": "支出笔数"
+  "expensesCount": "支出笔数",
+  "type_fiscal303": "增值税 303（季度）",
+  "type_fiscal347": "347 第三方交易",
+  "fiscalPeriod": "税务期间",
+  "fiscalYearHint": "报表年度",
+  "taxEstimateHint": "估算：进项税按店铺通用税率计算（采购/费用未存税额明细）。申报前请核对。",
+  "vatAccrued": "销项税（已计提）",
+  "vatSupported": "进项税（可抵扣）",
+  "taxBase": "计税基础",
+  "taxQuota": "税额",
+  "rate": "税率",
+  "taxResult": "清算结果",
+  "taxDue": "应缴",
+  "taxRefund": "应退",
+  "invoicesInPeriod": "期间发票数",
+  "partnerType": "类型",
+  "partner": "第三方",
+  "partnerClients": "涉及的客户",
+  "partnerProviders": "涉及的供应商",
+  "partnerTotal": "需申报的第三方（{{year}}）",
+  "partnerClient": "客户",
+  "partnerProvider": "供应商",
+  "taxThreshold": "347 门槛"
  },
  "users": {
   "subtitle": "用户、模块权限与审计",
@@ -881,7 +926,17 @@ const zh = {
   "autoBackup": "已下载自动备份",
   "resetDone": "数据表已重置",
   "currentState": "当前状态",
-  "totalRecords": "记录总数"
+  "totalRecords": "记录总数",
+  "tradeInMargin": "以旧换新加价率 (%)",
+  "tradeInMarginHint": "回收设备上架时在收购价之上的建议加价率",
+  "encBackupTitle": "备份加密（可选）",
+  "encBackupPassword": "加密密码",
+  "encBackupPlaceholder": "留空则导出不加密",
+  "encBackupHint": "AES-256-GCM + 派生密钥（PBKDF2 310k 次）。密码丢失后备份无法恢复。",
+  "exportedEncrypted": "加密备份已导出",
+  "encryptedDetected": "文件 {{name}} 已加密，请输入其密码以导入。",
+  "wrongPassword": "密码错误：备份未能解密。",
+  "unlockAndImport": "解密并导入"
  },
  "currency": {
   "EUR": "欧元",
@@ -1012,6 +1067,45 @@ const zh = {
   "invoices": "发票",
   "noInvoices": "暂无相关发票",
   "returns": "退货"
+ },
+ "tradeins": {
+  "subtitle": "向客户回收二手设备，支持估价与完整库存溯源",
+  "new": "设备估价",
+  "quote": "估价",
+  "quoteHint": "记录设备信息与议定价格；出价前不产生库存变动。",
+  "count": "设备",
+  "invested": "回收支出",
+  "stockValue": "转售价值",
+  "margin": "毛利",
+  "marginHint": "销售毛利：{{margin}}%",
+  "searchPlaceholder": "按编号、客户、型号或 IMEI 搜索…",
+  "empty": "暂无回收记录",
+  "number": "编号",
+  "device": "型号",
+  "buyPrice": "收购价",
+  "listPrice": "销售价",
+  "condition": "成色",
+  "existingCustomer": "既有客户",
+  "walkIn": "— 新客户 —",
+  "priceHint": "建议售价：{{price}}",
+  "listHint": "上架时会在库存中创建库存为 1 的商品，并写入一条「trade_in」库存流水。",
+  "listedToast": "「{{name}}」已加入库存",
+  "imeiExists": "库存中已存在该 IMEI 的设备",
+  "notPurchasable": "该设备已无法上架",
+  "purchase": "购买（向客户付款）",
+  "purchaseConfirm": "确认以 {{amount}} 收购 {{number}}？将向客户付款。",
+  "listCreate": "上架到库存",
+  "openProduct": "在库存中查看",
+  "cancelConfirm": "删除估价单 {{name}}？",
+  "alreadyListed": "已上架库存",
+  "status_quoted": "已估价",
+  "status_purchased": "已收购",
+  "status_listed": "已上架",
+  "status_cancelled": "已取消",
+  "cond_A": "A · 成色好",
+  "cond_B": "B · 有使用痕迹",
+  "cond_C": "C · 故障 / 拆件",
+  "cond_spare": "拆件机"
  }
 };
 export default zh;

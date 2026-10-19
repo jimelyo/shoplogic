@@ -1,5 +1,5 @@
 export type NavSection =
-  | 'dashboard' | 'pos' | 'cash' | 'inventory' | 'stock' | 'repairs' | 'quotes' | 'clients' | 'providers' | 'purchases' | 'expenses'
+  | 'dashboard' | 'pos' | 'cash' | 'inventory' | 'stock' | 'repairs' | 'quotes' | 'tradeins' | 'clients' | 'providers' | 'purchases' | 'expenses'
   | 'billing' | 'reports' | 'users' | 'notifications' | 'automations' | 'settings';
 /** State of a quote: open → accepted → converted to a sale or a repair, or rejected/expired. */
 export type QuoteStatus = 'draft' | 'sent' | 'accepted' | 'rejected' | 'expired' | 'converted';
@@ -36,11 +36,32 @@ export interface Repair {
   customerEmail?: string; customerId?: number; device: string; imei: string; problem: string; diagnosis?: string; notes?: string;
   status: RepairStatus; estimatedCost: number; finalCost?: number; createdAt: string;
 }
-export type StockMoveType = 'initial' | 'sale' | 'purchase' | 'adjustment' | 'create' | 'delete' | 'repair' | 'return';
+export type StockMoveType = 'initial' | 'sale' | 'purchase' | 'adjustment' | 'create' | 'delete' | 'repair' | 'return' | 'trade_in';
 /** A signed ledger entry for every change of a product's stock level. */
 export interface StockMove {
   id?: number; productId: number; productName: string; type: StockMoveType; qty: number;
   stockBefore: number; stockAfter: number; reference?: string; note?: string; userName?: string; timestamp: string;
+}
+
+/**
+ * One device a customer sells back to the store (trade-in / recompra).
+ * Lifecycle: quoted (tasado) → purchased (comprado) → listed (altado al inventario) | cancelled.
+ */
+export type TradeInStatus = 'quoted' | 'purchased' | 'listed' | 'cancelled';
+export type TradeInCondition = 'A' | 'B' | 'C' | 'spare';
+export interface TradeIn {
+  id?: number; number: string; date: string; status: TradeInStatus;
+  customerName: string; customerId?: number;
+  device: string; imei?: string; condition: TradeInCondition; notes?: string;
+  /** Agreed buy price paid to the customer (VAT-inclusive, like every POS price). */
+  buyPrice: number;
+  /** Reselling price set when the unit is listed (estimated from a margin when absent). */
+  listPrice?: number;
+  /** Product created in the inventory when the unit is listed. */
+  productId?: number;
+  /** Cash counted out of the drawer the purchase was paid from. */
+  cashSessionId?: number;
+  userName?: string; createdAt: string;
 }
 
 export interface CashAdjustment {
@@ -57,6 +78,7 @@ export interface CashSession {
   expected?: number; counted?: number; difference?: number;
   note?: string; adjustments?: CashAdjustment[]; createdAt: string;
 }
+
 
 export type PurchaseOrderStatus = 'draft' | 'sent' | 'partial' | 'received' | 'cancelled';
 export interface PurchaseOrderItem { productId: number; name: string; quantity: number; quantityReceived: number; cost: number }
@@ -125,7 +147,18 @@ export interface Invoice {
   verifCSV?: string;
   /** Última respuesta cruda de la AEAT para esta factura (trazabilidad). */
   verifLastResponse?: string;
+  /** When this invoice is a rectificativa: the id of the RECTIFIED invoice. */
+  rectifies?: number;
+  /** Rectificative invoice code (R1–R5) per AEAT; only meaningful with `rectifies`. */
+  rectCode?: RectifyingCode;
+  /** Rectification method: I = por diferencias (signed delta), S = por sustitución (corrected amounts). */
+  rectMethod?: 'S' | 'I';
 }
+/** Rectificative-invoice codes (AEAT design of registry). */
+export type RectifyingCode = 'R1' | 'R2' | 'R3' | 'R4' | 'R5';
+export const RECTIFYING_CODES: RectifyingCode[] = ['R1', 'R2', 'R3', 'R4', 'R5'];
+export const RECTIFYING_ICONS: Record<RectifyingCode, string> = { R1: '↩️', R2: '📉', R3: '⌛', R4: '⚖️', R5: '🧾' };
+
 export interface ProductCategory { id: string; name: string; icon: string; color: string; isDefault?: boolean }
 export interface PrinterConfig {
   enabled: boolean; name: string; connection: PrinterConnection; width: '80mm' | '58mm'; header?: string; showLogo?: boolean;
@@ -154,8 +187,13 @@ export interface Settings {
   invoiceNextNumber: number; invoiceLastYear?: number; invoiceDefaultDueDays: number; invoiceDefaultStatus: InvoiceStatus;
   invoiceDefaultPaymentMethod: PaymentMethod; invoiceDefaultNotes?: string; invoiceIncludeRepairDetail: boolean;
   invoiceAutoGenerateOnDelivery: boolean; invoiceYearReset: boolean;
+  /** Numbering of rectificative invoices: a dedicated series with this prefix, e.g. `R123 ─ F2026/0035`. */
+  invoiceRectPrefix: string;
+  invoiceNextRectNumber: number;
   /** Euros of spend that earn one loyalty point. */
   loyaltyRate: number;
+  /** Default markup (%) applied over the buy price when listing a trade-in unit. */
+  tradeInMargin: number;
   /** Inactivity minutes before the screen locks. 0 (or missing) keeps it disabled. */
   lockAfterMinutes?: number;
   /** Warranty length in days offered on sales, used by the IMEI dossier. */
@@ -178,6 +216,8 @@ export interface Settings {
 export interface User {
   id?: number; name: string; email: string; password: string; role: Role; permissions: NavSection[];
   avatar?: string; isActive: boolean; lastLogin?: string; createdAt: string;
+  /** Login guard (src/lib/guard.ts): consecutive failed attempts and lock deadline. */
+  failedLogins?: number; lockUntil?: string;
 }
 export interface AuditLog { id?: number; userId: number; userName: string; action: string; module: string; details?: string; timestamp: string; ip?: string }
 export interface AppNotification {
@@ -187,7 +227,7 @@ export interface AppNotification {
 export type { AppNotification as Notification };
 
 export const ALL_MODULES: NavSection[] = [
-  'dashboard', 'pos', 'cash', 'inventory', 'stock', 'repairs', 'quotes', 'clients', 'providers', 'purchases', 'expenses',
+  'dashboard', 'pos', 'cash', 'inventory', 'stock', 'repairs', 'quotes', 'tradeins', 'clients', 'providers', 'purchases', 'expenses',
   'billing', 'reports', 'users', 'notifications', 'automations', 'settings',
 ];
 
@@ -198,9 +238,9 @@ export const QUOTE_STATUS_ICONS: Record<QuoteStatus, string> = {
 
 export const DEFAULT_ROLE_PERMISSIONS: Record<Role, NavSection[]> = {
   admin: [...ALL_MODULES],
-  manager: ['dashboard', 'pos', 'cash', 'inventory', 'stock', 'repairs', 'quotes', 'clients', 'providers', 'purchases', 'expenses', 'billing', 'reports', 'notifications', 'automations'],
-  technician: ['dashboard', 'inventory', 'stock', 'repairs', 'quotes', 'notifications'],
-  cashier: ['dashboard', 'pos', 'cash', 'quotes', 'clients', 'notifications'],
+  manager: ['dashboard', 'pos', 'cash', 'inventory', 'stock', 'repairs', 'quotes', 'tradeins', 'clients', 'providers', 'purchases', 'expenses', 'billing', 'reports', 'notifications', 'automations'],
+  technician: ['dashboard', 'inventory', 'stock', 'repairs', 'quotes', 'tradeins', 'notifications'],
+  cashier: ['dashboard', 'pos', 'cash', 'quotes', 'tradeins', 'clients', 'notifications'],
 };
 /** Modules that a role can open but not modify */
 export const READ_ONLY_MODULES: Partial<Record<Role, NavSection[]>> = { technician: ['inventory'] };
@@ -227,14 +267,21 @@ export const NOTIFICATION_ICONS: Record<NotificationType, string> = {
   stock_critical: '🚨', stock_low: '⚠️', repair_overdue: '🔧', invoice_overdue: '💰', daily_summary: '📊', system: 'ℹ️',
 };
 export const NOTIFICATION_TYPES = Object.keys(NOTIFICATION_ICONS) as NotificationType[];
-export const STOCK_MOVE_TYPES: StockMoveType[] = ['initial', 'sale', 'purchase', 'adjustment', 'create', 'delete', 'repair', 'return'];
+export const STOCK_MOVE_TYPES: StockMoveType[] = ['initial', 'sale', 'purchase', 'adjustment', 'create', 'delete', 'repair', 'return', 'trade_in'];
 export const STOCK_MOVE_ICONS: Record<StockMoveType, string> = {
-  initial: '🏁', sale: '🛒', purchase: '🚚', adjustment: '✏️', create: '➕', delete: '🗑️', repair: '🔧', return: '↩️',
+  initial: '🏁', sale: '🛒', purchase: '🚚', adjustment: '✏️', create: '➕', delete: '🗑️', repair: '🔧', return: '↩️', trade_in: '♻️',
 };
 export const PURCHASE_ORDER_STATUSES: PurchaseOrderStatus[] = ['draft', 'sent', 'partial', 'received', 'cancelled'];
 export const PURCHASE_STATUS_ICONS: Record<PurchaseOrderStatus, string> = {
   draft: '📝', sent: '📤', partial: '📦', received: '✅', cancelled: '❌',
 };
+export const TRADE_IN_STATUSES: TradeInStatus[] = ['quoted', 'purchased', 'listed', 'cancelled'];
+export const TRADE_IN_STATUS_ICONS: Record<TradeInStatus, string> = {
+  quoted: '📝', purchased: '✅', listed: '📦', cancelled: '❌',
+};
+export const TRADE_IN_CONDITIONS: { id: TradeInCondition; icon: string }[] = [
+  { id: 'A', icon: '✨' }, { id: 'B', icon: '👍' }, { id: 'C', icon: '🩹' }, { id: 'spare', icon: '🧰' },
+];
 export const CURRENCIES: { code: string; symbol: string }[] = [
   { code: 'EUR', symbol: '€' }, { code: 'USD', symbol: '$' }, { code: 'GBP', symbol: '£' }, { code: 'MXN', symbol: '$' },
   { code: 'ARS', symbol: '$' }, { code: 'COP', symbol: '$' }, { code: 'CLP', symbol: '$' }, { code: 'BRL', symbol: 'R$' },

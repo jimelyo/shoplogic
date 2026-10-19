@@ -6,6 +6,7 @@ import { db } from '../db/database';
 import { useStore } from '../store/store';
 import type { User } from '../types';
 import { hashPassword, verifyPassword } from '../lib/hash';
+import { failedAttemptFields, fmtLockRemaining, lockedRemainingMs, loginSuccessFields } from '../lib/guard';
 import { logAction } from '../lib/audit';
 import { Button, Input } from './shared/Forms';
 import { LanguageSelector } from './shared/LanguageSelector';
@@ -38,11 +39,25 @@ export function Login() {
     if (!password) { setError(t('validation.required')); return; }
     setLoading(true);
     try {
-      const check = await verifyPassword(selected.password, password);
-      if (!check.ok) { setError(t('auth.invalid')); return; }
+      // Guardia: la cuenta se lee fresca de la BD porque liveQuery puede no
+      // haber refrescado el objeto en memoria tras falls anteriores.
+      const fresh = (await db.users.get(selected.id!)) ?? selected;
+      const remaining = lockedRemainingMs(fresh);
+      if (remaining > 0) { setError(t('auth.accountLocked', { time: fmtLockRemaining(remaining) })); return; }
+      const check = await verifyPassword(fresh.password, password);
+      if (!check.ok) {
+        const guard = failedAttemptFields(fresh);
+        await db.users.update(selected.id!, guard);
+        if (guard.lockUntil) {
+          setError(t('auth.accountLockedNow', { time: fmtLockRemaining(new Date(guard.lockUntil).getTime() - Date.now()) }));
+        } else {
+          setError(t('auth.invalid'));
+        }
+        return;
+      }
       const lastLogin = new Date().toISOString();
-      // Upgrade hashes written by older versions once the password is known to be right.
-      const patch = check.needsRehash ? { lastLogin, password: await hashPassword(password) } : { lastLogin };
+      // Éxito: resetea el contador de guardia (+ rehash de hashes antiguos).
+      const patch = { ...loginSuccessFields(), lastLogin, ...(check.needsRehash ? { password: await hashPassword(password) } : {}) };
       await db.users.update(selected.id!, patch);
       const session = { id: selected.id!, name: selected.name, email: selected.email, role: selected.role, permissions: selected.permissions };
       setCurrentUser(session);

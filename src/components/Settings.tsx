@@ -8,6 +8,7 @@ import { useFormat } from '../lib/format';
 import { logAction } from '../lib/audit';
 import { peekInvoiceNumber } from '../lib/invoices';
 import { backupCounts, downloadBackup, downloadFile, exportAll, externalBackupSupported, formatBytes, importBackup, parseBackup, pickExternalDir, resetTables, tableCounts, copyToExternal, type BackupData } from '../lib/backup';
+import { decryptBackup, encryptBackup, isEncryptedBackup } from '../lib/backup-crypto';
 import { verifyChain, verifactuCsv } from '../verifactu/audit';
 import { FiscalStatus, FiscalConfigFields } from './shared/FiscalStatus';
 import { VerifactuIncidents } from './shared/VerifactuIncidents';
@@ -379,6 +380,9 @@ function DataSection({ form, up }: { form: TSettings; up: (patch: Partial<TSetti
   const [importName, setImportName] = useState('');
   const [resetSel, setResetSel] = useState<TableName[]>([]);
   const [busy, setBusy] = useState(false);
+  // Cifrado opcional de backups (AES-GCM): contraseña al exportar / importar.
+  const [encPassword, setEncPassword] = useState('');
+  const [pendingEncrypted, setPendingEncrypted] = useState<{ name: string; text: string } | null>(null);
   const ext = form.externalBackup ?? { enabled: false };
   const supported = externalBackupSupported();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -388,15 +392,35 @@ function DataSection({ form, up }: { form: TSettings; up: (patch: Partial<TSetti
 
   const doExport = async () => {
     const b = await downloadBackup();
-    setLastExport({ name: b.filename, size: b.size });
-    await logAction('export', 'settings', `${b.filename} (${formatBytes(b.size)})`);
-    toast.success(`${t('settings.exported')} · ${formatBytes(b.size)}`);
+    let finalName = b.filename;
+    let finalText = b.json;
+    let size = b.size;
+    if (encPassword.trim()) {
+      const enc = await encryptBackup(b.json, encPassword);
+      finalName = b.filename.replace(/\.json$/, '.encrypted.slcrypt');
+      finalText = enc;
+      size = new Blob([enc]).size;
+      downloadFile(enc, finalName, 'text/plain');
+      toast.success(`${t('settings.exportedEncrypted')} · ${formatBytes(size)}`);
+    } else {
+      toast.success(`${t('settings.exported')} · ${formatBytes(size)}`);
+    }
+    setLastExport({ name: finalName, size });
+    await logAction('export', 'settings', `${finalName} (${formatBytes(size)})`);
+    setEncPassword('');
   };
   const onFile = async (file?: File) => {
     if (!file) return;
     try {
-      const d = parseBackup(await file.text());
-      setImportData(d); setImportName(file.name);
+      const text = await file.text();
+      if (isEncryptedBackup(text)) {
+        // Cifrado: pedir contraseña antes de descifrar e importar.
+        setPendingEncrypted({ name: file.name, text });
+        setImportData(null);
+      } else {
+        const d = parseBackup(text);
+        setImportData(d); setImportName(file.name);
+      }
     } catch { toast.error(t('settings.invalidFile')); }
     if (fileRef.current) fileRef.current.value = '';
   };
@@ -434,6 +458,10 @@ function DataSection({ form, up }: { form: TSettings; up: (patch: Partial<TSetti
         <SectionTitle>📤 {t('settings.export')}</SectionTitle>
         <p className="mb-3 text-sm text-sl-muted">{t('settings.exportHint')}</p>
         <p className="mb-3 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-300">🔐 {t('settings.channelsWarn')}</p>
+        <div className="mb-3 rounded-lg border border-sl-border bg-sl-card2 p-3">
+          <div className="flex items-center gap-2 text-sm font-semibold text-sl-text">🔒 {t('settings.encBackupTitle')}</div>
+          <Input label={t('settings.encBackupPassword')} type="password" value={encPassword} onChange={(e) => setEncPassword(e.target.value)} placeholder={t('settings.encBackupPlaceholder')} className="mt-2" hint={t('settings.encBackupHint')} autoComplete="new-password" />
+        </div>
         <div className="flex flex-wrap gap-2">
           <Button icon={<Download />} onClick={doExport}>{t('settings.exportJson')}</Button>
           {TABLE_NAMES.map((n) => (
@@ -480,8 +508,29 @@ function DataSection({ form, up }: { form: TSettings; up: (patch: Partial<TSetti
       <Card className="p-5">
         <SectionTitle>📥 {t('settings.import')}</SectionTitle>
         <p className="mb-3 text-sm text-sl-muted">{t('settings.importHint')}</p>
-        <input ref={fileRef} type="file" accept="application/json,.json" className="hidden" onChange={(e) => onFile(e.target.files?.[0])} />
+        <input ref={fileRef} type="file" accept="application/json,.json,.slcrypt,text/plain" className="hidden" onChange={(e) => onFile(e.target.files?.[0])} />
         <Button variant="outline" icon={<Upload />} onClick={() => fileRef.current?.click()}>{t('settings.selectFile')}</Button>
+        {pendingEncrypted && (
+          <div className="mt-3 rounded-lg border border-primary/40 bg-primary/5 p-3">
+            <p className="text-xs font-semibold text-primary">🔐 {t('settings.encryptedDetected', { name: pendingEncrypted.name })}</p>
+            <Input label={t('settings.encBackupPassword')} type="password" autoFocus value={encPassword} onChange={(e) => setEncPassword(e.target.value)} className="mt-2"
+              error={undefined as unknown as string | undefined} placeholder="••••••••" />
+            <div className="mt-2 flex gap-2">
+              <Button size="sm" loading={busy} onClick={async () => {
+                setBusy(true);
+                try {
+                  const d = await decryptBackup(pendingEncrypted.text, encPassword);
+                  setImportData(d); setImportName(pendingEncrypted.name);
+                  setPendingEncrypted(null); setEncPassword('');
+                } catch (e) {
+                  toast.error(String((e as Error).message) === 'wrongpassword' ? t('settings.wrongPassword') : t('settings.invalidFile'));
+                } finally { setBusy(false); }
+              }}>{t('settings.unlockAndImport')}</Button>
+              <Button size="sm" variant="ghost" onClick={() => { setPendingEncrypted(null); setEncPassword(''); }}>{t('common.cancel')}</Button>
+            </div>
+          </div>
+        )}
+        {importName && importData && <p className="mt-2 text-xs text-sl-muted">✅ {importName}</p>}
       </Card>
       <Card className="p-5">
         <SectionTitle right={<div className="flex gap-1"><Button size="sm" variant="ghost" onClick={() => setResetSel([...resettable])}>{t('settings.selectAll')}</Button><Button size="sm" variant="ghost" onClick={() => setResetSel([])}>{t('settings.deselectAll')}</Button></div>}>🗑️ {t('settings.reset')}</SectionTitle>

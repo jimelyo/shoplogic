@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { addDays } from 'date-fns';
-import { Download, Eye, Pencil, Plus, Printer, Trash, Wallet } from 'lucide-react';
+import { Download, Eye, Pencil, Plus, Printer, Trash, Undo2, Wallet } from 'lucide-react';
 import { db } from '../db/database';
 import { confirmDialog, toast } from '../store/store';
 import { useFormat } from '../lib/format';
@@ -10,13 +10,13 @@ import { matches } from '../lib/hooks';
 import { computeInvoiceTotals, isoDate, lineTotal, priceFromTotal, round2 } from '../lib/calc';
 import { logAction } from '../lib/audit';
 import { INVOICE_STATUS_COLORS, cssVar } from '../lib/colors';
-import { createInvoiceFromRepair, createInvoiceFromSale, nextInvoiceNumber, peekInvoiceNumber } from '../lib/invoices';
+import { createInvoiceFromRepair, createInvoiceFromSale, createRectifyingInvoice, nextInvoiceNumber, peekInvoiceNumber } from '../lib/invoices';
 import { markOverdueInvoices } from '../lib/notifications';
 import { invoiceHtml, printHtml } from '../lib/print';
 import { invoicePdf } from '../lib/pdf';
 import { invoiceSchema, validateForm, type FormErrors } from '../schemas';
-import type { Invoice, InvoiceStatus, PaymentMethod } from '../types';
-import { INVOICE_STATUSES, INVOICE_STATUS_ICONS, PAYMENT_METHODS } from '../types';
+import type { Invoice, InvoiceStatus, PaymentMethod, RectifyingCode } from '../types';
+import { INVOICE_STATUSES, INVOICE_STATUS_ICONS, PAYMENT_METHODS, RECTIFYING_CODES, RECTIFYING_ICONS } from '../types';
 import { PageHeader } from './shared/PageHeader';
 import { Badge, Card, EmptyState, IconButton, InfoRow, Pill, SearchInput, StatCard, Toolbar, ViewToggle, useViewMode } from './shared/UI';
 import { Button, Input, Select, TextArea, fieldClass } from './shared/Forms';
@@ -54,6 +54,11 @@ export function Billing() {
   const [payFor, setPayFor] = useState<Invoice | null>(null);
   const [payAmount, setPayAmount] = useState('');
   const [quickOpen, setQuickOpen] = useState<'sales' | 'repairs' | null>(null);
+  // Rectificativa R1–R5 sobre una factura emitida (devolución parcial/albarán).
+  const [rectFor, setRectFor] = useState<Invoice | null>(null);
+  const [rectAmount, setRectAmount] = useState('');
+  const [rectCode, setRectCode] = useState<RectifyingCode>('R1');
+  const [rectReason, setRectReason] = useState('');
 
   useEffect(() => {
     markOverdueInvoices().then((n) => { if (n) toast.warning(t('billing.overdueDetected', { count: n })); }).catch(() => undefined);
@@ -161,14 +166,33 @@ export function Billing() {
     await logAction('status_change', 'billing', `${i.number}: ${t(`invoiceStatus.${i.status}`)} → ${t(`invoiceStatus.${st}`)}`);
     if (preview?.id === i.id) setPreview({ ...i, ...patch });
   };
+  const submitRectificativa = async () => {
+    if (!rectFor) return;
+    const amount = round2(Number(rectAmount));
+    if (!(amount > 0)) { toast.error(t('validation.positive')); return; }
+    const original = round2(Math.max(rectFor.total, 0));
+    if (amount > original + 0.001) { toast.error(t('billing.rectExceeds', { amount: f.money(original) })); return; }
+    if (!rectReason.trim()) { toast.error(t('validation.required')); return; }
+    try {
+      const rect = await createRectifyingInvoice(rectFor, -amount, rectReason.trim(), rectCode);
+      toast.success(t('billing.rectCreated', { number: rect.number }));
+      setRectFor(null);
+    } catch (e) {
+      console.error('Rectificativa', e);
+      toast.error(t('common.error'));
+    }
+  };
   const print = (i: Invoice) => { printHtml(invoiceHtml(i, s, t, cssVar('--sl-primary', '#4f46e5')), i.number); logAction('print', 'billing', i.number); };
   const pdf = (i: Invoice) => { invoicePdf(i, s).catch((e) => console.error('PDF', e)); logAction('export', 'billing', `PDF ${i.number}`); };
 
-  const origin = (i: Invoice) => i.saleId ? <Badge color="cyan">🧾 {t('billing.fromSale')}</Badge> : i.repairId ? <Badge color="purple">🔧 {t('billing.fromRepair')}</Badge> : <Badge color="slate">✍️ {t('billing.manual')}</Badge>;
+  const origin = (i: Invoice) => i.rectCode
+    ? <Badge color="orange">{RECTIFYING_ICONS[i.rectCode]} {i.rectCode}</Badge>
+    : i.saleId ? <Badge color="cyan">🧾 {t('billing.fromSale')}</Badge> : i.repairId ? <Badge color="purple">🔧 {t('billing.fromRepair')}</Badge> : <Badge color="slate">✍️ {t('billing.manual')}</Badge>;
   const actions = (i: Invoice) => (
     <div className="flex justify-end gap-0.5">
       <IconButton title={t('common.view')} onClick={() => setPreview(i)}><Eye /></IconButton>
       {i.paid < i.total && i.status !== 'cancelled' && <IconButton title={t('billing.registerPayment')} tone="success" onClick={() => { setPayFor(i); setPayAmount(String(round2(i.total - i.paid))); }}><Wallet /></IconButton>}
+      {i.status !== 'cancelled' && !i.rectifies && <IconButton title={t('billing.rectify')} tone="primary" onClick={() => { setRectFor(i); setRectAmount(String(round2(Math.max(0, i.total - i.paid) || i.total))); setRectCode(i.customerDni ? 'R1' : 'R5'); setRectReason(''); }}><Undo2 /></IconButton>}
       <IconButton title={t('common.print')} onClick={() => print(i)}><Printer /></IconButton>
       <IconButton title="PDF" onClick={() => pdf(i)}><Download /></IconButton>
       <IconButton title={t('common.edit')} tone="primary" onClick={() => openEdit(i)}><Pencil /></IconButton>
@@ -327,6 +351,23 @@ export function Billing() {
           <Button icon={<Download />} onClick={() => pdf(preview)}>{t('billing.downloadPdf')}</Button>
         </>}>
         {preview && <InvoicePreview inv={preview} />}
+      </Modal>
+
+      {/* Rectificativa R1–R5 */}
+      <Modal open={!!rectFor} onClose={() => setRectFor(null)} size="sm" title={`↩️ ${t('billing.rectify')}`} subtitle={rectFor?.number}
+        footer={<><Button variant="secondary" onClick={() => setRectFor(null)}>{t('common.cancel')}</Button><Button onClick={submitRectificativa}>{t('billing.rectCreate')}</Button></>}>
+        {rectFor && (
+          <div className="space-y-3">
+            <InfoRow label={t('billing.originalTotal')} value={<b>{f.money(rectFor.total)}</b>} />
+            <p className="rounded-lg bg-amber-500/10 p-2 text-[11px] leading-4 text-amber-700 dark:text-amber-300">💡 {t('billing.rectHint')}</p>
+            <Select label={t('billing.rectCode')} value={rectCode} onChange={(e) => setRectCode(e.target.value as RectifyingCode)}>
+              {RECTIFYING_CODES.map((c) => <option key={c} value={c}>{RECTIFYING_ICONS[c]} {c} · {t(`billing.rect_${c}`)}</option>)}
+            </Select>
+            <Input label={t('billing.rectAmount')} type="number" step="0.01" min="0" value={rectAmount} onChange={(e) => setRectAmount(e.target.value)} autoFocus />
+            <Input label={t('common.reason')} value={rectReason} onChange={(e) => setRectReason(e.target.value)} placeholder={t('billing.rectReasonPlaceholder')} />
+            {Number(rectAmount) > 0 && <p className="text-xs text-sl-muted">Δ {t('common.total')}: <b className="text-red-500">−{f.money(Number(rectAmount))}</b> · {t('billing.rectNewTotal')}: <b>{f.money(rectFor.total - Number(rectAmount))}</b></p>}
+          </div>
+        )}
       </Modal>
 
       {/* Payment */}

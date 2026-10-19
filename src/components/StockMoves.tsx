@@ -19,7 +19,7 @@ import { LoadingPage } from './shared/Skeleton';
 type Period = 'week' | 'month' | 'year' | 'all';
 
 const TYPE_COLORS: Record<StockMoveType, BadgeColor> = {
-  initial: 'slate', sale: 'indigo', purchase: 'green', adjustment: 'amber', create: 'blue', delete: 'red', repair: 'purple', return: 'orange',
+  initial: 'slate', sale: 'indigo', purchase: 'green', adjustment: 'amber', create: 'blue', delete: 'red', repair: 'purple', return: 'orange', trade_in: 'cyan',
 };
 
 export function StockMoves() {

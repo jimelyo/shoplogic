@@ -1,7 +1,7 @@
 import Dexie, { type Table } from 'dexie';
 import type {
   AppNotification, AuditLog, Customer, Expense, Invoice, Product, Provider, PurchaseOrder, PurchaseOrderStatus,
-  CashSession, OutboxEntry, DailySnapshot, Quote, Repair, Sale, SaleReturn, Settings, StockMove, StockMoveType, User, PaymentMethod,
+  CashSession, OutboxEntry, DailySnapshot, Quote, Repair, Sale, SaleReturn, Settings, StockMove, StockMoveType, TradeIn, User, PaymentMethod,
 } from '../types';
 import { DEFAULT_ROLE_PERMISSIONS } from '../types';
 import { DEFAULT_CATEGORIES } from '../data/categories';
@@ -29,6 +29,7 @@ export class ShopDB extends Dexie {
   outbox!: Table<OutboxEntry, number>;
   snapshots!: Table<DailySnapshot, number>;
   quotes!: Table<Quote, number>;
+  tradeIns!: Table<TradeIn, number>;
 
   constructor() {
     super('shoplogic_pro');
@@ -77,6 +78,10 @@ export class ShopDB extends Dexie {
     this.version(10).stores({
       verifactuQueue: '++id, Huella, status, NumSerieFactura, invoiceId, createdAt, nextRetryAt',
     });
+    // v11 (Trade-in): recompra de dispositivos al cliente.
+    this.version(11).stores({
+      tradeIns: '++id, number, date, status, customerId, productId',
+    });
   }
 }
 
@@ -84,7 +89,7 @@ export const db = new ShopDB();
 
 export const TABLE_NAMES = [
   'products', 'sales', 'repairs', 'customers', 'providers', 'expenses', 'invoices', 'users', 'logs', 'notifications', 'settings',
-  'purchaseOrders', 'stockMoves', 'cashSessions', 'returns', 'outbox', 'quotes',
+  'purchaseOrders', 'stockMoves', 'cashSessions', 'returns', 'outbox', 'quotes', 'tradeIns',
 ] as const;
 export type TableName = (typeof TABLE_NAMES)[number];
 
@@ -112,7 +117,10 @@ export const DEFAULT_SETTINGS: Settings = {
   invoiceIncludeRepairDetail: true,
   invoiceAutoGenerateOnDelivery: true,
   invoiceYearReset: true,
+  invoiceRectPrefix: 'R',
+  invoiceNextRectNumber: 1,
   loyaltyRate: 10,
+  tradeInMargin: 30,
   lockAfterMinutes: 0,
   warrantyDays: 90,
   ticketPrinter: { enabled: true, name: 'Epson TM-T20III', connection: 'usb', width: '80mm', header: 'ShopLogic Mobile Store', showLogo: true },

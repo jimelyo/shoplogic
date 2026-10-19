@@ -1,7 +1,8 @@
 import { addDays } from 'date-fns';
 import { db, getSettings } from '../db/database';
-import type { Invoice, Repair, Sale, Settings } from '../types';
+import type { Invoice, InvoiceItem, RectifyingCode, Repair, Sale, Settings } from '../types';
 import { computeInvoiceTotals, formatInvoiceNumber, isoDate, itemFromTotal } from './calc';
+import { logAction } from './audit';
 import { emitAlta, emitAnulacion } from '../verifactu/service';
 
 export function peekInvoiceNumber(s: Settings, date = new Date()): string {
@@ -133,5 +134,69 @@ export async function createInvoiceFromRepair(repair: Repair, repairLabel = 'Rep
   if (inv.verifHash) {
     await db.invoices.update(inv.id, { verifHash: inv.verifHash, verifPrevHash: inv.verifPrevHash, verifTime: inv.verifTime, verifEnvio: inv.verifEnvio });
   }
+  return inv;
+}
+
+/** Siguiente número de la serie de rectificativas (p. ej. `R2026-0031`). */
+export async function nextRectInvoiceNumber(date = new Date()): Promise<string> {
+  const s = await getSettings();
+  const n = s.invoiceNextRectNumber || 1;
+  const number = formatInvoiceNumber({ ...s, invoicePrefix: s.invoiceRectPrefix || 'R' }, n, date);
+  await db.settings.update(s.id!, { invoiceNextRectNumber: n + 1 });
+  return number;
+}
+
+/**
+ * Rectificativas R1–R5 (Veri*factu) — emite una factura rectificativa de la
+ * factura `original` por el importe de la CORRECCIÓN (método I = por
+ * diferencias): los importes de la rectificativa representan el delta con
+ * signo (negativo cuando la base baja; p. ej. una devolución parcial).
+ *
+ * La rectificativa lleva serie propia (`settings.invoiceRectPrefix`) y
+ * referencia la original (FacturasRectificadas). La original NO se modifica
+ * (la cadena Veri*factu es inmutable); el efecto contable del delta lo aplica
+ * el llamador (p. ej. bajando `paid` o cancelando la original si es total).
+ *
+ * @param original    factura rectificada, ya persistida
+ * @param deltaTotal  delta con signo del IMPORTE TOTAL (IVA incl.), ≤ 0 en devoluciones
+ * @param reason      razón de la rectificación (descripción de la operación)
+ * @param code        R1–R5 según la causa (R1 por defecto: fundamento legal/art. 80)
+ */
+export async function createRectifyingInvoice(
+  original: Invoice,
+  deltaTotal: number,
+  reason: string,
+  code: RectifyingCode = 'R1',
+): Promise<Invoice> {
+  const s = await getSettings();
+  const rate = s.taxRate;
+  const items: InvoiceItem[] = [itemFromTotal(reason, 1, deltaTotal, rate)];
+  const totals = computeInvoiceTotals(items);
+  const now = new Date();
+  const inv: Invoice = {
+    number: await nextRectInvoiceNumber(now),
+    date: isoDate(now),
+    dueDate: original.dueDate,
+    customerName: original.customerName,
+    customerDni: original.customerDni,
+    customerAddress: original.customerAddress,
+    customerEmail: original.customerEmail,
+    items,
+    ...totals,
+    paid: totals.total,
+    status: 'paid',
+    paymentMethod: 'other',
+    notes: `Rectificativa ${code} de ${original.number}`,
+    rectifies: original.id,
+    rectCode: code,
+    rectMethod: 'I',
+    createdAt: now.toISOString(),
+  };
+  inv.id = await db.invoices.add(inv);
+  await applyVerifactu(inv, s);
+  if (inv.verifHash) {
+    await db.invoices.update(inv.id, { verifHash: inv.verifHash, verifPrevHash: inv.verifPrevHash, verifTime: inv.verifTime, verifEnvio: inv.verifEnvio });
+  }
+  await logAction('create', 'billing', `${inv.number} ← ${original.number} (${code})`);
   return inv;
 }
