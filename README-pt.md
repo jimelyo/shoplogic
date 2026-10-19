@@ -22,7 +22,7 @@
 ### 🛒 Ponto de Venda (TPV)
 - Cobrança com **um toque** a partir de cartões de produto ou tabela, com catálogo filtrado por categorias.
 - **Pagamentos divididos**: cobre uma venda com vários meios ao mesmo tempo (ex.: 20 € em dinheiro + resto em cartão), repartição validada antes de cobrar e refletida no talão.
-- Descontos por % ou valor fixo, IVA incluído com desglose no ecrã.
+- Descontos por % ou valor fixo, IVA incluído com decomposição no ecrã.
 - **Leitor de códigos**: por leitor USB (escreve na pesquisa) ou com a **câmara** (códigos EAN/UPC/Code128/QR e IMEI) através da API nativa `BarcodeDetector`.
 - **Atalhos de teclado**: `F1` pesquisar · `F2` cobrar · `F3` digitalizar · `F4` esvaziar carrinho.
 - Pontos de fidelidade automáticos por valor de compra.
@@ -62,7 +62,7 @@
 
 ### 🛍️ Compras de segunda mão (trade-in)
 - Módulo dedicado para **avaliar, comprar e reabastecer** terminais e acessórios de segunda mão, direto no menu principal.
-- Avaliação com desglose (custo + margem alvo), registo da compra ao fornecedor/particular e **alta direta no inventário** com o respetivo IMEI.
+- Avaliação com decomposição (custo + margem alvo), registo da compra ao fornecedor/particular e **alta direta no inventário** com o respetivo IMEI.
 - Rastreabilidade total do stock: cada compra é registada como movimento `trade_in` no ledger do produto, com origem (particular) e preço pago.
 - Integrado com o TPV: o artigo comprado pode ser vendido como qualquer outro produto.
 
