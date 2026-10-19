@@ -1,16 +1,17 @@
-# 📱 ShopLogic Pro v1.3.2
+# 📱 ShopLogic Pro v1.3.4
 
 <p align="center">
   <img src="public/icon-512.png" width="128" alt="ShopLogic Pro">
 </p>
 
-**ERP + TPV completo para tiendas de telefonía y accesorios** — ventas, cajas, inventario con trazabilidad, taller de reparaciones, facturación, reportes y automatizaciones de mensajería. Funciona 100% local (tus datos nunca salen de tu equipo) y se actualiza sola desde GitHub Releases.
+**ERP + TPV completo para tiendas de telefonía y accesorios** — ventas, cajas, inventario con trazabilidad, taller de reparaciones, facturación con Veri*factu, informes fiscales 303/347, compras de segunda mano y automatizaciones de mensajería. Funciona 100% local (tus datos nunca salen de tu equipo) y se actualiza sola desde GitHub Releases.
 
 > 🌍 **Idiomas / Languages / Idiomas / 语言 / اللغات**: [English](README-en.md) · [Português](README-pt.md) · [中文](README-zh.md) · [العربية](README-ar.md)
 
 [![Release](https://img.shields.io/github/v/release/jimelyo/shoplogic)](https://github.com/jimelyo/shoplogic/releases/latest)
 [![Plataforma](https://img.shields.io/badge/Windows-x64%20%7C%20arm64-blue)](https://github.com/jimelyo/shoplogic/releases/latest)
-[![Android](https://img.shields.io/badge/Android-APK%20v1.2.0-green)](https://github.com/jimelyo/shoplogic/releases/tag/v1.2.0)
+[![macOS](https://img.shields.io/badge/macOS-DMG%20x64%20%7C%20arm64-lightgrey)](https://github.com/jimelyo/shoplogic/releases/latest)
+[![Android](https://img.shields.io/badge/Android-APK%20v1.3.4-green)](https://github.com/jimelyo/shoplogic/releases/latest)
 [![Idiomas](https://img.shields.io/badge/idiomas-5%20·%20RTL%20árabe-purple)](#-idiomas)
 [![Licencia](https://img.shields.io/badge/uso-privado-informational)]()
 
@@ -37,12 +38,13 @@
 ### 📦 Inventario y movimientos
 - Productos con código de barras, IMEI, coste, PVP (IVA incl.), stock mínimo y márgenes calculados.
 - Alertas de stock bajo/agotado con notificaciones automáticas.
-- **Historial de movimientos por producto** (ledger): ventas, compras, ajustes y devoluciones con saldo anterior/posterior.
+- **Historial de movimientos por producto** (ledger): ventas, compras, ajustes, devoluciones y compras de segunda mano con saldo anterior/posterior.
 - Categorías personalizables con icono y color.
 - Escáner de cámara para buscar productos.
 
 ### 🔧 Taller de reparaciones
 - Tickets `R-000001` con cliente, dispositivo, IMEI, problema, diagnóstico y evolución de estados (recibido → diagnóstico → en proceso → esperando piezas → completado → entregado).
+- **Impresión del ticket de entrada** al registrar la reparación (opcional en el momento de crearla, pensado para cuando el cliente sigue en el mostrador) con **vista previa** antes de imprimir.
 - Aviso al cliente por WhatsApp/email al completar (automatizable), con resguardo imprimible.
 - Ficha de **historial por IMEI** con garantía configurada.
 - Facturación automática al entregar (opcional).
@@ -51,31 +53,35 @@
 - Apertura/cierre de turnos con fondo inicial, depósitos y retiradas.
 - Arqueo esperado vs contado con diferencia calculada, corte por venta (efectivo), facturas y devoluciones.
 
-### 🧾 Facturación
+### 🧾 Facturación y rectificativas
 - Numeración configurable (secuencial, por fecha, por año o formato personalizado), serie y prefijos.
 - Estados (borrador, enviada, pagada, parcial, vencida, cancelada) con cobros parciales.
 - **PDF profesional** con marca de agua, copias normalizadas y ticket de ventas.
 - **QR reglamentario** en el PDF: URL oficial de cotejo de la AEAT (35 mm, nivel M) + leyenda oficial «Factura verificable en la sede electrónica de la AEAT».
+- **Rectificativas R1–R5 (por diferencias)**: emite facturas rectificativas desde Facturación y genera **de forma automática** la rectificativa de una devolución parcial o total, con encolado Veri*factu encadenado.
+
+### 🛍️ Compras de segunda mano (trade-in)
+- Módulo dedicado para **tasar, comprar y reabastecer** terminales y accesorios de segunda mano desde el menú principal.
+- Tasación con desglose (coste + margen objetivo), registro de la compra al proveedor/particular y **alta directa al inventario** con su IMEI.
+- Trazabilidad completa del stock: cada compra se registra como movimiento `trade_in` en el ledger del producto, con origen (particular) y precio pagado.
+- Integrado con el TPV: el artículo comprado puede venderse como cualquier otro producto.
+
+### 📈 Reports / Informes fiscales
+- Ventas, beneficio, margen, ventas por categoría, reparaciones por estado.
+- **Modelo 303 (IVA trimestral)**: liquidación por trimestres con IVA devengado y soportado deducible, exportación **PDF/CSV**.
+- **Modelo 347**: declaración anual de operaciones con terceros (operaciones > 3.005 € por cliente/proveedor), exportación **PDF/CSV**.
+- Resumen financiero (ingresos, gastos, balance) y exportación **PDF de cualquier informe**.
 
 ### 🇪🇸 Veri*factu — España (RD 1007/2023 · Orden HAC/1177/2024)
 Módulo fiscal completo conforme a los documentos técnicos oficiales de la AEAT:
 - **Huella SHA-256 oficial**: cadena `campo=valor&…` con el orden exacto del documento AEAT v0.1.2, UTF-8 y hex MAYÚSCULAS. Reproduce los **3 vectores de prueba oficiales** (alta inicial, alta encadenada y anulación encadenada).
 - **Encadenamiento registro a registro** (`chainAlta`/`chainAnulacion`) con sensibilidad integral a cualquier campo modificado.
-- **XML** de `RegistroAlta`/`RegistroAnulacion`/lote (≤ 1000 registros) según los esquemas `SuministroLR.xsd`/`SuministroInformacion.xsd`, validado contra el ejemplo oficial del doc. v1.0.3.
+- **XML** de `RegistroAlta`/`RegistroAnulacion`/lote (≤ 1000 registros) según los esquemas `SuministroLR.xsd`/`SuministroInformacion.xsd`, validado contra el ejemplo oficial del doc. v1.0.3. Las **rectificativas** (R1–R5) se encadenan con su referencia a la factura original.
 - **SOAP** hacia los endpoints WSDL oficiales (preproducción `prewww1.aeat.es` / producción `www1.agenciatributaria.gob.es`) con parser de `RespuestaSuministro` (`Correcto` / `AceptadoConErrores` / `Incorrecto`) y detalle de errores por registro.
 - **Cola persistente y recuperable** tras reinicio: estados `PERSISTED → QUEUED → SENDING → ACCEPTED / ACCEPTED_WITH_ERRORS / REJECTED / RETRY_PENDING` con backoff 15 s → 1 min → 10 min → 1 h. La factura se persiste **siempre** (patrón outbox): si falla la emisión fiscal no se pierde ni se duplica.
-- **Firma XAdES-Enveloped** (ETSI EN 319 132) con xml-crypto + node-forge en el proceso main de Electron, cargando un certificado `.p12/.pfx` local (ver [guía paso a paso](#-verifactu--guía-paso-a-paso-certificado-aeat--envío-firmado)). La clave privada nunca sale del proceso main.
-- **Pantalla de incidencias** en Ajustes → Facturación: registros rechazados por la AEAT con **código y descripción del error**, reintentos individual y masivo, reencolado, descarte trazado en auditoría y copia de la respuesta XML. Los registros ya remitidos nunca se editan desde la UI.
-- **Panel de estado**: estado de la cola, auto-auditoría visual de la cadena y selector de modalidad (VERI*FACTU / NO VERI*FACTU) y entorno (pruebas/producción).
-
-### 👥 Clientes, proveedores y compras
-- Ficha 360° del cliente: gasto total, visitas, puntos, historial de dispositivos por IMEI.
-- Proveedores con contactos y pedidos de compra con **recepción parcial**.
-- **Reposición asistida**: genera un borrador de pedido con todos los productos bajo stock mínimo en un clic.
-
-### 📈 Reportes
-- Ventas, beneficio, margen, ventas por categoría, reparaciones por estado.
-- Resumen financiero (ingresos, gastos, balance) y exportación **PDF de cualquier informe**.
+- **Firma XAdES-Enveloped** (ETSI EN 319 132) con xml-crypto + node-forge en el proceso main de Electron, cargando un certificado `.p12/.pfx` local (ver [guía paso a paso](#%EF%B8%8F-verifactu--gu%C3%ADa-paso-a-paso-certificado-aeat--env%C3%ADo-firmado)). La clave privada nunca sale del proceso main.
+- **Companion**, pantalla de incidencias, panel de estado y declaración responsable del productor del SIF (ver historial v1.3.2).
+- **QR del cotejo AEAT** en el PDF de cada factura.
 
 ### 🤖 Automatizaciones y mensajería
 - **Avisos por etapa del taller**: cada cambio de estado de una reparación puede notificar al cliente automáticamente:
@@ -85,13 +91,13 @@ Módulo fiscal completo conforme a los documentos técnicos oficiales de la AEAT
   - ✅ Lista / Completada → WhatsApp + Email (resumen con coste final)
 - Automatizaciones configurables adicionales: recibos de venta por WhatsApp, resumen diario, backup diario, alertas de stock y facturas vencidas…
 - **WhatsApp** en dos modos: enlace directo `wa.me` (sin servidor) o **Cloud API** oficial.
-- **Email** con presets de Gmail/Outlook/SMTP genérico.
+- **Email** con presets de Gmail/Outlook/SMTP genérico. El **relay SMTP local** escucha solo en `127.0.0.1` y valida la cabecera `Origin` de cada envío.
 - Cola de envío (outbox) con reintentos al reiniciar si el servidor relay no estaba disponible.
 - Todo el uso queda registrado en la auditoría (quién envió qué y cuándo).
 
 ### 🌍 Idiomas
 
-La app está **100% traducida a 5 idiomas** (≈ 921 claves sincronizadas por `npm run check:i18n`) y disponible desde la pantalla de login y desde el menú lateral:
+La app está **100% traducida a 5 idiomas** (≈ 1.016 claves sincronizadas por `npm run check:i18n`) y disponible desde la pantalla de login y desde el menú lateral:
 
 | Código | Idioma | Bandera | RTL |
 |---|---|---|---|
@@ -106,8 +112,8 @@ La app está **100% traducida a 5 idiomas** (≈ 921 claves sincronizadas por `n
 - Fallback automático a español si falta una clave.
 
 ### ⚙️ Configuración y datos
-- Multiples monedas (EUR, USD, GBP, MXN, ARS, COP, CLP, BRL, CNY, MAD), IVA configurable.- Marca propia: nombre de la app, logo, datos fiscales del comercio en tickets/PDF.
-- 5 idiomas: **Español, English, Português, 中文, العربية** (con RTL para árabe).
+- **Backup programado** + **backups cifrados opcionales AES-256-GCM** (clave derivada con PBKDF2-SHA256, 310.000 iteraciones) con UI de cifrado/descifrado en Ajustes.
+- Múltiples monedas (EUR, USD, GBP, MXN, ARS, COP, CLP, BRL, CNY, MAD), IVA configurable. Marca propia: nombre de la app, logo, datos fiscales del comercio en tickets/PDF.
 - Tema claro/oscuro + 6 colores de acento.
 - Bloqueo de pantalla por inactividad con contraseña.
 - RBAC por roles: **admin, manager, técnico, cajero**, con matriz de permisos editable módulo a módulo.
@@ -125,8 +131,12 @@ La app está **100% traducida a 5 idiomas** (≈ 921 claves sincronizadas por `n
 
 - **100% local**: la base de datos vive en IndexedDB de tu navegador/equipo. Nada se envía a ningún servidor (los envíos de WhatsApp/email salen directamente de tu máquina o de tu propio relay).
 - Contraseñas con **PBKDF2-SHA256 (210.000 iteraciones)** + salt aleatorio por usuario, comparación en tiempo constante y upgrade automático de hashes antiguos.
+- **Bloqueo temporal del login** ante fallos repetidos (retardo exponencial `30 s·2ⁿ`): frena ataques de fuerza bruta offline sin bloquear al legítimo.
 - Las **credenciales de mensajería quedan enmascaradas** en el snapshot diario on-disk; el backup manual completo las incluye solo si tú lo pides, avisado en la UI.
+- **La contraseña del certificado `.p12` se cifra con safeStorage** (DPAPI en Windows / Keychain en macOS) y nunca se guarda en claro: los registros de Veri*factu se firman con la clave descifrada solo en el proceso main.
+- **Backups cifrados AES-256-GCM** opcionales (PBKDF2 310k) — si eliges poner contraseña al backup, el fichero exportado queda ilegible sin ella.
 - **Veri*factu**: el `.p12` del certificado AEAT se lee solo en el proceso main de Electron; la clave privada nunca llega al renderer ni viaja por la red. Sin firmador configurado la cola queda en `RETRY_PENDING` (nunca simula una aceptación).
+- El **relay SMTP** local solo acepta conexiones de `127.0.0.1` y rechaza peticiones con `Origin` externo.
 - Los backups importados se **validan fila a fila** antes de restaurar.
 - Electron con `contextIsolation` + sandbox y sin integración de Node en el renderer.
 
@@ -135,16 +145,39 @@ La app está **100% traducida a 5 idiomas** (≈ 921 claves sincronizadas por `n
 ## 🚀 Instalación
 
 ### 📱 Android
-1. Descarga **`shoplogic-pro-v1.2.0-android.apk`** desde [Release v1.2.0](https://github.com/jimelyo/shoplogic/releases/tag/v1.2.0) (misma firma que v1.1.0: se instala directamente encima).
+1. Descarga **`shoplogic-pro-v1.3.4-android.apk`** desde [Release v1.3.4](https://github.com/jimelyo/shoplogic/releases/tag/v1.3.4). ⚠️ La v1.3.4 está firmada con un **keystore nuevo**: no se instala encima de la v1.2.0 oficial (firma distinta) — desinstala antes si venías de esa versión.
 2. Permite **instalar apps de origen desconocido** para tu navegador/gestor de archivos (Ajustes → Seguridad) la primera vez.
 3. Abre el APK e instálala. Requiere **Android 6.0+ (API 23+)**. Sin permisos más allá de internet: los datos viven en IndexedDB dentro de la app, 100% locales.
 
+<details>
+<summary><b>Versión anterior v1.2.0 (misma firma que v1.1.0)</b></summary>
+
+1. Descarga **`shoplogic-pro-v1.2.0-android.apk`** desde [Release v1.2.0](https://github.com/jimelyo/shoplogic/releases/tag/v1.2.0).
+2. Permite **instalar apps de origen desconocido** para tu navegador/gestor de archivos (Ajustes → Seguridad) la primera vez.
+3. Abre el APK e instálala. Requiere Android 6.0+ (API 23+).
+</details>
+
 ### Windows (recomendado — escritorio)
-1. Descarga el **instalador v1.3.2** para tu arquitectura (x64 y ARM64 empaquetados en la misma release) desde [Releases](https://github.com/jimelyo/shoplogic/releases/latest):
-   - `ShopLogic-Setup-1.3.2-x64.exe` (Windows 10/11 x64)
-   - `ShopLogic-Setup-1.3.2-arm64.exe` (Windows on ARM)
+1. Descarga el **instalador v1.3.4** para tu arquitectura (x64 y ARM64 empaquetados en la misma release) desde [Releases](https://github.com/jimelyo/shoplogic/releases/latest):
+   - `ShopLogic-Setup-1.3.4-x64.exe` (Windows 10/11 x64)
+   - `ShopLogic-Setup-1.3.4-arm64.exe` (Windows on ARM)
 2. Ejecuta el instalador (instalación silenciosa con un solo UAC). El acceso directo queda en el escritorio.
-3. Las actualizaciones se descargan y aplican **automáticamente** a partir de ahí.
+3. Las actualizaciones se descargan y aplican **automáticamente** a partir de ahí (v1.3.3 y anteriores se actualizan solas: mismo canal electron-updater).
+
+### macOS
+1. Descarga la **DMG v1.3.4** para tu arquitectura desde [Releases](https://github.com/jimelyo/shoplogic/releases/latest):
+   - `ShopLogic-1.3.4-x64.dmg` (Intel)
+   - `ShopLogic-1.3.4-arm64.dmg` (Apple Silicon)
+2. Abre la DMG y arrastra la app a Aplicaciones. Las actualizaciones posteriores también son automáticas (`latest-mac.yml`).
+3. ⚠️ El DMG aún **no está notarizado por Apple**: la primera vez macOS pedirá «≡ System Settings → Privacy & Security → Open Anyway».
+
+<details>
+<summary><b>Versión anterior v1.2.0 (instaladores Windows)</b></summary>
+
+1. Descarga los instaladores de [Release v1.2.0](https://github.com/jimelyo/shoplogic/releases/tag/v1.2.0).
+2. Ejecuta el instalador (instalación silenciosa con un solo UAC).
+3. Las actualizaciones se aplican **automáticamente** a partir de ahí.
+</details>
 
 ### Navegador (PWA)
 - Sirve la build estática (`dist/`) con cualquier servidor web; también funciona abriendo `index.html` local.
@@ -172,12 +205,14 @@ Paso a paso para instalar el certificado electrónico del obligado tributario y 
 
 ### Paso 1 · Activar Veri*factu y elegir el entorno
 
-1. Abre la app: **Ajustes → Facturación → Veri*factu**.
+1. Abre la app: **Ajustes → Facturación → Veri*factu** (o usa el asistente 🧙 **Companion**, que guía estos pasos).
 2. Modalidad: `VERI*FACTU`.
 3. Entorno: `Pruebas (preproducción)`. El SOAP se dirigirá a `prewww1.aeat.es` (producción es `www1.agenciatributaria.gob.es`).
 4. Guarda los cambios. Desde ahora, cada factura nueva (venta o reparación) se encola para emisión fiscal; las facturas históricas NO se re-registran.
 
 ### Paso 2 · Copiar el certificado e instalarlo en `signer.json`
+
+Puedes hacerlo **con el asistente 🧙 VERI*FACTU Companion** (Ajustes → 🧙: selección nativa del fichero, validación de contraseña, copia y escritura segura) o a mano:
 
 La app (escritorio) firma cada envío XAdES-Enveloped leyendo un `.p12` local cuyo certificado y contraseña se declaran en:
 
@@ -205,6 +240,7 @@ La app (escritorio) firma cada envío XAdES-Enveloped leyendo un `.p12` local cu
    Notas:
    - `p12Path` también admite una ruta absoluta, p. ej. `"C:\\MiCarpeta\\certificado-aeat.p12"` (doble barra invertida en JSON).
    - Si `signer.json` falta o el `.p12` no existe, los registros quedan en `RETRY_PENDING` y el panel de estado informa del motivo — nunca se finge aceptación.
+   - Desde v1.3.4 la contraseña de `signer.json` se **guarda cifrada con safeStorage** (DPAPI/Keychain) la primera vez que la introduce el asistente; un fichero escrito a mano con texto plano también funciona, pero se cifra tras el primer uso.
 
 4. Reinicia la app (o vuelve a abrirla) y ve a **Ajustes → Facturación**: el panel de estado y la lista de incidencias muestran los registros encolados pasando de `QUEUED` → `SENDING` → `ACCEPTED` (o `REJECTED` con el detalle del error de la AEAT).
 
@@ -222,7 +258,7 @@ La app (escritorio) firma cada envío XAdES-Enveloped leyendo un `.p12` local cu
 2. Verifica la **primera factura en producción** revisando el panel / incidencias.
 3. La declaración responsable del productor del SIF (NIF, nombre del sistema, versión, número de instalación) se completa en `settings.verifactuConfig.system` — la AEAT no homologa software; es un documento del productor que avala el cumplimiento del RD 1007/2023.
 
-> 🧪 La prueba real contra preproducción exige el certificado del operador — el módulo está probado con los vectores oficiales de la AEAT (huella, XML, QR) y con un `.p12` autofirmado en los 108 tests unitarios; solo el tráfico real con `prewww1.aeat.es` queda pendiente de verificar por el operador.
+> 🧪 La prueba real contra preproducción exige el certificado del operador — el módulo está probado con los vectores oficiales de la AEAT (huella, XML, QR) y con un `.p12` autofirmado en los tests unitarios; solo el tráfico real con `prewww1.aeat.es` queda pendiente de verificar por el operador.
 
 ---
 
@@ -239,9 +275,16 @@ npm run lint         # oxlint
 npm run check:i18n   # comprueba 5 locales con llaves idénticas
 ```
 
+### Build de macOS (DMG)
+
+```bash
+npm run build                   # build web a dist/
+npx electron-builder --mac --x64 --arm64   # DMG x64 + arm64 en release/
+```
+
 ### Build Android (Capacitor)
 
-Lleva un JDK 21 (el sistema Java 25 es aún incompatibles con AGP) y envuelve el build web en una shell nativa:
+Lleva un JDK 21 (el sistema Java 25 es aún incompatible con AGP) y envuelve el build web en una shell nativa:
 
 ```bash
 npm run build                    # build web a dist/
@@ -260,49 +303,50 @@ cd android && ./gradlew assembleRelease      # APK firmada en app/build/outputs/
 - **Fiscalidad**: módulo `src/verifactu/` (huella AEAT, encadenamiento, XML, SOAP, cola, QR) + firma XAdES en el proceso main (`xml-crypto` + `node-forge`).
 - **Móvil**: Capacitor 8 (`capacitor.config.ts` + proyecto `android/`), APK firmada con keystore vía variables de entorno.
 - **i18n**: i18next + react-i18next, 5 recursos tipados en `src/i18n` (es · en · pt · zh · ar con RTL).
-- **Testing**: Vitest + fake-indexeddb (108 tests), incluidos tests de backups, credenciales, huella AEAT y firma XAdES.
+- **Testing**: Vitest + fake-indexeddb (155 tests), incluidos tests de backups, credenciales, huella AEAT, firma XAdES, rectificativas y trade-in.
 
 ### Estructura
 ```
 src/
-├── components/    # 25+ módulos UI (POS, Cash, Inventory, Repairs, Quotes, Billing, Reports…)
+├── components/    # 25+ módulos UI (POS, Cash, Inventory, Repairs, Quotes, Billing, Reports, TradeIns…)
 ├── verifactu/     # Módulo fiscal Veri*factu: huella, cadena, XML, SOAP, cola, QR (+ tests)
-├── lib/           # lógica core: calc, stock, invoices, cash, messaging, backup, csv, update…
+├── lib/           # lógica core: calc, stock, invoices, cash, messaging, backup, csv, update, tradein…
 ├── db/            # esquema Dexie + datos demo
-├── i18n/          # es, en, pt, zh, ar (921 claves sincronizadas)
+├── i18n/          # es, en, pt, zh, ar (1.016 claves sincronizadas)
 ├── schemas/       # validación Zod de todos los formularios
 └── types/         # modelos tipados del dominio
 electron/          # proceso principal, preload, updater y firmador XAdES
 android/           # proyecto Android nativo (Capacitor, build Gradle firmada)
+server/            # relay SMTP local (127.0.0.1) para envíos de email
 public/            # service worker + manifest
 ```
 
 ---
 
-## 📋 Novedades / Changelog (v1.3.2)
+## 📋 Novedades / Changelog (v1.3.4)
 
-### 🧙 VERI*FACTU Companion — nuevo módulo en Ajustes
+### 🛍️ Compras de segunda mano (trade-in)
+- Módulo renombrado a **"Compras 2ª mano"** (navegación en los 5 idiomas) para tasar, comprar y reabastecer terminales de segunda mano.
+- Tasación con coste + margen, registro de la compra y **alta directa al inventario** con IMEI.
+- **Trazabilidad total**: cada compra se registra como movimiento `trade_in` en el ledger del producto, con origen y precio pagado.
 
-Asistente de instalación y gestión fiscal (complemento del módulo VERI*FACTU, sin duplicar lógica):
+### 🧾 Rectificativas R1–R5
+- Emisión de **facturas rectificativas (por diferencias)** desde Facturación, y **detección automática** en devoluciones parciales/totales: la rectificativa se genera sola y se encola en Veri*factu con su referencia a la factura original.
 
-- **🪪 Certificado (.p12) guiado**: selección del fichero, validación de la contraseña y
-  escritura segura de `%APPDATA%\ShopLogic Pro\verifactu\signer.json` (modo 0600). La contraseña
-  viaja solo por IPC al **proceso main** de Electron y nunca llega al renderer, al IndexedDB ni al
-  almacenamiento del navegador. Estados de caducidad con aviso preventivo (≤ 45 días).
-- **🩺 Diagnóstico fiscal**: monitor de la cola de remisión por estado (`PERSISTED` → `QUEUED` →
-  `SENDING` → `ACCEPTED` / `ACCEPTED_WITH_ERRORS` / `REJECTED` / `RETRY_PENDING`), auditoría del
-  encadenamiento de huellas y **prueba de conexión en tiempo real** a los endpoints WSDL de
-  preproducción (`prewww1.aeat.es`) o producción (`www1.agenciatributaria.gob.es`) con latencia.
-- **⚠️ Centro de incidencias**: visor de la respuesta XML SOAP de la AEAT (solo lectura) para
-  registros rechazados o aceptados con errores, con reintentos individual y masivo. Los registros
-  remitidos NUNCA se editan: la cadena local es inmutable.
-- **📜 Declaración responsable**: formulario del productor del SIF (art. 10.d de la Orden
-  HAC/1177/2024) con validaciones y exportación del documento imprimible HTML para firmar.
-- Pruebas unitarias nuevas (`companion.test.ts`, 17 tests) y 921 claves i18n sincronizadas en los
-  5 idiomas.
+### 📈 Informes fiscales
+- **Modelo 303 (IVA trimestral)** y **Modelo 347 (operaciones con terceros)** en Reportes, con exportación **PDF y CSV** lista para la declaración.
 
-### Empaquetado multi-arquitectura
-- Instaladores NSIS Windows **x64 y ARM64** (`ShopLogic-Setup-1.3.2-x64.exe` / `ShopLogic-Setup-1.3.2-arm64.exe`).
+### 🔐 Hardening de seguridad
+- La contraseña del certificado `.p12` de Veri*factu se **cifra con safeStorage** (DPAPI/Keychain) en vez de guardarse en texto plano.
+- El **relay SMTP local** escucha solo en `127.0.0.1` y valida la cabecera `Origin`.
+- **Bloqueo temporal del login** ante fallos repetidos (backoff `30 s·2ⁿ`).
+- **Backups cifrados opcionales AES-256-GCM** (PBKDF2 310k) con UI de cifrado/descifrado en Ajustes.
+
+### 🎨 Nueva identidad visual
+- Logo corporativo nuevo en Electron (ico/icns), PWA, Android (mipmaps + splash) y social-preview de GitHub.
+
+### Empaquetado multi-plataforma
+- Instaladores NSIS Windows **x64 y ARM64** + **DMG macOS x64/arm64** + **APK Android** (versionCode 134) y auto-update para escritorio vía `latest.yml` / `latest-mac.yml`.
 
 ---
 
@@ -310,8 +354,10 @@ Asistente de instalación y gestión fiscal (complemento del módulo VERI*FACTU,
 
 | Version | Novedades principales |
 |---|---|
+| **v1.3.4** (Windows x64/ARM64 + macOS x64/ARM64 + Android) | **Compras 2ª mano** (trade-in con alta a inventario y trazabilidad) · **rectificativas R1–R5** con detección automática en devoluciones · **informes fiscales Modelo 303 y 347** · hardening de seguridad (safeStorage, SMTP localhost, bloqueo de login, backups AES-256-GCM) · nuevo logo en todas las plataformas |
+| **v1.3.3** (Windows) | **Impresión del ticket de reparación**: opción al crear + vista previa modal · cabecera del ticket sincronizada con el nombre real de la tienda |
 | **v1.3.2** (Windows x64 + ARM64) | **VERI*FACTU Companion**: asistente de certificado `.p12` con seguridad en el proceso main · diagnóstico de la cola AEAT + prueba de conexión · centro de incidencias con visor XML · declaración responsable exportable · empaquetado multi-arquitectura x64/ARM64 |
-| **v1.3.0** (Windows) | **Veri\*factu completo (RD 1007/2023)**: huella SHA-256 oficial con vectores AEAT · encadenamiento · XML/SOAP SuministroLR · colo persistente con reintentos · QR reglamentario en PDF · pantalla de incidencias con errores AEAT · **firmador XAdES-Enveloped** con `.p12` local · [guía paso a paso](#-verifactu--guía-paso-a-paso-certificado-aeat--envío-firmado) |
+| **v1.3.0** (Windows) | **Veri\*factu completo (RD 1007/2023)**: huella SHA-256 oficial con vectores AEAT · encadenamiento · XML/SOAP SuministroLR · cola persistente con reintentos · QR reglamentario en PDF · pantalla de incidencias con errores AEAT · **firmador XAdES-Enveloped** con `.p12` local · [guía paso a paso](#%EF%B8%8F-verifactu--gu%C3%ADa-paso-a-paso-certificado-aeat--env%C3%ADo-firmado) |
 | **v1.2.0** (Windows + Android) | **Búsqueda global Ctrl+K** · **copia de seguridad externa programada** · **Veri\*factu (España)** con huellas SHA-256 encadenadas · índices Dexie para catálogos grandes · workflow de CI de releases |
 | **v1.1.0** (Windows) | Login por selección de usuario + contraseña · aviso demo eliminado |
 | **v1.0.6** | Avisos por etapa del taller (recibido/en proceso/esperando piezas) en WhatsApp + email · icono regenerado |
