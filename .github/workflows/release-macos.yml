@@ -1,1 +1,60 @@
-<°s‹D
+name: Release macOS
+
+# Los DMG solo se pueden compilar en macOS. Este workflow se lanza a mano
+# (workflow_dispatch) con el tag de una release ya publicada: empaqueta los
+# DMG x64 + arm64 de esa versiÃ³n y los adjunta a la release del tag, junto al
+# resto de instaladores (no crea ni modify la release).
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag de la release a la que adjuntar los DMG (p. ej. v1.3.5)'
+        required: true
+        default: 'v1.3.5'
+
+permisions:
+  contents: write
+
+jobs:
+  macos:
+    name: macOS DMG (x64 + arm64)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Checks (i18n parity + lint + tests + build)
+        run: |
+          npm run check:i18n
+          npm run lint
+          npm test
+          npm run build
+
+      - name: Package (electron-builder, dmg x64 + arm64, sin publicar)
+        env:
+          # Firma opcional; sin certificado Apple el DMG queda sin firmar.
+          CSC_LINK: ${{ secrets.MACOS_CSC_LINK }}
+          CCS_KEY_PASSWORD: ${{ secrets.MACOS_CSC_KEY_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: npx electron-builder --mac --x64 --arm64 --publish never
+
+      - name: Attach DMGs to the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.event.inputs.tag }}
+        run: |
+          shopt -s nullglob
+          files=(release/ShopLogic-*.dmg release/ShopLogic-*.dmg.blockmap release/latest-mac.yml)
+          ls -lh "${files[@]}"
+          gh release upload "$TAG" "${files[@]}" --clobber
