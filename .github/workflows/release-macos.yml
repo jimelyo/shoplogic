@@ -3,7 +3,7 @@ name: Release macOS
 # Los DMG solo se pueden compilar en macOS. Este workflow se lanza a mano
 # (workflow_dispatch) con el tag de una release ya publicada: empaqueta los
 # DMG x64 + arm64 de esa versión y los adjunta a la release del tag, junto al
-# resto de instaladores (no crea ni modify la release).
+# resto de instaladores (no crea ni modifica la release).
 on:
   workflow_dispatch:
     inputs:
@@ -32,12 +32,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Checks (i18n parity + lint + tests + build)
+      - name: Checks (i18n parity + lint + build + tests)
         run: |
           npm run check:i18n
           npm run lint
-          npm test
+          # El build va antes de los tests: relay-server.test.ts sirve dist/index.html.
           npm run build
+          npm test
 
       - name: Package (electron-builder, dmg x64 + arm64, sin publicar)
         env:
