@@ -394,6 +394,12 @@ const zh = {
   "diagnosis": "诊断",
   "estimate": "报价",
   "finalCost": "最终费用",
+  "labor": "人工费",
+  "billingMode": "计费方式",
+  "laborIncluded": "已包含在价格中",
+  "laborSeparate": "单独计费（加到价格上）",
+  "laborCost": "人工费金额",
+  "laborIncludedHint": "价格已包含人工费：此金额仅供参考。",
   "dateIn": "送修",
   "dateOut": "取机",
   "existingCustomer": "现有客户",
@@ -560,6 +566,7 @@ const zh = {
   "taxThreshold": "347 门槛"
  },
  "users": {
+  "actionDenied": "您没有执行此操作的权限。",
   "subtitle": "用户、模块权限与审计",
   "new": "新建用户",
   "audit": "审计",
@@ -768,7 +775,11 @@ const zh = {
  "settings": {
   "subtitle": "店铺、本地化、开票、渠道、打印机、外观和数据",
   "unsaved": "有未保存的更改",
-  "channelsWarn": "凭据保存在此浏览器中，并会包含在“数据”的 JSON 导出中。",
+  "channelsWarn": "凭据保存在此浏览器中，并在“数据”的 JSON 导出中脱敏。",
+  "backupDigestOk": "完整性已验证（SHA-256）。",
+  "backupDigestBad": "文件与其 SHA-256 摘要不匹配，无法导入。",
+  "backupDigestNone": "此备份早于完整性校验；将逐行验证。",
+  "backupTables": "个表",
   "s_security": "安全",
   "updTitle": "应用更新",
   "updCheck": "立即检查",

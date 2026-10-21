@@ -53,7 +53,9 @@ describe('importBackup', () => {
     await db.products.clear();
     expect(await db.products.count()).toBe(0);
 
-    await importBackup({ ...backup, products: [] });
+    const empty = { ...backup, products: [] } as typeof backup;
+    if (empty._meta) delete empty._meta.digest;
+    await importBackup(empty);
     expect(await db.products.count()).toBe(0);
     expect(await db.users.count()).toBe(1);
 
@@ -66,6 +68,22 @@ describe('importBackup', () => {
   it('guarantees a settings row even when the backup has none', async () => {
     await importBackup({ products: [] });
     expect(await db.settings.count()).toBe(1);
+  });
+});
+
+describe('integrity digest', () => {
+  it('exports a SHA-256 digest and accepts the untouched payload', async () => {
+    await db.products.add({ name: 'Funda', category: 'accessories', barcode: '1', cost: 1, price: 2, stock: 3, minStock: 1, createdAt: '' });
+    const backup = parseBackup((await exportAll()).json);
+    expect(backup._meta?.digest).toMatch(/^[a-f0-9]{64}$/);
+    await expect(importBackup(backup)).resolves.toBeUndefined();
+  });
+
+  it('refuses a payload changed after export', async () => {
+    await db.products.add({ name: 'Funda', category: 'accessories', barcode: '1', cost: 1, price: 2, stock: 3, minStock: 1, createdAt: '' });
+    const backup = parseBackup((await exportAll()).json);
+    (backup.products![0] as { name: string }).name = 'Tampered';
+    await expect(importBackup(backup)).rejects.toThrow('backup.tampered');
   });
 });
 

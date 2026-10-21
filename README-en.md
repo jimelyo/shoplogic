@@ -1,4 +1,4 @@
-# 📱 ShopLogic Pro v1.3.4
+# 📱 ShopLogic Pro v1.3.5
 
 <p align="center">
   <img src="public/icon-512.png" width="128" alt="ShopLogic Pro">
@@ -11,7 +11,7 @@
 [![Release](https://img.shields.io/github/v/release/jimelyo/shoplogic)](https://github.com/jimelyo/shoplogic/releases/latest)
 [![Platform](https://img.shields.io/badge/Windows-x64%20%7C%20arm64-blue)](https://github.com/jimelyo/shoplogic/releases/latest)
 [![macOS](https://img.shields.io/badge/macOS-DMG%20x64%20%7C%20arm64-lightgrey)](https://github.com/jimelyo/shoplogic/releases/latest)
-[![Android](https://img.shields.io/badge/Android-APK%20v1.3.4-green)](https://github.com/jimelyo/shoplogic/releases/latest)
+[![Android](https://img.shields.io/badge/Android-APK%20v1.3.5-green)](https://github.com/jimelyo/shoplogic/releases/latest)
 [![Languages](https://img.shields.io/badge/languages-5%20·%20Arabic%20RTL-purple)](#-languages)
 [![License](https://img.shields.io/badge/use-private-informational)]()
 
@@ -145,21 +145,21 @@ The app is **fully translated into 5 languages** (≈ 1,016 keys synchronized by
 ## 🚀 Installation
 
 ### 📱 Android
-1. Download **`shoplogic-pro-v1.3.4-android.apk`** from [Release v1.3.4](https://github.com/jimelyo/shoplogic/releases/tag/v1.3.4). ⚠️ v1.3.4 is signed with a **new keystore**: it does not install over the official v1.2.0 (different signature) — uninstall first if you came from that version.
+1. Download **`shoplogic-pro-v1.3.5-android.apk`** from [Release v1.3.5](https://github.com/jimelyo/shoplogic/releases/tag/v1.3.5). ⚠️ v1.3.5 is signed with a **new keystore**: it does not install over the official v1.2.0 (different signature) — uninstall first if you came from that version.
 2. Allow **installing apps from unknown sources** for your browser/file manager (Settings → Security) the first time.
 3. Open the APK and install it. Requires **Android 6.0+ (API 23+)**. No permissions beyond internet: data lives in IndexedDB inside the app, 100% local.
 
 ### Windows (recommended — desktop)
 1. Download the **v1.3.4 installer** for your architecture (x64 and ARM64 packaged in the same release) from [Releases](https://github.com/jimelyo/shoplogic/releases/latest):
-   - `ShopLogic-Setup-1.3.4-x64.exe` (Windows 10/11 x64)
-   - `ShopLogic-Setup-1.3.4-arm64.exe` (Windows on ARM)
+   - `ShopLogic-Setup-1.3.5-x64.exe` (Windows 10/11 x64)
+   - `ShopLogic-Setup-1.3.5-arm64.exe` (Windows on ARM)
 2. Run the installer (silent install with a single UAC). The shortcut lands on the desktop.
 3. Updates are downloaded and applied **automatically** from then on (v1.3.3 and earlier auto-update through the same electron-updater channel).
 
 ### macOS
 1. Download the **v1.3.4 DMG** for your architecture from [Releases](https://github.com/jimelyo/shoplogic/releases/latest):
-   - `ShopLogic-1.3.4-x64.dmg` (Intel)
-   - `ShopLogic-1.3.4-arm64.dmg` (Apple Silicon)
+   - `ShopLogic-1.3.5-x64.dmg` (Intel)
+   - `ShopLogic-1.3.5-arm64.dmg` (Apple Silicon)
 2. Open the DMG and drag the app to Applications. Subsequent updates are also automatic (`latest-mac.yml`).
 3. ⚠️ The DMG is **not yet notarized by Apple**: the first time macOS will ask "System Settings → Privacy & Security → Open Anyway".
 
@@ -183,7 +183,7 @@ The app loads demo data (phones, customers, repairs, invoices…) and these user
 
 ## 🇪🇸 Veri*factu — Step-by-step guide (AEAT certificate + signed submission)
 
-The full guide lives in the [Spanish README](README.md): enable Veri*factu in Settings → Billing, install your `.p12` certificate (either through the 🧙 VERI*FACTU Companion wizard, which validates the password and writes `verifactu/signer.json` securely, or by hand at `%APPDATA%\shoplogic\verifactu\signer.json`), then submit a test invoice against the AEAT pre-production endpoint (`prewww1.aeat.es`). Since v1.3.4 the certificate password is stored **encrypted with safeStorage** (DPAPI/Keychain) instead of plain text.
+The full guide lives in the [Spanish README](README.md): enable Veri*factu in Settings → Billing, install your `.p12` certificate (either through the 🧙 VERI*FACTU Companion wizard, which validates the password and writes `verifactu/signer.json` securely, or by hand at `%APPDATA%\shoplogic\verifactu\signer.json`), then submit a test invoice against the AEAT pre-production endpoint (`prewww1.aeat.es`). Since v1.3.5 the certificate password is stored **encrypted with safeStorage** (DPAPI/Keychain) instead of plain text.
 
 ---
 
@@ -248,7 +248,12 @@ public/            # service worker + manifest
 
 ---
 
-## 📋 What's new / Changelog (v1.3.4)
+## 📋 What's new / Changelog (v1.3.5)
+
+### 🔧 Labor costs in repairs
+- Each repair can mark labor as **included in the price** (informational) or **separate** (added on top): amount, live VAT breakdown, its own line on the automatic invoice and on the printed receipt.
+- Hardening: production CSP, SHA-256 digest backups with masked credentials, per-action permissions and lazy i18n.
+
 
 ### 🛍️ Second-hand purchases (trade-in)
 - Module renamed to **"2nd-hand purchases"** (navigation in all 5 languages) to appraise, buy and restock second-hand devices.
@@ -279,6 +284,7 @@ public/            # service worker + manifest
 
 | Version | Main changes |
 |---|---|
+| **v1.3.5** (Windows x64/ARM64 + macOS x64/ARM64 + Android) | **Labor costs in repairs** (included or separate, on invoices and receipts) · hardening: production CSP, SHA-256 digest backups + masked credentials, per-action permissions, atomic invoice numbering · lazy i18n |
 | **v1.3.4** (Windows x64/ARM64 + macOS x64/ARM64 + Android) | **Second-hand purchases** (trade-in with inventory intake and traceability) · **rectifications R1–R5** with automatic detection on returns · **fiscal reports Models 303 and 347** · security hardening (safeStorage, localhost SMTP, login lockout, AES-256-GCM backups) · new logo on all platforms |
 | **v1.3.3** (Windows) | **Repair ticket printing**: option when creating + modal preview · ticket header synced with the real store name |
 | **v1.3.2** (Windows x64 + ARM64) | **VERI*FACTU Companion**: `.p12` certificate wizard secured in the main process · AEAT queue diagnostics + connection test · incidents center with XML viewer · exportable responsible declaration · multi-architecture x64/ARM64 packaging |

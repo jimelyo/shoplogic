@@ -9,6 +9,7 @@ import { matches } from '../lib/hooks';
 import { discountAmount, pad, round2, splitVat } from '../lib/calc';
 import { makeMove } from '../lib/stock';
 import { logAction } from '../lib/audit';
+import { canDo } from '../lib/permissions';
 import { channelReady, type SendTarget } from '../lib/channels';
 import { dispatchMessage, fallbackLink } from '../lib/messaging';
 import { generateNotifications } from '../lib/notifications';
@@ -55,8 +56,9 @@ export function POS() {
 
   const list = useMemo(() => (products ?? []).filter((p) => (cat === 'all' || p.category === cat) && matches(q, p.name, p.barcode, p.imei)), [products, q, cat]);
   const total = round2(cartItems.reduce((a, i) => a + i.product.price * i.quantity, 0));
-  const discPct = discMode === 'percent' ? Math.min(Math.max(parseFloat(discValue.replace(',', '.')) || 0, 0), 100) : undefined;
-  const disc = discountAmount(total, parseFloat(discValue.replace(',', '.')) || 0, discMode);
+  const canDiscount = canDo(user, 'pos.discount');
+  const discPct = canDiscount && discMode === 'percent' ? Math.min(Math.max(parseFloat(discValue.replace(',', '.')) || 0, 0), 100) : undefined;
+  const disc = canDiscount ? discountAmount(total, parseFloat(discValue.replace(',', '.')) || 0, discMode) : 0;
   const finalTotal = round2(total - disc);
   // Sending the receipt needs a customer on file: a walk-in sale has no contact.
   const ticketCustomer = ticket?.customerId ? customers?.find((c) => c.id === ticket.customerId) : undefined;
@@ -227,7 +229,7 @@ export function POS() {
                 const out = p.stock <= 0;
                 const inCart = cartItems.find((i) => i.product.id === p.id)?.quantity;
                 return (
-                  <button key={p.id} type="button" disabled={out} onClick={() => add(p)}
+                  <button key={p.id} type="button" data-testid="pos-product" disabled={out} onClick={() => add(p)}
                     className={`group relative flex flex-col rounded-xl border bg-sl-card p-3 text-start shadow-sm animate-slide-up ${out ? 'cursor-not-allowed border-sl-border opacity-40 grayscale' : 'border-sl-border hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-md active:scale-[.98]'}`}
                     style={{ transitionProperty: 'transform, box-shadow, border-color, background-color', transitionDuration: '150ms' }}>
                     {inCart ? <span className="absolute end-2 top-2 flex size-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-white shadow">{inCart}</span> : null}
@@ -300,22 +302,26 @@ export function POS() {
             </div>
             <div>
               <span className="mb-1 block text-xs font-semibold text-sl-muted">{t('pos.discount')}</span>
-              <div className="flex gap-1.5">
-                <div className="flex overflow-hidden rounded-lg border border-sl-border">
-                  {(['percent', 'amount'] as const).map((m) => (
-                    <button key={m} type="button" onClick={() => setDiscMode(m)}
-                      className={`w-10 text-sm font-bold ${discMode === m ? 'bg-primary text-white' : 'bg-sl-card text-sl-muted hover:bg-sl-hover'}`}>
-                      {m === 'percent' ? '%' : s.currencySymbol}
-                    </button>
-                  ))}
+              {canDiscount ? (
+                <div className="flex gap-1.5">
+                  <div className="flex overflow-hidden rounded-lg border border-sl-border">
+                    {(['percent', 'amount'] as const).map((m) => (
+                      <button key={m} type="button" onClick={() => setDiscMode(m)}
+                        className={`w-10 text-sm font-bold ${discMode === m ? 'bg-primary text-white' : 'bg-sl-card text-sl-muted hover:bg-sl-hover'}`}>
+                        {m === 'percent' ? '%' : s.currencySymbol}
+                      </button>
+                    ))}
+                  </div>
+                  <input
+                    type="number" inputMode="decimal" min={0} max={discMode === 'percent' ? 100 : undefined} step="0.01"
+                    value={discValue} onChange={(e) => setDiscValue(e.target.value)}
+                    placeholder={discMode === 'percent' ? '0 – 100' : `0 – ${Math.round(total * 100) / 100}`}
+                    className="h-9 min-w-0 flex-1 rounded-lg border border-sl-border bg-sl-input px-3 text-sm text-sl-text outline-none focus:border-primary"
+                  />
                 </div>
-                <input
-                  type="number" inputMode="decimal" min={0} max={discMode === 'percent' ? 100 : undefined} step="0.01"
-                  value={discValue} onChange={(e) => setDiscValue(e.target.value)}
-                  placeholder={discMode === 'percent' ? '0 – 100' : `0 – ${Math.round(total * 100) / 100}`}
-                  className="h-9 min-w-0 flex-1 rounded-lg border border-sl-border bg-sl-input px-3 text-sm text-sl-text outline-none focus:border-primary"
-                />
-              </div>
+              ) : (
+                <p className="rounded-lg border border-sl-border bg-sl-card2 px-3 py-2 text-xs text-sl-muted">🔒 {t('users.actionDenied')}</p>
+              )}
             </div>
             <div className="space-y-1 rounded-xl bg-sl-hover p-3 text-sm">
               {disc > 0 && (
@@ -358,7 +364,7 @@ export function POS() {
               </div>
             )}
             {!splitOk && <p className="mb-1 text-[11px] font-semibold text-amber-600 dark:text-amber-400">⚠️ {t('pos.splitSumWarn')}</p>}
-            <Button size="lg" variant="success" className="w-full" disabled={!cartItems.length || !splitOk} loading={busy} onClick={checkout}>💳 {t('pos.checkout')} · {f.money(finalTotal)}</Button>
+            <Button size="lg" variant="success" data-testid="pos-checkout" className="w-full" disabled={!cartItems.length || !splitOk} loading={busy} onClick={checkout}>💳 {t('pos.checkout')} · {f.money(finalTotal)}</Button>
           </div>
         </Card>
       </div>

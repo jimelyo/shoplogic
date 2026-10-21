@@ -394,6 +394,12 @@ const en = {
   "diagnosis": "Diagnosis",
   "estimate": "Estimate",
   "finalCost": "Final cost",
+  "labor": "Labor",
+  "billingMode": "Charge mode",
+  "laborIncluded": "Included in the price",
+  "laborSeparate": "Separate (added to the price)",
+  "laborCost": "Labor amount",
+  "laborIncludedHint": "The price already includes labor: the amount is informational only.",
   "dateIn": "Check-in",
   "dateOut": "Check-out",
   "existingCustomer": "Existing customer",
@@ -560,6 +566,7 @@ const en = {
   "taxThreshold": "347 threshold"
  },
  "users": {
+  "actionDenied": "You do not have permission for this action.",
   "subtitle": "Users, module permissions and audit log",
   "new": "New user",
   "audit": "Audit log",
@@ -768,7 +775,11 @@ const en = {
  "settings": {
   "subtitle": "Store, localization, billing, channels, printers, appearance and data",
   "unsaved": "You have unsaved changes",
-  "channelsWarn": "Credentials are stored in this browser and are included in the Data JSON export.",
+  "channelsWarn": "Credentials are stored in this browser and masked in the Data JSON export.",
+  "backupDigestOk": "Integrity verified (SHA-256).",
+  "backupDigestBad": "The file does not match its SHA-256 digest. It will not be imported.",
+  "backupDigestNone": "This backup predates integrity checks; rows will be validated individually.",
+  "backupTables": "tables",
   "s_security": "Security",
   "updTitle": "App updates",
   "updCheck": "Check now",

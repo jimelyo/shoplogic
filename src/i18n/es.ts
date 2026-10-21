@@ -394,6 +394,12 @@ const es = {
   "diagnosis": "Diagnóstico",
   "estimate": "Presupuesto",
   "finalCost": "Coste final",
+  "labor": "Mano de obra",
+  "billingMode": "Forma de cobro",
+  "laborIncluded": "Incluida en el precio",
+  "laborSeparate": "Aparte (se suma al precio)",
+  "laborCost": "Importe mano de obra",
+  "laborIncludedHint": "El precio ya incluye la mano de obra: el importe es solo informativo.",
   "dateIn": "Entrada",
   "dateOut": "Salida",
   "existingCustomer": "Cliente existente",
@@ -560,6 +566,7 @@ const es = {
   "taxThreshold": "Umbral 347"
  },
  "users": {
+  "actionDenied": "No tienes permiso para esta acción.",
   "subtitle": "Usuarios, permisos por módulo y auditoría",
   "new": "Nuevo usuario",
   "audit": "Auditoría",
@@ -768,7 +775,11 @@ const es = {
  "settings": {
   "subtitle": "Tienda, localización, facturación, canales, impresoras, apariencia y datos",
   "unsaved": "Tienes cambios sin guardar",
-  "channelsWarn": "Las credenciales se guardan en este navegador y se incluyen en la exportación JSON de Datos.",
+  "channelsWarn": "Las credenciales se guardan en este navegador y se enmascaran en la exportación JSON de Datos.",
+  "backupDigestOk": "Integridad verificada (SHA-256).",
+  "backupDigestBad": "El archivo no coincide con su huella SHA-256. No se importará.",
+  "backupDigestNone": "Este backup es anterior al control de integridad; se validará fila a fila.",
+  "backupTables": "tablas",
   "s_security": "Seguridad",
   "updTitle": "Actualización de la aplicación",
   "updCheck": "Buscar ahora",

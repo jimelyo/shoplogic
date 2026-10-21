@@ -28,8 +28,8 @@ const nowIso = () => new Date().toISOString();
 import { DataTable } from './shared/SortableTable';
 import { LoadingPage } from './shared/Skeleton';
 
-type RForm = { customerName: string; customerPhone: string; customerEmail: string; device: string; imei: string; problem: string; diagnosis: string; notes: string; status: RepairStatus; estimatedCost: string; finalCost: string };
-const emptyForm = (): RForm => ({ customerName: '', customerPhone: '', customerEmail: '', device: '', imei: '', problem: '', diagnosis: '', notes: '', status: 'received', estimatedCost: '', finalCost: '' });
+type RForm = { customerName: string; customerPhone: string; customerEmail: string; device: string; imei: string; problem: string; diagnosis: string; notes: string; status: RepairStatus; estimatedCost: string; finalCost: string; laborMode: 'included' | 'separate'; laborCost: string };
+const emptyForm = (): RForm => ({ customerName: '', customerPhone: '', customerEmail: '', device: '', imei: '', problem: '', diagnosis: '', notes: '', status: 'received', estimatedCost: '', finalCost: '', laborMode: 'included', laborCost: '' });
 
 const NEXT: Partial<Record<RepairStatus, RepairStatus[]>> = {
   received: ['diagnosis', 'cancelled'],
@@ -134,7 +134,7 @@ export function Repairs() {
   const openNew = () => { setEditing(null); setForm(emptyForm()); setErrors({}); setExisting(''); setOpen(true); };
   const openEdit = (r: Repair) => {
     setEditing(r); setExisting(r.customerId ? String(r.customerId) : '');
-    setForm({ customerName: r.customerName, customerPhone: r.customerPhone, customerEmail: r.customerEmail ?? '', device: r.device, imei: r.imei ?? '', problem: r.problem, diagnosis: r.diagnosis ?? '', notes: r.notes ?? '', status: r.status, estimatedCost: String(r.estimatedCost), finalCost: r.finalCost !== undefined ? String(r.finalCost) : '' });
+    setForm({ customerName: r.customerName, customerPhone: r.customerPhone, customerEmail: r.customerEmail ?? '', device: r.device, imei: r.imei ?? '', problem: r.problem, diagnosis: r.diagnosis ?? '', notes: r.notes ?? '', status: r.status, estimatedCost: String(r.estimatedCost), finalCost: r.finalCost !== undefined ? String(r.finalCost) : '', laborMode: r.laborMode ?? 'included', laborCost: r.laborCost !== undefined ? String(r.laborCost) : '' });
     setErrors({}); setOpen(true);
   };
   const pickCustomer = (id: string) => {
@@ -147,7 +147,7 @@ export function Repairs() {
     const st = await getSettings();
     if (!st.invoiceAutoGenerateOnDelivery) return;
     if ((await db.invoices.where('repairId').equals(r.id!).count()) > 0) return;
-    const inv = await createInvoiceFromRepair(r, t('repairs.repairOf'));
+    const inv = await createInvoiceFromRepair(r, t('repairs.repairOf'), t('repairs.labor'));
     await logAction('create', 'billing', `${inv.number} ← ${r.ticketNumber}`);
     toast.info(t('repairs.invoiceCreated', { number: inv.number }));
   };
@@ -228,6 +228,19 @@ export function Repairs() {
   const previewDoc = (r: Repair) => buildDoc(repairReceiptHtml(r, s, t), r.ticketNumber);
   const invoiced = (r: Repair) => invoices.some((i) => i.repairId === r.id);
 
+  /** Labor (VAT-included) amount that adds to the repair price when billed separately. */
+  const laborAdd = (r: Pick<Repair, 'laborMode' | 'laborCost'>) => (r.laborMode === 'separate' ? r.laborCost ?? 0 : 0);
+  const hasLabor = (r: Pick<Repair, 'laborMode' | 'laborCost'>) => (r.laborCost ?? 0) > 0;
+  /** Small sub-line spelling the on-top labor charge, shown under the cost amounts. */
+  const laborSuffix = (r: Pick<Repair, 'laborMode' | 'laborCost'>) =>
+    r.laborMode === 'separate' && (r.laborCost ?? 0) > 0 ? (
+      <div className="text-[10px] leading-tight text-sl-muted">🔩 + {f.money(r.laborCost!)} {t('repairs.laborSeparate')}</div>
+    ) : null;
+  const laborInfo = (r: Pick<Repair, 'laborMode' | 'laborCost'>) =>
+    (r.laborCost ?? 0) > 0 ? (
+      <>{f.money(r.laborCost!)} <span className="text-[10px] text-sl-muted">· {r.laborMode === 'separate' ? t('repairs.laborSeparate') : t('repairs.laborIncluded')}</span></>
+    ) : <span className="text-sl-muted">—</span>;
+
   const vatLine = (n: number | undefined) => {
     if (n === undefined || n === null) return <span className="text-sl-muted">—</span>;
     const v = splitVat(n, s.taxRate);
@@ -290,7 +303,15 @@ export function Repairs() {
               <div className="mt-1 text-[11px] text-sl-muted">📅 {f.dateTime(r.dateIn)}</div>
               <div className="mt-3 grid grid-cols-2 gap-2 rounded-lg bg-sl-hover p-2 text-xs">
                 <div><div className="mb-0.5 text-sl-muted">{t('repairs.estimate')}</div>{vatLine(r.estimatedCost)}</div>
-                <div><div className="mb-0.5 text-sl-muted">{t('repairs.finalCost')}</div>{vatLine(r.finalCost)}</div>
+                <div><div className="mb-0.5 text-sl-muted">{t('repairs.finalCost')}</div>{vatLine(r.finalCost)}{laborSuffix(r)}</div>
+                {hasLabor(r) && <div className="col-span-2 flex items-center justify-between border-t border-sl-border/60 pt-1.5">
+                  <span className="text-sl-muted">🔩 {t('repairs.labor')}</span>
+                  <span className="text-sl-text">{laborInfo(r)}</span>
+                </div>}
+                {hasLabor(r) && <div className="col-span-2 flex items-center justify-between">
+                  <span className="font-semibold text-sl-muted">{t('common.total')}</span>
+                  <span className="font-bold text-primary">{f.money(splitVat((r.finalCost ?? r.estimatedCost) + laborAdd(r), s.taxRate).total)}</span>
+                </div>}
               </div>
               <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-sl-border pt-3">
                 {quick(r)}
@@ -309,7 +330,7 @@ export function Repairs() {
             { key: 'problem', label: t('repairs.problem'), render: (r) => <span className="line-clamp-1 max-w-[220px] text-sl-muted">{r.problem}</span> },
             { key: 'status', label: t('common.status'), render: (r) => <RepairStatusBadge status={r.status} />, sortValue: (r) => REPAIR_STATUSES.indexOf(r.status) },
             { key: 'estimatedCost', label: t('repairs.estimate'), render: (r) => vatLine(r.estimatedCost) },
-            { key: 'finalCost', label: t('repairs.finalCost'), render: (r) => vatLine(r.finalCost) },
+            { key: 'finalCost', label: t('repairs.finalCost'), render: (r) => <div>{vatLine(r.finalCost)}{laborSuffix(r)}{hasLabor(r) && <div className="font-bold text-primary">= {f.money(splitVat((r.finalCost ?? r.estimatedCost) + laborAdd(r), s.taxRate).total)}</div>}</div> },
             { key: '_a', label: '', sortable: false, render: rowActions },
           ]} />
       )}
@@ -343,10 +364,27 @@ export function Repairs() {
               <Input label={`${t('repairs.estimate')} (${t('tax.included')})`} type="number" step="0.01" min="0" value={form.estimatedCost} onChange={(e) => setForm({ ...form, estimatedCost: e.target.value })} error={errors.estimatedCost} />
               <Input label={t('repairs.finalCost')} type="number" step="0.01" min="0" value={form.finalCost} onChange={(e) => setForm({ ...form, finalCost: e.target.value })} error={errors.finalCost} />
             </div>
+            <div className="sm:col-span-2 rounded-xl border border-sl-border bg-sl-card2 p-3">
+              <div className="mb-2 text-xs font-bold uppercase tracking-wide text-sl-muted">🔩 {t('repairs.labor')}</div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <Select label={t('repairs.billingMode')} value={form.laborMode} onChange={(e) => setForm({ ...form, laborMode: e.target.value as 'included' | 'separate' })}>
+                  <option value="included">{t('repairs.laborIncluded')}</option>
+                  <option value="separate">{t('repairs.laborSeparate')}</option>
+                </Select>
+                <Input label={t('repairs.laborCost')} type="number" step="0.01" min="0" value={form.laborCost} onChange={(e) => setForm({ ...form, laborCost: e.target.value })} error={errors.laborCost} hint={form.laborMode === 'included' ? t('common.optional') : undefined} />
+              </div>
+              {form.laborMode === 'included' && form.laborCost && <p className="mt-2 text-[11px] text-sl-muted">ℹ️ {t('repairs.laborIncludedHint')}</p>}
+            </div>
           </div>
           {Number(form.estimatedCost) > 0 && (
             <div className="rounded-lg bg-sl-hover p-3 text-xs text-sl-muted">
-              🧮 {t('repairs.estimate')}: {(() => { const v = splitVat(Number(form.finalCost || form.estimatedCost), s.taxRate); return <><b>{f.money(v.base)}</b> + <b>{f.money(v.vat)}</b> {t('tax.vat')} ({s.taxRate}%) = <b className="text-sl-text">{f.money(v.total)}</b></>; })()}
+              🧮 {t('repairs.estimate')}: {(() => {
+                const base = (Number(form.finalCost) || Number(form.estimatedCost) || 0) + (form.laborMode === 'separate' ? Number(form.laborCost) || 0 : 0);
+                const v = splitVat(base, s.taxRate);
+                return <><b>{f.money(v.base)}</b> + <b>{f.money(v.vat)}</b> {t('tax.vat')} ({s.taxRate}%) = <b className="text-sl-text">{f.money(v.total)}</b>
+                  {form.laborMode === 'separate' && Number(form.laborCost) > 0 && <> — 🔩 {f.money(Number(form.laborCost))} {t('repairs.laborSeparate')}</>}
+                </>;
+              })()}
             </div>
           )}
         </div>
@@ -394,6 +432,10 @@ export function Repairs() {
                 ) : <span className="font-mono">—</span>} />
                 <InfoRow label={t('repairs.estimate')} value={vatLine(detail.estimatedCost)} />
                 <InfoRow label={t('repairs.finalCost')} value={vatLine(detail.finalCost)} />
+                <InfoRow label={t('repairs.labor')} value={laborInfo(detail)} />
+                {laborAdd(detail) > 0 && <InfoRow label={`🔩 ${t('common.total')}`} value={
+                  <div className="leading-tight"><div className="font-bold text-primary">{f.money(splitVat((detail.finalCost ?? detail.estimatedCost) + laborAdd(detail), s.taxRate).total)}</div><div className="text-[10px] text-sl-muted">{f.money(detail.finalCost ?? detail.estimatedCost)} + 🔩 {f.money(detail.laborCost!)} · {t('tax.included')}</div></div>
+                } />}
               </div>
             </div>
             <div className="rounded-lg bg-sl-hover p-3 text-sm"><b>⚠️ {t('repairs.problem')}:</b> {detail.problem}</div>

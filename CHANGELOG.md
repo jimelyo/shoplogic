@@ -1,5 +1,40 @@
 # Changelog
 
+## 1.3.5 — Mano de obra en reparaciones + hardening y calidad (2026-10-22)
+
+### Reparaciones: mano de obra
+- **Opción de mano de obra** en cada reparación (nueva y en edición): **incluida en el precio** (informativa, con aviso) o **aparte (se suma al precio)** con su importe.
+- Tarjetas, tabla y detalle muestran el desglose «🔩 mano de obra + X €» y el **total final** (precio + mano de obra, IVA incluido).
+- **Factura automática al entregar**: la mano de obra aparte genera su **propia línea** en la factura junto a la reparación (correcta para Veri*factu).
+- **Resguardo impreso / vista previa**: línea de mano de obra con su condición y total ya sumado.
+- Validación Zod (obligatoria y > 0 cuando es aparte) y 3 tests unitarios de facturación desde reparación.
+
+### Seguridad
+- **CSP de producción** inyectada en el build (`script-src 'self' file:`, sin
+  `unsafe-eval`) y **bloqueo de navegación** en Electron (`will-navigate`,
+  `will-redirect`); las ventanas nuevas solo abren http(s)/mailto en el navegador.
+- **Backups manuales y externos con credenciales enmascaradas** (WhatsApp/SMTP);
+  la restauración conserva las credenciales locales.
+- **Digest SHA-256** en cada backup, verificación al importar y **vista previa**
+  con recuento de tablas antes de reemplazar datos.
+- Guard de CI para `node-forge` (GHSA-86w9-cpqp-85rv): solo se permite el parseo
+  PKCS#12, nunca APIs de verificación de firma. `xml-crypto` actualizado a 6.4.0.
+- Scaffolding de **firma Authenticode y notarización macOS** (`afterSign`,
+  entitlements, secretos documentados en `SECURITY.md`).
+
+### Permisos
+- **Permisos por acción** además de por módulo: descuentos, devoluciones, cambio
+  de precio, borrado de facturas y exportación/importación de datos. Editables
+  por usuario en Usuarios → Acciones; los roles antiguos heredan los defaults.
+
+### Calidad
+- **Numeración de facturas atómica** dentro de una transacción Dexie (sin
+  duplicados con dos ventanas).
+- **i18n lazy**: cada idioma se carga bajo demanda (~65 KB gzip menos en la
+  primera carga).
+- **CI en PR** (lint, tests, build, i18n, guard) y **6 tests E2E de Playwright**
+  para login, venta, reparación, backup, fiscal y error de contraseña.
+
 ## 1.3.3 — Tickets de reparación: impresión y vista previa (2026-10-16)
 
 ### Nuevo

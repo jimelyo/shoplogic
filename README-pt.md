@@ -1,4 +1,4 @@
-# 📱 ShopLogic Pro v1.3.4
+# 📱 ShopLogic Pro v1.3.5
 
 <p align="center">
   <img src="public/icon-512.png" width="128" alt="ShopLogic Pro">
@@ -11,7 +11,7 @@
 [![Release](https://img.shields.io/github/v/release/jimelyo/shoplogic)](https://github.com/jimelyo/shoplogic/releases/latest)
 [![Plataforma](https://img.shields.io/badge/Windows-x64%20%7C%20arm64-blue)](https://github.com/jimelyo/shoplogic/releases/latest)
 [![macOS](https://img.shields.io/badge/macOS-DMG%20x64%20%7C%20arm64-lightgrey)](https://github.com/jimelyo/shoplogic/releases/latest)
-[![Android](https://img.shields.io/badge/Android-APK%20v1.3.4-green)](https://github.com/jimelyo/shoplogic/releases/latest)
+[![Android](https://img.shields.io/badge/Android-APK%20v1.3.5-green)](https://github.com/jimelyo/shoplogic/releases/latest)
 [![Idiomas](https://img.shields.io/badge/idiomas-5%20·%20RTL%20árabe-purple)](#-idiomas)
 [![Licença](https://img.shields.io/badge/uso-privado-informational)]()
 
@@ -145,21 +145,21 @@ A app está **100% traduzida em 5 idiomas** (≈ 1.016 chaves sincronizadas, ver
 ## 🚀 Instalação
 
 ### 📱 Android
-1. Descarregue **`shoplogic-pro-v1.3.4-android.apk`** a partir da [Release v1.3.4](https://github.com/jimelyo/shoplogic/releases/tag/v1.3.4). ⚠️ A v1.3.4 está assinada com um **keystore novo**: não instala por cima da v1.2.0 oficial (assinatura distinta) — desinstale primeiro se vinha dessa versão.
+1. Descarregue **`shoplogic-pro-v1.3.5-android.apk`** a partir da [Release v1.3.5](https://github.com/jimelyo/shoplogic/releases/tag/v1.3.5). ⚠️ A v1.3.5 está assinada com um **keystore novo**: não instala por cima da v1.2.0 oficial (assinatura distinta) — desinstale primeiro se vinha dessa versão.
 2. Permita **instalar apps de origem desconhecida** para o seu navegador/gestor de ficheiros (Definições → Segurança) da primeira vez.
 3. Abra o APK e instale-a. Requer **Android 6.0+ (API 23+)**. Sem permissões para além da internet: os dados vivem no IndexedDB dentro da app, 100% locais.
 
 ### Windows (recomendado — desktop)
-1. Descarregue o **instalador v1.3.4** para a sua arquitetura (x64 e ARM64 na mesma release) a partir de [Releases](https://github.com/jimelyo/shoplogic/releases/latest):
-   - `ShopLogic-Setup-1.3.4-x64.exe` (Windows 10/11 x64)
-   - `ShopLogic-Setup-1.3.4-arm64.exe` (Windows on ARM)
+1. Descarregue o **instalador v1.3.5** para a sua arquitetura (x64 e ARM64 na mesma release) a partir de [Releases](https://github.com/jimelyo/shoplogic/releases/latest):
+   - `ShopLogic-Setup-1.3.5-x64.exe` (Windows 10/11 x64)
+   - `ShopLogic-Setup-1.3.5-arm64.exe` (Windows on ARM)
 2. Execute o instalador (instalação silenciosa com um só UAC). O atalho fica no ambiente de trabalho.
 3. As atualizações passam a ser descarregadas e aplicadas **automaticamente** (v1.3.3 e anteriores atualizam-se sozinhas pelo mesmo canal electron-updater).
 
 ### macOS
-1. Descarregue a **DMG v1.3.4** para a sua arquitetura a partir de [Releases](https://github.com/jimelyo/shoplogic/releases/latest):
-   - `ShopLogic-1.3.4-x64.dmg` (Intel)
-   - `ShopLogic-1.3.4-arm64.dmg` (Apple Silicon)
+1. Descarregue a **DMG v1.3.5** para a sua arquitetura a partir de [Releases](https://github.com/jimelyo/shoplogic/releases/latest):
+   - `ShopLogic-1.3.5-x64.dmg` (Intel)
+   - `ShopLogic-1.3.5-arm64.dmg` (Apple Silicon)
 2. Abra a DMG e arraste a app para Aplicações. As atualizações seguintes também são automáticas (`latest-mac.yml`).
 3. ⚠️ A DMG ainda **não está notarizada pela Apple**: da primeira vez o macOS pedirá «≡ Definições do Sistema → Privacidade e Segurança → Abrir Igualmente».
 
@@ -242,7 +242,12 @@ public/            # service worker + manifest
 
 ---
 
-## 📋 Novidades / Changelog (v1.3.4)
+## 📋 Novidades / Changelog (v1.3.5)
+
+### 🔩 Mão de obra em reparações
+- Cada reparação pode marcar a mão de obra como **incluída no preço** (informativa) ou **à parte** (somada ao preço): importe, desdobramento de IVA em tempo real, linha própria na fatura automática e no recibo impresso.
+- Hardening: CSP de produção, backups com digest SHA-256 e credenciais mascaradas, permissões por ação e i18n lazy.
+
 
 ### 🛍️ Compras de segunda mão (trade-in)
 - Módulo renomeado para **"Compras 2ª mão"** (navegação nos 5 idiomas) para avaliar, comprar e reabastecer terminais de segunda mão.
@@ -273,6 +278,7 @@ public/            # service worker + manifest
 
 | Versão | Novidades principais |
 |---|---|
+| **v1.3.5** (Windows x64/ARM64 + macOS x64/ARM64 + Android) | **Mão de obra em reparações** (incluída ou à parte, em faturas e recibos) · hardening: CSP de produção, backups digest SHA-256 + credenciais mascaradas, permissões por ação, faturas atómicas · i18n lazy |
 | **v1.3.4** (Windows x64/ARM64 + macOS x64/ARM64 + Android) | **Compras 2ª mão** (trade-in com alta ao inventário e rastreabilidade) · **retificativas R1–R5** com deteção automática em devoluções · **relatórios fiscais Modelo 303 e 347** · hardening de segurança (safeStorage, SMTP localhost, bloqueio de login, backups AES-256-GCM) · novo logótipo em todas as plataformas |
 | **v1.3.3** (Windows) | **Impressão do talão de reparação**: opção ao criar + pré-visualização modal · cabeçalho do talão sincronizado com o nome real da loja |
 | **v1.3.2** (Windows x64 + ARM64) | **VERI*FACTU Companion**: assistente de certificado `.p12` com segurança no processo main · diagnóstico da fila AEAT + teste de ligação · centro de incidências com visualizador XML · declaração responsável exportável · empacotamento multi-arquitetura x64/ARM64 |

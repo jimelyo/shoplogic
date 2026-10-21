@@ -1,6 +1,6 @@
 <div dir="rtl">
 
-# 📱 ShopLogic Pro v1.3.4
+# 📱 ShopLogic Pro v1.3.5
 
 <p align="center" dir="ltr">
   <img src="public/icon-512.png" width="128" alt="ShopLogic Pro">
@@ -13,7 +13,7 @@
 [![الإصدار](https://img.shields.io/github/v/release/jimelyo/shoplogic)](https://github.com/jimelyo/shoplogic/releases/latest)
 [![المنصة](https://img.shields.io/badge/Windows-x64%20%7C%20arm64-blue)](https://github.com/jimelyo/shoplogic/releases/latest)
 [![macOS](https://img.shields.io/badge/macOS-DMG%20x64%20%7C%20arm64-lightgrey)](https://github.com/jimelyo/shoplogic/releases/latest)
-[![أندرويد](https://img.shields.io/badge/Android-APK%20v1.3.4-green)](https://github.com/jimelyo/shoplogic/releases/latest)
+[![أندرويد](https://img.shields.io/badge/Android-APK%20v1.3.5-green)](https://github.com/jimelyo/shoplogic/releases/latest)
 [![اللغات](https://img.shields.io/badge/اللغات-5%20·%20RTL%20عربي-purple)](#-اللغات)
 [![الترخيص](https://img.shields.io/badge/استخدام-خاص-informational)]()
 
@@ -147,21 +147,21 @@
 ## 🚀 التثبيت
 
 ### 📱 أندرويد
-1. نزّل **`shoplogic-pro-v1.3.4-android.apk`** من [الإصدار v1.3.4](https://github.com/jimelyo/shoplogic/releases/tag/v1.3.4). ⚠️ النسخة v1.3.4 موقّعة بـ **keystore جديد**: لا تُثبَّت فوق النسخة الرسمية v1.2.0 (توقيع مختلف) — احذف النسخة السابقة أولًا إن كنت تحديثًا منها.
+1. نزّل **`shoplogic-pro-v1.3.5-android.apk`** من [الإصدار v1.3.5](https://github.com/jimelyo/shoplogic/releases/tag/v1.3.5). ⚠️ النسخة v1.3.5 موقّعة بـ **keystore جديد**: لا تُثبَّت فوق النسخة الرسمية v1.2.0 (توقيع مختلف) — احذف النسخة السابقة أولًا إن كنت تحديثًا منها.
 2. اسمح بـ **تثبيت تطبيقات من مصادر غير معروفة** لمتصفحك/مدير الملفات (الإعدادات → الأمان) أول مرة.
 3. افتح ملف APK وثبّته. يتطلب **أندرويد 6.0+ (API 23+)**. لا أذونات سوى الإنترنت: البيانات تعيش في IndexedDB داخل التطبيق، محلية 100%.
 
 ### ويندوز (موصى به — سطح المكتب)
-1. نزّل **مثبّت v1.3.4** لمعماريّتك (x64 وARM64 في الإصدار نفسه) من [الإصدارات](https://github.com/jimelyo/shoplogic/releases/latest):
-   - `ShopLogic-Setup-1.3.4-x64.exe` (ويندوز 10/11 x64)
-   - `ShopLogic-Setup-1.3.4-arm64.exe` (Windows on ARM)
+1. نزّل **مثبّت v1.3.5** لمعماريّتك (x64 وARM64 في الإصدار نفسه) من [الإصدارات](https://github.com/jimelyo/shoplogic/releases/latest):
+   - `ShopLogic-Setup-1.3.5-x64.exe` (ويندوز 10/11 x64)
+   - `ShopLogic-Setup-1.3.5-arm64.exe` (Windows on ARM)
 2. شغّل المثبّت (تثبيت صامت بـ UAC واحد). يظهر الاختصار على سطح المكتب.
 3. تُنزَّل التحديثات وتُطبَّق **تلقائيًا** من هناك (النسخ v1.3.3 وما قبلها تُحدّث ذاتيًا عبر قناة electron-updater نفسها).
 
 ### macOS
-1. نزّل **DMG v1.3.4** لمعماريّتك من [الإصدارات](https://github.com/jimelyo/shoplogic/releases/latest):
-   - `ShopLogic-1.3.4-x64.dmg` (Intel)
-   - `ShopLogic-1.3.4-arm64.dmg` (Apple Silicon)
+1. نزّل **DMG v1.3.5** لمعماريّتك من [الإصدارات](https://github.com/jimelyo/shoplogic/releases/latest):
+   - `ShopLogic-1.3.5-x64.dmg` (Intel)
+   - `ShopLogic-1.3.5-arm64.dmg` (Apple Silicon)
 2. افتح ملف DMG واسحب التطبيق إلى «التطبيقات». التحديثات اللاحقة تلقائية أيضًا (`latest-mac.yml`).
 3. ⚠️ ملف DMG **لم يُصدَّق (notarized) من Apple بعد**: أول مرة سيطلب macOS «≡ إعدادات النظام → الخصوصية والأمان → فتح على أي حال».
 
@@ -244,7 +244,12 @@ public/            # service worker + manifest
 
 ---
 
-## 📋 جديد الإصدار / سجل التغييرات (v1.3.4)
+## 📋 جديد الإصدار / سجل التغييرات (v1.3.5)
+
+### 🔧 أجرة العمل في الإصلاح
+- يمكن تحديد أجرة العمل في كل إصلاح بحيث تكون **مشمولة في السعر** (للعلم) أو **منفصلة (تُضاف إلى السعر)**: المبلغ، تفصيل ضريبة القيمة المضافة حيًا، سطر مستقل في الفاتورة التلقائية وفي السند المطبوع.
+- تحصين الأمان: CSP للإنتاج، نسخ احتياطية ببصمة SHA-256 واعتماديات مقنّعة، أذونات لكل إجراء و i18n كسول.
+
 
 ### 🛍️ شراء الأجهزة المستعملة (trade-in)
 - إعادة تسمية الوحدة إلى **«شراء أجهزة مستعملة»** (التنقل باللغات الخمس) لتقدير وشراء وإعادة توريد الأجهزة المستعملة.
@@ -275,6 +280,7 @@ public/            # service worker + manifest
 
 | الإصدار | أهم الجديد |
 |---|---|
+| **v1.3.5** (ويندوز x64/ARM64 + macOS x64/ARM64 + أندرويد) | **أجرة العمل في الإصلاح** (مشمولة أو منفصلة، في الفواتير والسندات) · تحصين الأمان: CSP للإنتاج، نسخ digest SHA-256 + اعتماديات مقنّعة، أذونات لكل إجراء، فواتير ذرية · i18n كسول |
 | **v1.3.4** (ويندوز x64/ARM64 + macOS x64/ARM64 + أندرويد) | **شراء الأجهزة المستعملة** (trade-in بإدخال إلى الجرد وتتبع) · **فواتير تصحيحية R1–R5** بكشف تلقائي عند الإرجاع · **تقارير مالية نموذج 303 و347** · تحصين الأمان (safeStorage وSMTP على localhost وقفل الدخول ونسخ AES-256-GCM) · شعار جديد في كل المنصات |
 | **v1.3.3** (ويندوز) | **طباعة تذكرة الإصلاح**: خيار عند الإنشاء + معاينة منبثقة · ترويسة التذكرة مُزامنة باسم المتجر الحقيقي |
 | **v1.3.2** (ويندوز x64 + ARM64) | **VERI*FACTU Companion**: مساعد شهادة `.p12` بأمان في عملية main · تشخيص قائمة AEAT + اختبار اتصال · مركز حوادث بعارض XML · إقرار مسؤول قابل للتصدير · تغليف x64/ARM64 |

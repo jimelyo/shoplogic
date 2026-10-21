@@ -38,11 +38,27 @@ function createWindow() {
   win.setMenuBarVisibility(false);
   win.on('closed', () => { win = null; });
 
-  // External links (WhatsApp, mailto, docs) open in the default browser.
+  // External links (WhatsApp, mailto, docs) open in the default browser. Any
+  // other new window is denied by default; only http(s)/mailto leave the app.
   win.webContents.setWindowOpenHandler(({ url }) => {
-    if (/^https?:|^mailto:|^whatsapp:/i.test(url)) { void shell.openExternal(url); return { action: 'deny' }; }
-    return { action: 'allow' };
+    if (/^https:\/\/|^mailto:/i.test(url)) void shell.openExternal(url);
+    return { action: 'deny' };
   });
+
+  // The renderer must never navigate away from the packaged app (or from the
+  // Vite dev server in development). A remote page would otherwise inherit the
+  // preload bridge on the same BrowserWindow.
+  win.webContents.on('will-navigate', (event, url) => {
+    const allowed = DEV_URL ? url.startsWith(DEV_URL) : url.startsWith('file://');
+    if (allowed) return;
+    event.preventDefault();
+    if (/^https:\/\/|^mailto:/i.test(url)) void shell.openExternal(url);
+  });
+  win.webContents.on('will-redirect', (event, url) => {
+    const allowed = DEV_URL ? url.startsWith(DEV_URL) : url.startsWith('file://');
+    if (!allowed) event.preventDefault();
+  });
+  win.webContents.on('will-attach-webview', (event) => event.preventDefault());
 
   if (DEV_URL) {
     void win.loadURL(DEV_URL);

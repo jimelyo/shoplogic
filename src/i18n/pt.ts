@@ -394,6 +394,12 @@ const pt = {
   "diagnosis": "Diagnóstico",
   "estimate": "Orçamento",
   "finalCost": "Custo final",
+  "labor": "Mão de obra",
+  "billingMode": "Forma de cobrança",
+  "laborIncluded": "Incluída no preço",
+  "laborSeparate": "À parte (somada ao preço)",
+  "laborCost": "Importe da mão de obra",
+  "laborIncludedHint": "O preço já inclui a mão de obra: o importe é apenas informativo.",
   "dateIn": "Entrada",
   "dateOut": "Saída",
   "existingCustomer": "Cliente existente",
@@ -560,6 +566,7 @@ const pt = {
   "taxThreshold": "Limiar do 347"
  },
  "users": {
+  "actionDenied": "Não tem permissão para esta ação.",
   "subtitle": "Utilizadores, permissões por módulo e auditoria",
   "new": "Novo utilizador",
   "audit": "Auditoria",
@@ -768,7 +775,11 @@ const pt = {
  "settings": {
   "subtitle": "Loja, localização, faturação, canais, impressoras, aparência e dados",
   "unsaved": "Tem alterações por guardar",
-  "channelsWarn": "As credenciais ficam guardadas neste navegador e são incluídas na exportação JSON de Dados.",
+  "channelsWarn": "As credenciais ficam guardadas neste navegador e são mascaradas na exportação JSON de Dados.",
+  "backupDigestOk": "Integridade verificada (SHA-256).",
+  "backupDigestBad": "O ficheiro não corresponde ao seu hash SHA-256. Não será importado.",
+  "backupDigestNone": "Este backup é anterior ao controlo de integridade; as linhas serão validadas uma a uma.",
+  "backupTables": "tabelas",
   "s_security": "Segurança",
   "updTitle": "Atualização da aplicação",
   "updCheck": "Procurar agora",

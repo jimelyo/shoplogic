@@ -7,7 +7,7 @@ import { confirmDialog, toast, useStore } from '../store/store';
 import { useFormat } from '../lib/format';
 import { logAction } from '../lib/audit';
 import { peekInvoiceNumber } from '../lib/invoices';
-import { backupCounts, downloadBackup, downloadFile, exportAll, externalBackupSupported, formatBytes, importBackup, parseBackup, pickExternalDir, resetTables, tableCounts, copyToExternal, type BackupData } from '../lib/backup';
+import { backupCounts, downloadBackup, downloadFile, exportAll, externalBackupSupported, formatBytes, importBackup, inspectBackup, isBackupIntact, pickExternalDir, resetTables, tableCounts, copyToExternal, type BackupData } from '../lib/backup';
 import { decryptBackup, encryptBackup, isEncryptedBackup } from '../lib/backup-crypto';
 import { verifyChain, verifactuCsv } from '../verifactu/audit';
 import { FiscalStatus, FiscalConfigFields } from './shared/FiscalStatus';
@@ -21,6 +21,7 @@ import { DEFAULT_CHANNELS, MAIL_PRESETS, MAIL_PROVIDERS, TEMPLATE_PLACEHOLDERS, 
 import { channelIssues, channelStatusOf, mailtoLink, previewParams, renderTemplate, waLink, type SendTarget } from '../lib/channels';
 import { dispatchMessage, MAX_OUTBOX_ATTEMPTS, retryOutbox } from '../lib/messaging';
 import { sanitize } from '../schemas';
+import { canDo } from '../lib/permissions';
 import { PageHeader } from './shared/PageHeader';
 import { Badge, Card, SectionTitle } from './shared/UI';
 import { Button, fieldClass, Input, Select, TextArea, Toggle } from './shared/Forms';
@@ -383,6 +384,10 @@ function DataSection({ form, up }: { form: TSettings; up: (patch: Partial<TSetti
   // Cifrado opcional de backups (AES-GCM): contraseña al exportar / importar.
   const [encPassword, setEncPassword] = useState('');
   const [pendingEncrypted, setPendingEncrypted] = useState<{ name: string; text: string } | null>(null);
+  const [digestValid, setDigestValid] = useState<boolean | null>(null);
+  const me = useStore((s) => s.currentUser);
+  const canExport = canDo(me, 'data.export');
+  const canImport = canDo(me, 'data.import');
   const ext = form.externalBackup ?? { enabled: false };
   const supported = externalBackupSupported();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -391,6 +396,7 @@ function DataSection({ form, up }: { form: TSettings; up: (patch: Partial<TSetti
   const resettable = TABLE_NAMES.filter((n) => n !== 'users');
 
   const doExport = async () => {
+    if (!canExport) { toast.error(t('users.actionDenied')); return; }
     const b = await downloadBackup();
     let finalName = b.filename;
     let finalText = b.json;
@@ -418,14 +424,16 @@ function DataSection({ form, up }: { form: TSettings; up: (patch: Partial<TSetti
         setPendingEncrypted({ name: file.name, text });
         setImportData(null);
       } else {
-        const d = parseBackup(text);
-        setImportData(d); setImportName(file.name);
+        const info = await inspectBackup(text);
+        setImportData(info.data); setImportName(file.name); setDigestValid(info.digestValid);
       }
     } catch { toast.error(t('settings.invalidFile')); }
     if (fileRef.current) fileRef.current.value = '';
   };
   const doImport = async () => {
     if (!importData) return;
+    if (!canImport) { toast.error(t('users.actionDenied')); return; }
+    if (digestValid === false) { toast.error(t('settings.backupDigestBad')); return; }
     if (!(await confirmDialog(t('settings.importConfirm1'), { danger: true, confirmLabel: t('common.continue') }))) return;
     if (!(await confirmDialog(t('settings.importConfirm2'), { danger: true, confirmLabel: t('settings.importNow') }))) return;
     setBusy(true);
@@ -439,6 +447,7 @@ function DataSection({ form, up }: { form: TSettings; up: (patch: Partial<TSetti
   };
   const doReset = async () => {
     if (!resetSel.length) return;
+    if (!canImport) { toast.error(t('users.actionDenied')); return; }
     if (!(await confirmDialog(t('settings.resetConfirm', { tables: resetSel.map((n) => t(`tables.${n}`)).join(', ') }), { danger: true, confirmLabel: t('settings.resetNow') }))) return;
     setBusy(true);
     try {
@@ -463,9 +472,9 @@ function DataSection({ form, up }: { form: TSettings; up: (patch: Partial<TSetti
           <Input label={t('settings.encBackupPassword')} type="password" value={encPassword} onChange={(e) => setEncPassword(e.target.value)} placeholder={t('settings.encBackupPlaceholder')} className="mt-2" hint={t('settings.encBackupHint')} autoComplete="new-password" />
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button icon={<Download />} onClick={doExport}>{t('settings.exportJson')}</Button>
+          <Button icon={<Download />} onClick={doExport} disabled={!canExport}>{t('settings.exportJson')}</Button>
           {TABLE_NAMES.map((n) => (
-            <Button key={n} size="sm" variant="ghost" title={t('settings.exportCsvHint', { table: t(`tables.${n}`) })} onClick={async () => {
+            <Button key={n} size="sm" variant="ghost" disabled={!canExport} title={t('settings.exportCsvHint', { table: t(`tables.${n}`) })} onClick={async () => {
               const c = await exportTableCsv(n);
               await logAction('export', 'settings', `csv ${n} (${c})`);
               toast.success(`${t('settings.exportCsv')} · ${t(`tables.${n}`)} (${c})`);
@@ -491,8 +500,8 @@ function DataSection({ form, up }: { form: TSettings; up: (patch: Partial<TSetti
               const r = await pickExternalDir();
               if (r) toast.success(`${t('settings.extBackupReady')} ${r.name}`);
             }}>📁 {t('settings.extBackupPick')}</Button>
-            <Button variant="ghost" onClick={async () => {
-              const b = await exportAll('_external');
+            <Button variant="ghost" disabled={!canExport} onClick={async () => {
+              const b = await exportAll('_external', { maskCredentials: true });
               try {
                 let dir = ext.dir;
                 if (!dir) { const picked = await pickExternalDir(); dir = picked?.name; }
@@ -509,7 +518,7 @@ function DataSection({ form, up }: { form: TSettings; up: (patch: Partial<TSetti
         <SectionTitle>📥 {t('settings.import')}</SectionTitle>
         <p className="mb-3 text-sm text-sl-muted">{t('settings.importHint')}</p>
         <input ref={fileRef} type="file" accept="application/json,.json,.slcrypt,text/plain" className="hidden" onChange={(e) => onFile(e.target.files?.[0])} />
-        <Button variant="outline" icon={<Upload />} onClick={() => fileRef.current?.click()}>{t('settings.selectFile')}</Button>
+        <Button variant="outline" icon={<Upload />} disabled={!canImport} onClick={() => fileRef.current?.click()}>{t('settings.selectFile')}</Button>
         {pendingEncrypted && (
           <div className="mt-3 rounded-lg border border-primary/40 bg-primary/5 p-3">
             <p className="text-xs font-semibold text-primary">🔐 {t('settings.encryptedDetected', { name: pendingEncrypted.name })}</p>
@@ -520,7 +529,7 @@ function DataSection({ form, up }: { form: TSettings; up: (patch: Partial<TSetti
                 setBusy(true);
                 try {
                   const d = await decryptBackup(pendingEncrypted.text, encPassword);
-                  setImportData(d); setImportName(pendingEncrypted.name);
+                  setImportData(d); setImportName(pendingEncrypted.name); setDigestValid(await isBackupIntact(d));
                   setPendingEncrypted(null); setEncPassword('');
                 } catch (e) {
                   toast.error(String((e as Error).message) === 'wrongpassword' ? t('settings.wrongPassword') : t('settings.invalidFile'));
@@ -565,10 +574,13 @@ function DataSection({ form, up }: { form: TSettings; up: (patch: Partial<TSetti
       </Card>
 
       <Modal open={!!importData} onClose={() => setImportData(null)} title={`📥 ${t('settings.importPreview')}`} subtitle={importName}
-        footer={<><Button variant="secondary" onClick={() => setImportData(null)}>{t('common.cancel')}</Button><Button variant="danger" loading={busy} onClick={doImport}>{t('settings.importNow')}</Button></>}>
+        footer={<><Button variant="secondary" onClick={() => setImportData(null)}>{t('common.cancel')}</Button><Button variant="danger" loading={busy} disabled={digestValid === false || !canImport} onClick={doImport}>{t('settings.importNow')}</Button></>}>
         {importData && (
           <div className="space-y-3">
-            {importData._meta && <p className="text-xs text-sl-muted">📅 {importData._meta.exportedAt}</p>}
+            {importData._meta && <p className="text-xs text-sl-muted">📅 {importData._meta.exportedAt}{importData._meta.tables ? ` · ${importData._meta.tables} ${t('settings.backupTables')}` : ''}</p>}
+            <p className={`rounded-lg border px-3 py-2 text-xs font-semibold ${digestValid === false ? 'border-red-500/40 bg-red-500/10 text-red-600 dark:text-red-300' : digestValid ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300' : 'border-sl-border bg-sl-card2 text-sl-muted'}`}>
+              {digestValid === false ? `❌ ${t('settings.backupDigestBad')}` : digestValid ? `✅ ${t('settings.backupDigestOk')}` : `ℹ️ ${t('settings.backupDigestNone')}`}
+            </p>
             <div className="grid grid-cols-2 gap-2">
               {Object.entries(backupCounts(importData)).map(([k, v]) => (
                 <div key={k} className={`flex justify-between rounded-lg border px-3 py-2 text-sm ${k === 'users' ? 'border-sl-border opacity-50' : 'border-sl-border'}`}>

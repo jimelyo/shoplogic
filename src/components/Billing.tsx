@@ -4,11 +4,12 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { addDays } from 'date-fns';
 import { Download, Eye, Pencil, Plus, Printer, Trash, Undo2, Wallet } from 'lucide-react';
 import { db } from '../db/database';
-import { confirmDialog, toast } from '../store/store';
+import { confirmDialog, toast, useStore } from '../store/store';
 import { useFormat } from '../lib/format';
 import { matches } from '../lib/hooks';
 import { computeInvoiceTotals, isoDate, lineTotal, priceFromTotal, round2 } from '../lib/calc';
 import { logAction } from '../lib/audit';
+import { canDo } from '../lib/permissions';
 import { INVOICE_STATUS_COLORS, cssVar } from '../lib/colors';
 import { createInvoiceFromRepair, createInvoiceFromSale, createRectifyingInvoice, nextInvoiceNumber, peekInvoiceNumber } from '../lib/invoices';
 import { markOverdueInvoices } from '../lib/notifications';
@@ -38,6 +39,7 @@ export function InvoiceStatusBadge({ status }: { status: InvoiceStatus }) {
 export function Billing() {
   const { t } = useTranslation();
   const f = useFormat();
+  const canDelete = canDo(useStore((s) => s.currentUser), 'billing.delete');
   const s = f.settings;
   const invoices = useLiveQuery(() => db.invoices.reverse().sortBy('createdAt'), []);
   const sales = useLiveQuery(() => db.sales.toArray(), []);
@@ -130,6 +132,7 @@ export function Billing() {
     setOpen(false);
   };
   const remove = async (i: Invoice) => {
+    if (!canDelete) { toast.error(t('users.actionDenied')); return; }
     if (!(await confirmDialog(t('common.confirmDelete', { name: i.number }), { danger: true, confirmLabel: t('common.delete') }))) return;
     await db.invoices.delete(i.id!); await logAction('delete', 'billing', i.number); toast.success(t('common.deleted'));
   };
@@ -196,7 +199,7 @@ export function Billing() {
       <IconButton title={t('common.print')} onClick={() => print(i)}><Printer /></IconButton>
       <IconButton title="PDF" onClick={() => pdf(i)}><Download /></IconButton>
       <IconButton title={t('common.edit')} tone="primary" onClick={() => openEdit(i)}><Pencil /></IconButton>
-      <IconButton title={t('common.delete')} tone="danger" onClick={() => remove(i)}><Trash /></IconButton>
+      <IconButton title={t('common.delete')} tone="danger" disabled={!canDelete} onClick={() => remove(i)}><Trash /></IconButton>
     </div>
   );
   const paidBar = (i: Invoice) => (

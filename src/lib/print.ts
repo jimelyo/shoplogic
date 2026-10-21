@@ -82,7 +82,8 @@ export function repairReceiptHtml(r: Repair, s: Settings, t: T) {
   const lang = i18n.language;
   const m = (n: number) => formatMoney(n, s, lang);
   const amount = r.finalCost ?? r.estimatedCost;
-  const v = splitVat(amount, s.taxRate);
+  const labor = r.laborMode === 'separate' ? r.laborCost ?? 0 : 0;
+  const v = splitVat(amount + labor, s.taxRate);
   return `${ticketCss(s.ticketPrinter?.width ?? '80mm')}${storeHeader(s, t)}
   <div class="c b">${esc(t('repairs.receiptTitle'))}</div>
   <div class="c b" style="font-size:16px">${esc(r.ticketNumber)}</div><hr>
@@ -93,7 +94,8 @@ export function repairReceiptHtml(r: Repair, s: Settings, t: T) {
   <div><span class="b">${esc(t('repairs.device'))}:</span> ${esc(r.device)}<br><span class="b">IMEI:</span> ${esc(r.imei || '—')}</div>
   <div style="margin-top:4px"><span class="b">${esc(t('repairs.problem'))}:</span> ${esc(r.problem)}</div>
   ${r.diagnosis ? `<div style="margin-top:4px"><span class="b">${esc(t('repairs.diagnosis'))}:</span> ${esc(r.diagnosis)}</div>` : ''}<hr>
-  <table><tr><td class="b">${esc(r.finalCost !== undefined ? t('repairs.finalCost') : t('repairs.estimate'))}</td><td></td></tr>
+  <table><tr><td class="b">${esc(r.finalCost !== undefined ? t('repairs.finalCost') : t('repairs.estimate'))}</td><td class="r">${m(amount)}</td></tr>
+  ${labor > 0 ? `<tr><td>${esc(t('repairs.labor'))} (${esc(r.laborMode === 'separate' ? t('repairs.laborSeparate') : t('repairs.laborIncluded'))})</td><td class="r">${m(r.laborCost!)}</td></tr>` : ''}
   <tr><td>${esc(t('tax.base'))}</td><td class="r">${m(v.base)}</td></tr>
   <tr><td>${esc(t('tax.vat'))} (${s.taxRate}%)</td><td class="r">${m(v.vat)}</td></tr>
   <tr class="tot"><td>${esc(t('tax.totalInc'))}</td><td class="r">${m(v.total)}</td></tr></table><hr>

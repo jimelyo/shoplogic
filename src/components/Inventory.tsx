@@ -8,7 +8,7 @@ import { useFormat } from '../lib/format';
 import { matches } from '../lib/hooks';
 import { makeMove } from '../lib/stock';
 import { logAction } from '../lib/audit';
-import { isReadOnly } from '../lib/permissions';
+import { canDo, isReadOnly } from '../lib/permissions';
 import { generateNotifications } from '../lib/notifications';
 import { categorySchema, productSchema, validateForm, type FormErrors } from '../schemas';
 import { CATEGORY_COLORS, CATEGORY_ICON_CHOICES, DEFAULT_CATEGORIES, categoryLabel } from '../data/categories';
@@ -36,6 +36,7 @@ export function Inventory() {
   const setActive = useStore((x) => x.setActiveModule);
   const setStockFocus = useStore((x) => x.setStockFocusProductId);
   const readOnly = isReadOnly(user, 'inventory');
+  const canPrice = canDo(user, 'inventory.price');
   const products = useLiveQuery(() => db.products.toArray(), []);
   const cats = f.settings.categories?.length ? f.settings.categories : DEFAULT_CATEGORIES;
   const [q, setQ] = useState('');
@@ -71,6 +72,10 @@ export function Inventory() {
     setErrors(r.errors);
     if (!r.success) return;
     const d = r.data;
+    if (editing && !canPrice && (Number(d.price) !== editing.price || Number(d.cost) !== editing.cost)) {
+      toast.error(t('users.actionDenied'));
+      return;
+    }
     if (d.barcode) {
       const dup = await db.products.where('barcode').equals(d.barcode).first();
       if (dup && dup.id !== editing?.id) { setErrors({ barcode: 'validation.duplicate' }); return; }
@@ -202,8 +207,8 @@ export function Inventory() {
           <Input label={t('inventory.barcode')} value={form.barcode} onChange={(e) => setForm({ ...form, barcode: e.target.value })} error={errors.barcode} />
           <Input label="IMEI" value={form.imei} onChange={(e) => setForm({ ...form, imei: e.target.value })} hint={t('common.optional')} />
           <div className="grid grid-cols-2 gap-3">
-            <Input label={t('inventory.cost')} type="number" step="0.01" min="0" value={form.cost} onChange={(e) => setForm({ ...form, cost: e.target.value })} error={errors.cost} />
-            <Input label={`${t('common.price')} (${t('tax.included')})`} type="number" step="0.01" min="0" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} error={errors.price} />
+            <Input label={t('inventory.cost')} type="number" step="0.01" min="0" value={form.cost} onChange={(e) => setForm({ ...form, cost: e.target.value })} error={errors.cost} disabled={!canPrice} hint={!canPrice ? t('users.actionDenied') : undefined} />
+            <Input label={`${t('common.price')} (${t('tax.included')})`} type="number" step="0.01" min="0" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} error={errors.price} disabled={!canPrice} />
           </div>
           <Input label={t('common.stock')} type="number" min="0" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} error={errors.stock} />
           <Input label={t('inventory.minStock')} type="number" min="0" value={form.minStock} onChange={(e) => setForm({ ...form, minStock: e.target.value })} error={errors.minStock} />

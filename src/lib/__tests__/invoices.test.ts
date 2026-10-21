@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { db, getSettings } from '../../db/database';
-import { createInvoiceFromSale, nextInvoiceNumber, peekInvoiceNumber } from '../invoices';
+import { createInvoiceFromRepair, createInvoiceFromSale, nextInvoiceNumber, peekInvoiceNumber } from '../invoices';
 import { formatInvoiceNumber } from '../calc';
-import type { Sale, Settings } from '../../types';
+import type { Repair, Sale, Settings } from '../../types';
 
 const clearAll = async () => {
   await db.transaction('rw', db.tables, async () => {
@@ -46,6 +46,14 @@ describe('nextInvoiceNumber', () => {
     expect((await getSettings()).invoiceNextNumber).toBe(3);
   });
 
+
+  it('never hands the same number to concurrent callers', async () => {
+    const now = new Date(2026, 4, 1);
+    const numbers = await Promise.all(Array.from({ length: 8 }, () => nextInvoiceNumber(now)));
+    expect(new Set(numbers).size).toBe(8);
+    expect((await getSettings()).invoiceNextNumber).toBe(9);
+  });
+
   it('skips numbers already taken', async () => {
     const now = new Date(2026, 4, 1);
     const s = await getSettings();
@@ -86,5 +94,39 @@ describe('createInvoiceFromSale', () => {
     expect(inv.totalTax).toBe(162.96);
     expect(await db.invoices.count()).toBe(1);
     expect((await getSettings()).invoiceNextNumber).toBe(2);
+  });
+});
+
+describe('createInvoiceFromRepair', () => {
+  const repair = (patch: Partial<Repair> = {}): Repair => ({
+    id: 9, ticketNumber: 'R-000007', dateIn: new Date(2026, 4, 1).toISOString(),
+    customerName: 'Laura', customerPhone: '660112233', customerId: 3,
+    device: 'iPhone 13', imei: '', problem: 'Pantalla rota',
+    status: 'delivered', estimatedCost: 129, createdAt: new Date(2026, 4, 1).toISOString(),
+    ...patch,
+  });
+
+  it('keeps a single line when labor is included in the price', async () => {
+    const inv = await createInvoiceFromRepair(repair({ laborMode: 'included', laborCost: 30, finalCost: 129 }));
+
+    expect(inv.items).toHaveLength(1);
+    expect(inv.total).toBe(129);
+  });
+
+  it('adds a separate labor line on top of the repair price', async () => {
+    const inv = await createInvoiceFromRepair(repair({ laborMode: 'separate', laborCost: 30, finalCost: 119 }));
+
+    expect(inv.items).toHaveLength(2);
+    expect(inv.items[0].total).toBe(119);
+    expect(inv.items[1].total).toBe(30);
+    expect(inv.items[1].description).toContain('Mano de obra');
+    expect(inv.total).toBe(149);
+  });
+
+  it('ignores the labor amount for legacy repairs without laborMode', async () => {
+    const inv = await createInvoiceFromRepair(repair({ laborCost: 30 }));
+
+    expect(inv.items).toHaveLength(1);
+    expect(inv.total).toBe(129);
   });
 });

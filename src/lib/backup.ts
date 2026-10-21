@@ -2,7 +2,17 @@ import { format } from 'date-fns';
 import Dexie from 'dexie';
 import { db, DEFAULT_SETTINGS, TABLE_NAMES, getSettings, type TableName } from '../db/database';
 
-export type BackupData = Partial<Record<TableName, unknown[]>> & { _meta?: { app: string; version: number; exportedAt: string } };
+export type BackupData = Partial<Record<TableName, unknown[]>> & {
+  _meta?: {
+    app: string;
+    version: number;
+    exportedAt: string;
+    /** SHA-256 of the table payload (computed after masking credentials). */
+    digest?: string;
+    /** Number of tables included in the payload. */
+    tables?: number;
+  };
+};
 
 export interface SnapshotOptions {
   /** Exclude messaging credentials from an ON-DISK snapshot: they are masked instead. */
@@ -44,19 +54,61 @@ export function downloadFile(content: string | Blob, filename: string, mime = 'a
   setTimeout(() => URL.revokeObjectURL(url), 2000);
 }
 
+/** Deterministic SHA-256 over the table payload, excluding `_meta`. */
+export async function backupDigest(data: BackupData): Promise<string> {
+  const payload: BackupData = {};
+  for (const name of TABLE_NAMES) if (Array.isArray(data[name])) payload[name] = data[name];
+  const bytes = new TextEncoder().encode(JSON.stringify(payload));
+  const hash = await crypto.subtle.digest('SHA-256', bytes as BufferSource);
+  return Array.from(new Uint8Array(hash)).map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
 export async function exportAll(suffix = '', opts: SnapshotOptions = {}): Promise<{ json: string; size: number; filename: string }> {
   let data: BackupData = { _meta: { app: 'ShopLogic Pro', version: 1, exportedAt: new Date().toISOString() } };
   for (const name of TABLE_NAMES) data[name] = await db.table(name).toArray();
   if (opts.maskCredentials) data = applyCredentialMask(data);
+  const digest = await backupDigest(data);
+  data._meta = { ...(data._meta ?? { app: 'ShopLogic Pro', version: 1, exportedAt: new Date().toISOString() }), digest, tables: Object.keys(data).filter((k) => k !== '_meta').length };
   const json = JSON.stringify(data, null, 2);
   const filename = `shoplogic_backup_${format(new Date(), 'yyyy-MM-dd')}${suffix}.json`;
   return { json, size: new Blob([json]).size, filename };
 }
 
+/**
+ * Manual exports mask messaging credentials by default: a backup file may be
+ * copied to a USB stick or cloud drive, so tokens/SMTP passwords must not
+ * travel in clear text. Restoring a masked backup keeps the live credentials.
+ */
 export async function downloadBackup(suffix = '') {
-  const b = await exportAll(suffix);
+  const b = await exportAll(suffix, { maskCredentials: true });
   downloadFile(b.json, b.filename);
   return b;
+}
+
+/** True when the payload still matches the digest stored in `_meta`. */
+export async function isBackupIntact(data: BackupData): Promise<boolean | null> {
+  const expected = data._meta?.digest;
+  if (!expected) return null;
+  return (await backupDigest(data)) === expected;
+}
+
+/** Non-destructive inspection used by the restore preview. */
+export async function inspectBackup(text: string): Promise<{
+  data: BackupData;
+  counts: Record<string, number>;
+  digestValid: boolean | null;
+  exportedAt?: string;
+  tables?: number;
+}> {
+  const data = parseBackup(text);
+  const digestValid = await isBackupIntact(data);
+  return {
+    data,
+    counts: backupCounts(data),
+    digestValid,
+    exportedAt: data._meta?.exportedAt,
+    tables: data._meta?.tables,
+  };
 }
 
 export function parseBackup(text: string): BackupData {
@@ -110,6 +162,8 @@ export function backupCounts(d: BackupData): Record<string, number> {
 
 /** Restores everything except users (users are always protected). */
 export async function importBackup(d: BackupData) {
+  // Integrity gate: a digest mismatch means the file changed after export.
+  if ((await isBackupIntact(d)) === false) throw new Error('backup.tampered');
   // Integrity gate: rows missing mandatory fields would crash the app at runtime.
   const { ok, errors } = validateBackupRows(d);
   if (!ok) throw new Error(`backup.corrupt: ${errors.join(', ')}`);

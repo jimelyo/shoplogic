@@ -1,8 +1,8 @@
 import { create } from 'zustand';
-import type { Accent, NavSection, Product, Role, ThemeMode } from '../types';
-import { ACCENTS, ALL_MODULES } from '../types';
+import type { Accent, ActionPermission, NavSection, Product, Role, ThemeMode } from '../types';
+import { ACCENTS, ALL_MODULES, DEFAULT_ACTION_PERMISSIONS } from '../types';
 
-export interface SessionUser { id: number; name: string; email: string; role: Role; permissions: NavSection[] }
+export interface SessionUser { id: number; name: string; email: string; role: Role; permissions: NavSection[]; actions: ActionPermission[] }
 export interface CartItem { product: Product; quantity: number }
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
 export interface ToastMsg { id: number; type: ToastType; message: string }
@@ -53,7 +53,12 @@ export function applyTheme(mode: ThemeMode, accent: Accent) {
 }
 
 const loadSession = (): SessionUser | null => {
-  try { return JSON.parse(localStorage.getItem('sl_session') || 'null'); } catch { return null; }
+  try {
+    const raw = JSON.parse(localStorage.getItem('sl_session') || 'null') as SessionUser | null;
+    // Sessions created before action permissions existed get their role defaults.
+    if (raw && !Array.isArray(raw.actions)) raw.actions = [...(DEFAULT_ACTION_PERMISSIONS[raw.role] ?? [])];
+    return raw;
+  } catch { return null; }
 };
 
 let toastId = 0;

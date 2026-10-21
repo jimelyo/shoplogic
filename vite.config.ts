@@ -45,10 +45,38 @@ self.addEventListener('fetch', (e) => {
   }
 }
 
+
+/**
+ * Production-only Content-Security-Policy. It is injected at build time (not
+ * in index.html) so Vite's HMR preamble and eval-free dev pipeline keep
+ * working; packaged/web builds get a strict policy with no unsafe-eval.
+ */
+function contentSecurityPolicy(): Plugin {
+  const policy = [
+    "default-src 'self'",
+    "base-uri 'self'",
+    "object-src 'none'",
+    "form-action 'self'",
+    "script-src 'self' file:",
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: blob:",
+    "font-src 'self' data:",
+    "worker-src 'self' blob:",
+    "connect-src 'self' file: https://graph.facebook.com https://*.aeat.es https://*.agenciatributaria.gob.es",
+  ].join('; ')
+  return {
+    name: 'inject-csp',
+    apply: 'build',
+    transformIndexHtml(html) {
+      return html.replace('</head>', `  <meta http-equiv="Content-Security-Policy" content="${policy}" />\n  </head>`)
+    },
+  }
+}
+
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   return {
-    plugins: [react(), tailwindcss(), precacheWorker()],
+    plugins: [react(), tailwindcss(), precacheWorker(), contentSecurityPolicy()],
     // Relative base: the static build must work from file:// inside Electron
     // (absolute /assets/... URLs break there). Harmless for the web deploy.
     base: './',

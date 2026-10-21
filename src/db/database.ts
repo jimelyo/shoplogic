@@ -3,7 +3,7 @@ import type {
   AppNotification, AuditLog, Customer, Expense, Invoice, Product, Provider, PurchaseOrder, PurchaseOrderStatus,
   CashSession, OutboxEntry, DailySnapshot, Quote, Repair, Sale, SaleReturn, Settings, StockMove, StockMoveType, TradeIn, User, PaymentMethod,
 } from '../types';
-import { DEFAULT_ROLE_PERMISSIONS } from '../types';
+import { DEFAULT_ACTION_PERMISSIONS, DEFAULT_ROLE_PERMISSIONS } from '../types';
 import { DEFAULT_CATEGORIES } from '../data/categories';
 import { DEFAULT_AUTOMATIONS } from '../data/automations';
 import { DEFAULT_CHANNELS } from '../data/channels';
@@ -201,10 +201,10 @@ async function doSeed(force: boolean) {
   // already committed and throw PrematureCommitError.
   const newUsers: User[] | null = (await db.users.count()) === 0
     ? [
-        { name: 'Administrador', email: 'admin@shoplogic.com', password: await hashPassword('admin123'), role: 'admin', permissions: [...DEFAULT_ROLE_PERMISSIONS.admin], isActive: true, createdAt: daysAgo(90) },
-        { name: 'Marta Manager', email: 'manager@shoplogic.com', password: await hashPassword('manager123'), role: 'manager', permissions: [...DEFAULT_ROLE_PERMISSIONS.manager], isActive: true, createdAt: daysAgo(80) },
-        { name: 'Pedro Técnico', email: 'tecnico@shoplogic.com', password: await hashPassword('tecnico123'), role: 'technician', permissions: [...DEFAULT_ROLE_PERMISSIONS.technician], isActive: true, createdAt: daysAgo(70) },
-        { name: 'Lucía Cajera', email: 'cajero@shoplogic.com', password: await hashPassword('cajero123'), role: 'cashier', permissions: [...DEFAULT_ROLE_PERMISSIONS.cashier], isActive: true, createdAt: daysAgo(60) },
+        { name: 'Administrador', email: 'admin@shoplogic.com', password: await hashPassword('admin123'), role: 'admin', permissions: [...DEFAULT_ROLE_PERMISSIONS.admin], actions: [...DEFAULT_ACTION_PERMISSIONS.admin], isActive: true, createdAt: daysAgo(90) },
+        { name: 'Marta Manager', email: 'manager@shoplogic.com', password: await hashPassword('manager123'), role: 'manager', permissions: [...DEFAULT_ROLE_PERMISSIONS.manager], actions: [...DEFAULT_ACTION_PERMISSIONS.manager], isActive: true, createdAt: daysAgo(80) },
+        { name: 'Pedro Técnico', email: 'tecnico@shoplogic.com', password: await hashPassword('tecnico123'), role: 'technician', permissions: [...DEFAULT_ROLE_PERMISSIONS.technician], actions: [...DEFAULT_ACTION_PERMISSIONS.technician], isActive: true, createdAt: daysAgo(70) },
+        { name: 'Lucía Cajera', email: 'cajero@shoplogic.com', password: await hashPassword('cajero123'), role: 'cashier', permissions: [...DEFAULT_ROLE_PERMISSIONS.cashier], actions: [...DEFAULT_ACTION_PERMISSIONS.cashier], isActive: true, createdAt: daysAgo(60) },
       ]
     : null;
 

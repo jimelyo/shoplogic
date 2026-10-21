@@ -3,9 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { ArrowLeft, Undo2 } from 'lucide-react';
 import { db } from '../db/database';
-import { toast, confirmDialog } from '../store/store';
+import { toast, confirmDialog, useStore } from '../store/store';
 import { useFormat } from '../lib/format';
 import { logAction } from '../lib/audit';
+import { canDo } from '../lib/permissions';
 import { createReturn, refundable } from '../lib/returns';
 import type { Sale } from '../types';
 import { Badge, EmptyState } from './shared/UI';
@@ -20,6 +21,8 @@ import { Modal } from './shared/Modal';
 export function SalesReturns({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { t } = useTranslation();
   const f = useFormat();
+  const user = useStore((s) => s.currentUser);
+  const canRefund = canDo(user, 'pos.refund');
   const sales = useLiveQuery(() => (open ? db.sales.orderBy('date').reverse().toArray() : []), [open]);
   const [q, setQ] = useState('');
   const [target, setTarget] = useState<Sale | null>(null);
@@ -53,6 +56,7 @@ export function SalesReturns({ open, onClose }: { open: boolean; onClose: () => 
 
   const submit = async () => {
     if (!target) return;
+    if (!canRefund) { toast.error(t('users.actionDenied')); return; }
     const lines = Object.entries(qty)
       .map(([productId, quantity]) => ({ productId: Number(productId), quantity }))
       .filter((l) => l.quantity > 0);
@@ -86,7 +90,7 @@ export function SalesReturns({ open, onClose }: { open: boolean; onClose: () => 
       footer={target ? (
         <>
           <Button variant="secondary" icon={<ArrowLeft />} onClick={backToList}>{t('returns.back')}</Button>
-          <Button variant="danger" icon={<Undo2 />} loading={busy} onClick={submit}>{t('returns.confirmShort')}</Button>
+          <Button variant="danger" icon={<Undo2 />} loading={busy} disabled={!canRefund} onClick={submit}>{t('returns.confirmShort')}</Button>
         </>
       ) : <Button variant="secondary" onClick={onClose}>{t('common.close')}</Button>}>
 

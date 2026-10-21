@@ -9,7 +9,7 @@ import { flushOutbox } from './lib/messaging';
 import { ensureDailySnapshot } from './lib/backup';
 import { initUpdateSystem } from './lib/update';
 import type { NavSection } from './types';
-import { ALL_MODULES } from './types';
+import { ALL_MODULES, DEFAULT_ACTION_PERMISSIONS } from './types';
 import { Layout } from './components/Layout';
 import { Login } from './components/Login';
 import { LockScreen } from './components/LockScreen';
@@ -116,8 +116,10 @@ export default function App() {
   useEffect(() => {
     if (!ready || !user || dbUser === undefined) return;
     if (!dbUser || !dbUser.isActive) { logout(); return; }
-    const changed = dbUser.name !== user.name || dbUser.role !== user.role || dbUser.email !== user.email || dbUser.permissions.join() !== user.permissions.join();
-    if (changed) setCurrentUser({ id: dbUser.id!, name: dbUser.name, email: dbUser.email, role: dbUser.role, permissions: dbUser.permissions });
+    const dbActions = dbUser.actions ?? DEFAULT_ACTION_PERMISSIONS[dbUser.role] ?? [];
+    const changed = dbUser.name !== user.name || dbUser.role !== user.role || dbUser.email !== user.email
+      || dbUser.permissions.join() !== user.permissions.join() || dbActions.join() !== user.actions.join();
+    if (changed) setCurrentUser({ id: dbUser.id!, name: dbUser.name, email: dbUser.email, role: dbUser.role, permissions: dbUser.permissions, actions: dbActions });
   }, [dbUser, ready]);
 
   useEffect(() => {

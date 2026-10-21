@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronDown, Check } from 'lucide-react';
-import { LANGUAGES } from '../../i18n';
+import { changeLanguage, LANGUAGES } from '../../i18n';
 import { useClickOutside } from '../../lib/hooks';
 
 export function LanguageSelector({ direction = 'down', compact = false, className = '' }: { direction?: 'up' | 'down'; compact?: boolean; className?: string }) {
@@ -29,7 +29,7 @@ export function LanguageSelector({ direction = 'down', compact = false, classNam
             <button
               key={l.code}
               type="button"
-              onClick={() => { i18n.changeLanguage(l.code); setOpen(false); }}
+              onClick={() => { void changeLanguage(l.code); setOpen(false); }}
               className={`flex w-full items-center gap-2.5 px-3 py-2 text-start text-sm hover:bg-sl-hover ${l.code === cur.code ? 'font-semibold text-primary' : 'text-sl-text'}`}
             >
               <span className="text-base">{l.flag}</span>

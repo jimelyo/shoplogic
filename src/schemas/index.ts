@@ -39,6 +39,12 @@ export const repairSchema = z.object({
   problem: req(), diagnosis: opt(), notes: opt(),
   status: z.enum(['received', 'diagnosis', 'in_progress', 'waiting_parts', 'completed', 'delivered', 'cancelled']),
   estimatedCost: money(), finalCost: optMoney(),
+  /** Labor billed inside the price (included) or added on top (separate). */
+  laborMode: z.enum(['included', 'separate']).default('included'),
+  laborCost: optMoney(),
+}).superRefine((d, ctx) => {
+  if (d.laborMode === 'separate' && !(d.laborCost && d.laborCost > 0))
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['laborCost'], message: 'validation.positive' });
 });
 
 export const expenseSchema = z.object({
@@ -103,6 +109,7 @@ export const userSchema = z.object({
   role: z.enum(['admin', 'manager', 'technician', 'cashier']),
   isActive: z.boolean(),
   permissions: z.array(z.string()),
+  actions: z.array(z.string()).default([]),
 });
 
 export type FormErrors = Record<string, string>;

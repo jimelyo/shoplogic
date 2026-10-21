@@ -10,17 +10,17 @@ import { hashPassword } from '../lib/hash';
 import { logAction } from '../lib/audit';
 import { ADMIN_ONLY } from '../lib/permissions';
 import { userSchema, validateForm, type FormErrors } from '../schemas';
-import type { NavSection, Role, User } from '../types';
-import { ALL_MODULES, DEFAULT_ROLE_PERMISSIONS, ROLES, ROLE_ICONS } from '../types';
+import type { ActionPermission, NavSection, Role, User } from '../types';
+import { ACTION_PERMISSIONS, ALL_MODULES, DEFAULT_ACTION_PERMISSIONS, DEFAULT_ROLE_PERMISSIONS, ROLES, ROLE_ICONS } from '../types';
 import { PageHeader } from './shared/PageHeader';
 import { Badge, Card, EmptyState, IconButton, Pill, SearchInput, Toolbar, ViewToggle, useViewMode } from './shared/UI';
 import { Button, Input, Select, Toggle } from './shared/Forms';
 import { Modal } from './shared/Modal';
 import { DataTable } from './shared/SortableTable';
 import { LoadingPage } from './shared/Skeleton';
-import { MODULE_ICONS, PermissionGrid, RoleBadge, RolePermissionsMatrix } from './shared/RolePermissions';
+import { ActionPermissionGrid, MODULE_ICONS, PermissionGrid, RoleBadge, RolePermissionsMatrix } from './shared/RolePermissions';
 
-type UForm = { name: string; email: string; password: string; role: Role; isActive: boolean; permissions: NavSection[] };
+type UForm = { name: string; email: string; password: string; role: Role; isActive: boolean; permissions: NavSection[]; actions: ActionPermission[] };
 
 type ActionColor = 'green' | 'blue' | 'red' | 'amber' | 'purple' | 'slate' | 'cyan' | 'orange';
 const ACTION_COLORS: Record<string, ActionColor> = {
@@ -41,7 +41,7 @@ export function Users() {
   const [logModule, setLogModule] = useState('all');
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<User | null>(null);
-  const [form, setForm] = useState<UForm>({ name: '', email: '', password: '', role: 'cashier', isActive: true, permissions: [...DEFAULT_ROLE_PERMISSIONS.cashier] });
+  const [form, setForm] = useState<UForm>({ name: '', email: '', password: '', role: 'cashier', isActive: true, permissions: [...DEFAULT_ROLE_PERMISSIONS.cashier], actions: [...DEFAULT_ACTION_PERMISSIONS.cashier] });
   const [errors, setErrors] = useState<FormErrors>({});
 
   const list = useMemo(() => (users ?? []).filter((u) => matches(q, u.name, u.email, t(`roles.${u.role}`))), [users, q, t]);
@@ -49,9 +49,9 @@ export function Users() {
   if (!users || !logs) return <LoadingPage />;
   const admins = users.filter((u) => u.role === 'admin' && u.isActive);
 
-  const openNew = () => { setEditing(null); setForm({ name: '', email: '', password: '', role: 'cashier', isActive: true, permissions: [...DEFAULT_ROLE_PERMISSIONS.cashier] }); setErrors({}); setOpen(true); };
-  const openEdit = (u: User) => { setEditing(u); setForm({ name: u.name, email: u.email, password: '', role: u.role, isActive: u.isActive, permissions: [...u.permissions] }); setErrors({}); setOpen(true); };
-  const changeRole = (role: Role) => setForm({ ...form, role, permissions: [...DEFAULT_ROLE_PERMISSIONS[role]] });
+  const openNew = () => { setEditing(null); setForm({ name: '', email: '', password: '', role: 'cashier', isActive: true, permissions: [...DEFAULT_ROLE_PERMISSIONS.cashier], actions: [...DEFAULT_ACTION_PERMISSIONS.cashier] }); setErrors({}); setOpen(true); };
+  const openEdit = (u: User) => { setEditing(u); setForm({ name: u.name, email: u.email, password: '', role: u.role, isActive: u.isActive, permissions: [...u.permissions], actions: [...(u.actions ?? DEFAULT_ACTION_PERMISSIONS[u.role])] }); setErrors({}); setOpen(true); };
+  const changeRole = (role: Role) => setForm({ ...form, role, permissions: [...DEFAULT_ROLE_PERMISSIONS[role]], actions: [...DEFAULT_ACTION_PERMISSIONS[role]] });
 
   const save = async () => {
     const r = validateForm(userSchema, form);
@@ -63,17 +63,18 @@ export function Users() {
     const dup = await db.users.where('email').equalsIgnoreCase(d.email).first();
     if (dup && dup.id !== editing?.id) { setErrors({ email: 'validation.duplicate' }); return; }
     const permissions = (d.permissions as NavSection[]).filter((m) => d.role === 'admin' || !ADMIN_ONLY.includes(m));
+    const actions = d.role === 'admin' ? ACTION_PERMISSIONS.map((a) => a.id) : (d.actions as ActionPermission[]);
     if (editing) {
       const lastAdmin = editing.role === 'admin' && admins.length <= 1 && (d.role !== 'admin' || !d.isActive);
       if (lastAdmin) { toast.error(t('users.lastAdmin')); return; }
-      const patch: Partial<User> = { name: d.name, email: d.email, role: d.role, isActive: d.isActive, permissions };
+      const patch: Partial<User> = { name: d.name, email: d.email, role: d.role, isActive: d.isActive, permissions, actions };
       if (d.password) patch.password = await hashPassword(d.password);
       await db.users.update(editing.id!, patch);
       await logAction('update', 'users', `${d.email} · ${t(`roles.${d.role}`)} · ${permissions.length}/${ALL_MODULES.length}`);
       if (d.password) await logAction('password_change', 'users', d.email);
       toast.success(t('common.updated'));
     } else {
-      await db.users.add({ name: d.name, email: d.email, password: await hashPassword(d.password), role: d.role, permissions, isActive: d.isActive, createdAt: new Date().toISOString() });
+      await db.users.add({ name: d.name, email: d.email, password: await hashPassword(d.password), role: d.role, permissions, actions, isActive: d.isActive, createdAt: new Date().toISOString() });
       await logAction('create', 'users', `${d.email} · ${t(`roles.${d.role}`)}`);
       toast.success(t('common.created'));
     }
@@ -185,6 +186,10 @@ export function Users() {
           <div className="rounded-xl border border-sl-border bg-sl-card2 p-3">
             <div className="mb-2 text-xs font-bold uppercase tracking-wide text-sl-muted">🔐 {t('users.permissions')}</div>
             <PermissionGrid value={form.permissions} onChange={(p) => setForm({ ...form, permissions: p })} role={form.role} />
+          </div>
+          <div className="rounded-xl border border-sl-border bg-sl-card2 p-3">
+            <div className="mb-2 text-xs font-bold uppercase tracking-wide text-sl-muted">⚡ {t('common.actions')}</div>
+            <ActionPermissionGrid value={form.actions} onChange={(a) => setForm({ ...form, actions: a })} role={form.role} />
           </div>
         </div>
       </Modal>

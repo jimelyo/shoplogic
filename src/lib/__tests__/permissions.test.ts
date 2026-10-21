@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { ADMIN_ONLY, canAccess, firstAccessible, isReadOnly } from '../permissions';
-import { DEFAULT_ROLE_PERMISSIONS } from '../../types';
+import { ADMIN_ONLY, canAccess, canDo, firstAccessible, isReadOnly } from '../permissions';
+import { DEFAULT_ACTION_PERMISSIONS, DEFAULT_ROLE_PERMISSIONS } from '../../types';
 import type { SessionUser } from '../../store/store';
 
-const user = (role: SessionUser['role'], permissions?: SessionUser['permissions']): SessionUser => ({
-  id: 1, name: 'Test', email: 't@t.t', role, permissions: permissions ?? DEFAULT_ROLE_PERMISSIONS[role],
+const user = (role: SessionUser['role'], permissions?: SessionUser['permissions'], actions?: SessionUser['actions']): SessionUser => ({
+  id: 1, name: 'Test', email: 't@t.t', role,
+  permissions: permissions ?? DEFAULT_ROLE_PERMISSIONS[role],
+  actions: actions ?? [...DEFAULT_ACTION_PERMISSIONS[role]],
 });
 
 describe('canAccess', () => {
@@ -57,5 +59,21 @@ describe('firstAccessible', () => {
   it('returns null when nothing is reachable', () => {
     expect(firstAccessible(user('cashier', []))).toBe(null);
     expect(firstAccessible(null)).toBe(null);
+  });
+});
+
+describe('canDo', () => {
+  it('always allows admin and follows role defaults for legacy sessions', () => {
+    expect(canDo(user('admin', [], []), 'pos.discount')).toBe(true);
+    expect(canDo(user('cashier'), 'pos.discount')).toBe(true);
+    expect(canDo(user('cashier'), 'data.export')).toBe(false);
+    expect(canDo(user('manager'), 'data.export')).toBe(true);
+    expect(canDo(user('technician'), 'pos.refund')).toBe(false);
+  });
+
+  it('honours explicit grants and denials', () => {
+    expect(canDo(user('cashier', undefined, ['pos.refund']), 'pos.refund')).toBe(true);
+    expect(canDo(user('cashier', undefined, ['pos.refund']), 'pos.discount')).toBe(false);
+    expect(canDo(null, 'pos.discount')).toBe(false);
   });
 });

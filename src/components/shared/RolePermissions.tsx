@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Lock } from 'lucide-react';
-import type { NavSection, Role } from '../../types';
-import { ALL_MODULES, DEFAULT_ROLE_PERMISSIONS, READ_ONLY_MODULES, ROLE_ICONS, ROLES } from '../../types';
+import type { ActionPermission, NavSection, Role } from '../../types';
+import { ACTION_PERMISSIONS, ALL_MODULES, DEFAULT_ACTION_PERMISSIONS, DEFAULT_ROLE_PERMISSIONS, READ_ONLY_MODULES, ROLE_ICONS, ROLES } from '../../types';
 import { ADMIN_ONLY } from '../../lib/permissions';
 import type { BadgeColor } from '../../lib/colors';
 import { Badge } from './UI';
@@ -49,6 +49,38 @@ export function PermissionGrid({ value, onChange, role }: { value: NavSection[];
               <span className="text-base">{MODULE_ICONS[m]}</span>
               <span className="flex-1 truncate">{t(`nav.${m}`)}</span>
               {lock ? <Lock className="size-3.5" /> : <span>{on ? '✓' : '○'}</span>}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+
+/** Checkbox grid for sensitive actions (discounts, refunds, price edits…). */
+export function ActionPermissionGrid({ value, onChange, role }: { value: ActionPermission[]; onChange: (v: ActionPermission[]) => void; role: Role }) {
+  const { t } = useTranslation();
+  const locked = role === 'admin';
+  const toggle = (a: ActionPermission) => {
+    if (locked) return;
+    onChange(value.includes(a) ? value.filter((x) => x !== a) : [...value, a]);
+  };
+  return (
+    <div>
+      <div className="mb-2 flex flex-wrap items-center gap-2">
+        <Button size="sm" variant="outline" onClick={() => onChange([...DEFAULT_ACTION_PERMISSIONS[role]])}>↺ {t('users.resetRole')}</Button>
+        <span className="ms-auto text-xs text-sl-muted">{locked ? '👑' : `${value.length}/${ACTION_PERMISSIONS.length}`}</span>
+      </div>
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        {ACTION_PERMISSIONS.map((a) => {
+          const on = locked || value.includes(a.id);
+          return (
+            <button key={a.id} type="button" disabled={locked} onClick={() => toggle(a.id)}
+              className={`flex items-center gap-2 rounded-lg border px-2.5 py-2 text-start text-xs font-semibold ${locked ? 'cursor-not-allowed border-sl-border bg-sl-card2 text-sl-muted opacity-70' : on ? 'border-emerald-500/60 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300' : 'border-sl-border bg-sl-card text-sl-muted hover:border-primary/50'}`}>
+              <span className="text-base">{a.icon}</span>
+              <span className="flex-1 truncate">{t(a.labelKey)}</span>
+              <span>{on ? '✓' : '○'}</span>
             </button>
           );
         })}

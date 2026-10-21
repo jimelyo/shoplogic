@@ -39,3 +39,8 @@ android/app/src/main/res/drawable*/launcher-background.xml
 !debug.keystore
 
 .vercel
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/

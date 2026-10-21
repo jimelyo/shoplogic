@@ -1,4 +1,4 @@
-# 📱 ShopLogic Pro v1.3.4
+# 📱 ShopLogic Pro v1.3.5
 
 <p align="center">
   <img src="public/icon-512.png" width="128" alt="ShopLogic Pro">
@@ -11,7 +11,7 @@
 [![Release](https://img.shields.io/github/v/release/jimelyo/shoplogic)](https://github.com/jimelyo/shoplogic/releases/latest)
 [![平台](https://img.shields.io/badge/Windows-x64%20%7C%20arm64-blue)](https://github.com/jimelyo/shoplogic/releases/latest)
 [![macOS](https://img.shields.io/badge/macOS-DMG%20x64%20%7C%20arm64-lightgrey)](https://github.com/jimelyo/shoplogic/releases/latest)
-[![Android](https://img.shields.io/badge/Android-APK%20v1.3.4-green)](https://github.com/jimelyo/shoplogic/releases/latest)
+[![Android](https://img.shields.io/badge/Android-APK%20v1.3.5-green)](https://github.com/jimelyo/shoplogic/releases/latest)
 [![语言](https://img.shields.io/badge/语言-5%20·%20阿拉伯语%20RTL-purple)](#-语言)
 [![许可](https://img.shields.io/badge/使用-私人-informational)]()
 
@@ -145,21 +145,21 @@
 ## 🚀 安装
 
 ### 📱 Android
-1. 从 [Release v1.3.4](https://github.com/jimelyo/shoplogic/releases/tag/v1.3.4) 下载 **`shoplogic-pro-v1.3.4-android.apk`**。⚠️ v1.3.4 使用**新的 keystore 签名**：无法覆盖安装官方 v1.2.0（签名不同）— 如需升级请先卸载。
+1. 从 [Release v1.3.5](https://github.com/jimelyo/shoplogic/releases/tag/v1.3.5) 下载 **`shoplogic-pro-v1.3.5-android.apk`**。⚠️ v1.3.5 使用**新的 keystore 签名**：无法覆盖安装官方 v1.2.0（签名不同）— 如需升级请先卸载。
 2. 首次安装时，允许浏览器/文件管理器**安装未知来源应用**（设置 → 安全）。
 3. 打开 APK 安装。需要 **Android 6.0+（API 23+）**。除网络外无其他权限：数据保存在应用内的 IndexedDB，完全本地。
 
 ### Windows（推荐 — 桌面）
 1. 从 [Releases](https://github.com/jimelyo/shoplogic/releases/latest) 下载适合您架构的 **v1.3.4 安装包**（x64 与 ARM64 在同一 release 内）：
-   - `ShopLogic-Setup-1.3.4-x64.exe`（Windows 10/11 x64）
-   - `ShopLogic-Setup-1.3.4-arm64.exe`（Windows on ARM）
+   - `ShopLogic-Setup-1.3.5-x64.exe`（Windows 10/11 x64）
+   - `ShopLogic-Setup-1.3.5-arm64.exe`（Windows on ARM）
 2. 运行安装包（静默安装，仅一次 UAC）。快捷方式位于桌面。
 3. 此后更新自动下载并应用（v1.3.3 及更早版本走同一 electron-updater 渠道也会自动升级）。
 
 ### macOS
 1. 从 [Releases](https://github.com/jimelyo/shoplogic/releases/latest) 下载适合您架构的 **v1.3.4 DMG**：
-   - `ShopLogic-1.3.4-x64.dmg`（Intel）
-   - `ShopLogic-1.3.4-arm64.dmg`（Apple Silicon）
+   - `ShopLogic-1.3.5-x64.dmg`（Intel）
+   - `ShopLogic-1.3.5-arm64.dmg`（Apple Silicon）
 2. 打开 DMG 并将应用拖入「应用程序」。后续更新同样自动（`latest-mac.yml`）。
 3. ⚠️ DMG **尚未经 Apple 公证**：首次打开时 macOS 会要求「系统设置 → 隐私与安全性 → 仍要打开」。
 

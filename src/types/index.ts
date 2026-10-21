@@ -4,6 +4,28 @@ export type NavSection =
 /** State of a quote: open → accepted → converted to a sale or a repair, or rejected/expired. */
 export type QuoteStatus = 'draft' | 'sent' | 'accepted' | 'rejected' | 'expired' | 'converted';
 export type Role = 'admin' | 'manager' | 'technician' | 'cashier';
+/**
+ * Sensitive operations that are not a whole module. Module access answers
+ * "can I open POS?"; an action permission answers "can I discount / refund /
+ * change a price / export the database?".
+ */
+export type ActionPermission =
+  | 'pos.discount' | 'pos.refund' | 'inventory.price' | 'billing.delete' | 'data.export' | 'data.import';
+export const ACTION_PERMISSIONS: { id: ActionPermission; icon: string; labelKey: string }[] = [
+  { id: 'pos.discount', icon: '🏷️', labelKey: 'pos.discount' },
+  { id: 'pos.refund', icon: '↩️', labelKey: 'returns.confirmShort' },
+  { id: 'inventory.price', icon: '💶', labelKey: 'common.price' },
+  { id: 'billing.delete', icon: '🗑️', labelKey: 'common.delete' },
+  { id: 'data.export', icon: '📤', labelKey: 'settings.export' },
+  { id: 'data.import', icon: '📥', labelKey: 'settings.import' },
+];
+/** Defaults applied to existing users that predate action permissions. */
+export const DEFAULT_ACTION_PERMISSIONS: Record<Role, ActionPermission[]> = {
+  admin: ACTION_PERMISSIONS.map((a) => a.id),
+  manager: ['pos.discount', 'pos.refund', 'inventory.price', 'billing.delete', 'data.export', 'data.import'],
+  technician: [],
+  cashier: ['pos.discount'],
+};
 export type PaymentMethod = 'cash' | 'card' | 'transfer' | 'other';
 export type RepairStatus = 'received' | 'diagnosis' | 'in_progress' | 'waiting_parts' | 'completed' | 'delivered' | 'cancelled';
 export type InvoiceStatus = 'draft' | 'sent' | 'paid' | 'partial' | 'overdue' | 'cancelled';
@@ -35,6 +57,10 @@ export interface Repair {
   id?: number; ticketNumber: string; dateIn: string; dateOut?: string; customerName: string; customerPhone: string;
   customerEmail?: string; customerId?: number; device: string; imei: string; problem: string; diagnosis?: string; notes?: string;
   status: RepairStatus; estimatedCost: number; finalCost?: number; createdAt: string;
+  /** How the labor charge is billed: inside the repair price (informational) or added on top of it. */
+  laborMode?: 'included' | 'separate';
+  /** Labor amount (VAT included). Informational when `laborMode` is 'included'. */
+  laborCost?: number;
 }
 export type StockMoveType = 'initial' | 'sale' | 'purchase' | 'adjustment' | 'create' | 'delete' | 'repair' | 'return' | 'trade_in';
 /** A signed ledger entry for every change of a product's stock level. */
@@ -215,6 +241,8 @@ export interface Settings {
 }
 export interface User {
   id?: number; name: string; email: string; password: string; role: Role; permissions: NavSection[];
+  /** Sensitive-action grants; absent on legacy rows, where role defaults apply. */
+  actions?: ActionPermission[];
   avatar?: string; isActive: boolean; lastLogin?: string; createdAt: string;
   /** Login guard (src/lib/guard.ts): consecutive failed attempts and lock deadline. */
   failedLogins?: number; lockUntil?: string;

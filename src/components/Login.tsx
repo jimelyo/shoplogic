@@ -13,7 +13,7 @@ import { LanguageSelector } from './shared/LanguageSelector';
 import { ThemeMenu } from './Layout';
 import { firstAccessible } from '../lib/permissions';
 import { appNameOf, BrandMark } from './shared/Brand';
-import { ROLE_ICONS } from '../types';
+import { DEFAULT_ACTION_PERMISSIONS, ROLE_ICONS } from '../types';
 import { useFormat } from '../lib/format';
 
 export function Login() {
@@ -59,7 +59,7 @@ export function Login() {
       // Éxito: resetea el contador de guardia (+ rehash de hashes antiguos).
       const patch = { ...loginSuccessFields(), lastLogin, ...(check.needsRehash ? { password: await hashPassword(password) } : {}) };
       await db.users.update(selected.id!, patch);
-      const session = { id: selected.id!, name: selected.name, email: selected.email, role: selected.role, permissions: selected.permissions };
+      const session = { id: selected.id!, name: selected.name, email: selected.email, role: selected.role, permissions: selected.permissions, actions: selected.actions ?? DEFAULT_ACTION_PERMISSIONS[selected.role] };
       setCurrentUser(session);
       const first = firstAccessible(session);
       if (first) setActiveModule(first === 'dashboard' || !session.permissions.includes(useStore.getState().activeModule) ? first : useStore.getState().activeModule);
