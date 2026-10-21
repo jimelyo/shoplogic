@@ -12,7 +12,7 @@ on:
         required: true
         default: 'v1.3.5'
 
-permisions:
+permissions:
   contents: write
 
 jobs:
@@ -43,7 +43,7 @@ jobs:
         env:
           # Firma opcional; sin certificado Apple el DMG queda sin firmar.
           CSC_LINK: ${{ secrets.MACOS_CSC_LINK }}
-          CCS_KEY_PASSWORD: ${{ secrets.MACOS_CSC_KEY_PASSWORD }}
+          CSC_KEY_PASSWORD: ${{ secrets.MACOS_CSC_KEY_PASSWORD }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
