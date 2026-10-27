@@ -26,12 +26,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Checks (i18n parity + lint + tests + build)
+      - name: Checks (i18n parity + lint + build + tests)
         run: |
           npm run check:i18n
           npm run lint
-          npm test
           npm run build
+          npm test
 
       - name: Package (electron-builder, x64 + arm64)
         env:
