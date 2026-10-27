@@ -102,4 +102,9 @@ jobs:
       - uses: actions/checkout@v4
       - env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release edit "$GITHUB_REF_NAME" --latest
+        # `gh release edit --latest` devuelve un 422 ("Release.tag_name already
+        # exists") sobre un tag publicado; la API PATCH con make_latest no lo padece.
+        run: |
+          RELEASE_ID=$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${GITHUB_REF_NAME}" --jq '.id')
+          gh api -X PATCH "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" -F make_latest=true >/dev/null
+          echo "Release ${GITHUB_REF_NAME} marcada como latest"
