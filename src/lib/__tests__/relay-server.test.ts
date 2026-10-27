@@ -5,18 +5,35 @@
  *  · un POST same-origin pasa el filtro y falla solo en el envío (502/400),
  *    demostrando que el relay queda alcanzable desde su propio origen.
  */
-import { afterAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import fs from 'node:fs';
+import path from 'node:path';
 
 const PORT = 34_581;
 const BASE = `http://127.0.0.1:${PORT}`;
 
-process.env.PORT = String(PORT);
-// El módulo hace listen al importarse (igual que en producción).
-const relay = await import('../../../server.mjs');
+// El servidor sirve `dist/index.html` como fallback SPA: en CI puede ejecutarse
+// `npm test` antes de `npm run build`, así que sembramos un mínimo si falta y
+// lo retiramos al terminar (nunca tocamos un dist real).
+const distIndex = path.resolve(process.cwd(), 'dist/index.html');
+let seeded = false;
+
+beforeAll(() => {
+  if (!fs.existsSync(distIndex)) {
+    fs.mkdirSync(path.dirname(distIndex), { recursive: true });
+    fs.writeFileSync(distIndex, '<!doctype html>relay-test');
+    seeded = true;
+  }
+});
 
 afterAll(async () => {
   await relay.closeServer();
+  if (seeded) fs.rmSync(path.dirname(distIndex), { recursive: true, force: true });
 });
+
+process.env.PORT = String(PORT);
+// El módulo hace listen al importarse (igual que en producción).
+const relay = await import('../../../server.mjs');
 
 describe('relay server', () => {
   it('/readyz responde desde loopback', async () => {

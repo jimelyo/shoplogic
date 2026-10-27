@@ -116,6 +116,7 @@ const server = http.createServer(async (req, res) => {
   let p = path.normalize(decodeURIComponent(url.pathname)).replace(/^(\.\.[/\\])+/, '');
   let file = path.join(ROOT, p);
   if (!file.startsWith(ROOT) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) file = path.join(ROOT, 'index.html');
+  if (!fs.existsSync(file)) return json(res, 404, { ok: false, error: 'notBuilt' });
   const ext = path.extname(file);
   const hashed = url.pathname.startsWith('/assets/');
   res.writeHead(200, { 'Content-Type': TYPES[ext] || 'application/octet-stream', 'Cache-Control': hashed ? 'public, max-age=31536000, immutable' : 'no-store' });
