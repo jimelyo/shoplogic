@@ -5,8 +5,15 @@ import { formatMoney, safeFormat } from './format';
 
 type T = (k: string, o?: Record<string, unknown>) => string;
 
-export const esc = (s: unknown) =>
+/**
+ * Canonical HTML escape for anything interpolated into ticket/invoice HTML.
+ * Certadaded and preferred name (reports H3): data from the DB — even rows
+ * imported from old, pre-sanitized backups — is never trusted at print time.
+ */
+export const escHtml = (s: unknown) =>
   String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+/** Legacy alias kept for every existing import. */
+export const esc = escHtml;
 
 /** Full standalone document for a printable receipt body — used by printHtml and by preview modals. */
 export function buildDoc(body: string, title: string) {
@@ -55,7 +62,7 @@ function storeHeader(s: Settings, t: T) {
   // (nunca la editó) se imprime el nombre real de la tienda, no el demo.
   const header = !tp?.header || tp.header === 'ShopLogic Mobile Store' ? s.storeName : tp.header;
   const logo = s.logo
-    ? `<div class="c"><img src="${s.logo}" alt="" style="max-width:26mm;max-height:20mm;object-fit:contain;margin:0 auto 2px"></div>`
+    ? `<div class="c"><img src="${escHtml(s.logo)}" alt="" style="max-width:26mm;max-height:20mm;object-fit:contain;margin:0 auto 2px"></div>`
     : (tp?.showLogo !== false ? '<div class="c logo">📱</div>' : '');
   return `${logo}
   <h1 class="c">${esc(header || s.storeName)}</h1>
@@ -132,7 +139,7 @@ export function invoiceHtml(inv: Invoice, s: Settings, t: T, brand = '#4f46e5') 
   const copies = Math.max(1, Math.min(5, np?.copies ?? 1));
   const one = `<div class="page">
     ${np?.watermark ? `<div class="wm">${esc(np.watermark)}</div>` : ''}
-    <div class="head"><div>${s.logo ? `<img src="${s.logo}" alt="" class="brand">` : ''}<div class="store">${esc(s.storeName)}</div><div class="muted">${esc(t('settings.cif'))}: ${esc(s.cif)}<br>${esc(s.address)}<br>${esc(s.phone)} · ${esc(s.email)}</div></div>
+    <div class="head"><div>${s.logo ? `<img src="${escHtml(s.logo)}" alt="" class="brand">` : ''}<div class="store">${escHtml(s.storeName)}</div><div class="muted">${esc(t('settings.cif'))}: ${esc(s.cif)}<br>${esc(s.address)}<br>${esc(s.phone)} · ${esc(s.email)}</div></div>
     <div class="ttl"><div class="big">${esc(t('billing.invoice'))}</div><div class="num">${esc(inv.number)}</div>
     <div class="muted">${esc(t('common.date'))}: ${safeFormat(inv.date, 'dd/MM/yyyy')}<br>${esc(t('billing.dueDate'))}: ${safeFormat(inv.dueDate, 'dd/MM/yyyy')}</div></div></div>
     <div class="cust"><div class="lbl">${esc(t('billing.billTo'))}</div><div class="b">${esc(inv.customerName)}</div>

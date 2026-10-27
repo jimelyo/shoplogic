@@ -8,21 +8,29 @@ export const FAILED_ATTEMPTS_BEFORE_LOCK = 3;
 const BASE_WAIT_MS = 30_000;
 const MAX_WAIT_MS = 3_600_000;
 
-export interface LoginGuardFields {
+import type { UpdateSpec } from 'dexie';
+import type { User } from '../types';
+
+/** Campos de guardia tal y como viven en la ficha del usuario. */
+export interface LoginGuardRecord {
   failedLogins?: number;
   /** ISO instant hasta el que la cuenta queda bloqueada. */
   lockUntil?: string;
 }
 
+/** Ese mismo record como patch válido para `db.users.update()`. Dexie 4 exige
+ *  UpdateSpec estricto: la intersección aporta los índices `actions.${number}`. */
+export type LoginGuardFields = LoginGuardRecord & UpdateSpec<User>;
+
 /** Milisegundos restantes de bloqueo (0 = desbloqueada). */
-export function lockedRemainingMs(u: LoginGuardFields | null | undefined, now = Date.now()): number {
+export function lockedRemainingMs(u: LoginGuardRecord | null | undefined, now = Date.now()): number {
   const until = u?.lockUntil ? Date.parse(u.lockUntil) : NaN;
   if (!Number.isFinite(until)) return 0;
   return Math.max(0, until - now);
 }
 
 /** Parche (Patch de User) tras un intento fallido: nada sensible almacenado. */
-export function failedAttemptFields(u: LoginGuardFields): LoginGuardFields {
+export function failedAttemptFields(u: LoginGuardRecord): LoginGuardFields {
   const attempts = (u.failedLogins ?? 0) + 1;
   if (attempts < FAILED_ATTEMPTS_BEFORE_LOCK) return { failedLogins: attempts };
   const step = Math.min(attempts - FAILED_ATTEMPTS_BEFORE_LOCK, 7);

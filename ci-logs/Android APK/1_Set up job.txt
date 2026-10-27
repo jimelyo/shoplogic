@@ -1,0 +1,34 @@
+﻿2026-10-21T23:01:35.5600335Z Current runner version: '2.338.0'
+2026-10-21T23:01:35.5626349Z ##[group]Runner Image Provisioner
+2026-10-21T23:01:35.5627300Z Hosted Compute Agent
+2026-10-21T23:01:35.5627914Z Version: 20261012.601
+2026-10-21T23:01:35.5628723Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d
+2026-10-21T23:01:35.5629734Z Build Date: 2026-10-12T17:48:21Z
+2026-10-21T23:01:35.5630521Z Worker ID: {9f48548f-3869-4f09-89da-41fec321127d}
+2026-10-21T23:01:35.5631331Z Region: canadaeast
+2026-10-21T23:01:35.5631902Z Cloud: Azure
+2026-10-21T23:01:35.5632569Z ##[endgroup]
+2026-10-21T23:01:35.5634052Z ##[group]Operating System
+2026-10-21T23:01:35.5634835Z Ubuntu
+2026-10-21T23:01:35.5635400Z 24.04.5
+2026-10-21T23:01:35.5636005Z LTS
+2026-10-21T23:01:35.5637088Z ##[endgroup]
+2026-10-21T23:01:35.5637689Z ##[group]Runner Image
+2026-10-21T23:01:35.5638722Z Image: ubuntu-24.04
+2026-10-21T23:01:35.5639598Z Version: 20261012.334.1
+2026-10-21T23:01:35.5640785Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-21T23:01:35.5642651Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+2026-10-21T23:01:35.5643735Z ##[endgroup]
+2026-10-21T23:01:35.5644895Z ##[group]GITHUB_TOKEN Permissions
+2026-10-21T23:01:35.5647148Z Contents: write
+2026-10-21T23:01:35.5647842Z Metadata: read
+2026-10-21T23:01:35.5648415Z ##[endgroup]
+2026-10-21T23:01:35.5650778Z Secret source: Actions
+2026-10-21T23:01:35.5651901Z Cache mode: write
+2026-10-21T23:01:35.5652913Z Prepare workflow directory
+2026-10-21T23:01:35.5991657Z Prepare all required actions
+2026-10-21T23:01:35.6039220Z Getting action download info
+2026-10-21T23:01:35.8871156Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-21T23:01:36.0096817Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2026-10-21T23:01:36.1318594Z Download action repository 'actions/setup-java@v4' (SHA:cf277c60eb25467037889841efdb72551f06f6c3)
+2026-10-21T23:01:36.8033583Z Complete job name: Android APK

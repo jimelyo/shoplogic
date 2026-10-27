@@ -100,7 +100,7 @@ export function VerifactuIncidents() {
               {showAll ? t('vf.showIncidents', 'Solo incidencias') : t('vf.showAll', 'Ver todo')}
             </Button>
             <Button size="sm" variant="secondary" onClick={() => { void retryAllVencidos(); }}>🔁 {t('vf.retryAllBtn', 'Reintentar pendientes')}</Button>
-            <Button size="sm" variant="outline" onClick={() => { void refresh(); }}>↺</Button>
+            <Button size="sm" variant="outline" aria-label={t('common.refresh')} onClick={() => { void refresh(); }}>↺</Button>
           </div>
         }
       >

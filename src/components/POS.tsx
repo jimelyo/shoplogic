@@ -351,7 +351,7 @@ export function POS() {
                       onChange={(e) => setSplitLine(idx, { amount: Number(e.target.value) || 0 })}
                       className="h-8 w-24 rounded-md border border-sl-border bg-sl-input px-2 text-xs text-sl-text outline-none focus:border-primary" />
                     {splitLines.length > 1 && (
-                      <button type="button" className="text-sl-muted hover:text-red-500" onClick={() => setSplitLines((ls) => ls.filter((_, i) => i !== idx))}>✕</button>
+                      <button type="button" aria-label={t('common.removeLine')} className="text-sl-muted hover:text-red-500" onClick={() => setSplitLines((ls) => ls.filter((_, i) => i !== idx))}>✕</button>
                     )}
                   </div>
                 ))}

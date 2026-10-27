@@ -133,11 +133,11 @@ export function SalesReturns({ open, onClose }: { open: boolean; onClose: () => 
                   <div className="text-xs text-sl-muted">{f.money(i.price)} · {max > 0 ? t('returns.maxAvailable', { count: max }) : t('returns.fullyReturned')}</div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button size="sm" variant="ghost" onClick={() => setLine(i.productId, max, value - 1)}>−</Button>
+                  <Button size="sm" variant="ghost" aria-label={t('common.quantityMinus')} onClick={() => setLine(i.productId, max, value - 1)}>−</Button>
                   <input type="number" min={0} max={max} value={value} disabled={max <= 0}
                     onChange={(e) => setLine(i.productId, max, Number(e.target.value))}
                     className="w-16 rounded-lg border border-sl-border bg-sl-input px-2 py-1 text-center text-sm text-sl-text outline-none focus:border-primary disabled:opacity-40" />
-                  <Button size="sm" variant="ghost" onClick={() => setLine(i.productId, max, value + 1)}>+</Button>
+                  <Button size="sm" variant="ghost" aria-label={t('common.quantityPlus')} onClick={() => setLine(i.productId, max, value + 1)}>+</Button>
                 </div>
               </div>
             );

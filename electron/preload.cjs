@@ -15,6 +15,11 @@ contextBridge.exposeInMainWorld('shoplogicDesktop', {
   /** #11 external backup: write a UTF-8 text file into a subfolder of the user's Documents. */
   saveTextFile: (opts) => ipcRenderer.invoke('files:save-text', opts),
   pickBackupDir: () => ipcRenderer.invoke('files:pick-dir'),
+  /** Migración de origen file:// → app://: la ventana oculta sobre el origen
+   *  viejo volca su Dexie por aquí; el origen nuevo lee el dump una vez. */
+  sendOriginDump: (json) => ipcRenderer.send('origin-migration:dump', json),
+  getOriginMigration: () => ipcRenderer.invoke('origin-migration:get'),
+  finishOriginMigration: () => ipcRenderer.invoke('origin-migration:finish'),
   /** VERI*FACTU: firma XAdES del registro (proceso main usa el .p12 local). */
   verifactuSign: (xml) => ipcRenderer.invoke('verifactu:sign', xml),
   verifactuSignerStatus: () => ipcRenderer.invoke('verifactu:signer-status'),

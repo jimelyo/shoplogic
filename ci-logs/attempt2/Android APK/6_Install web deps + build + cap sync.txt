@@ -1,0 +1,104 @@
+﻿2026-10-21T23:23:51.8651119Z ##[group]Run npm ci
+2026-10-21T23:23:51.8651502Z [36;1mnpm ci[0m
+2026-10-21T23:23:51.8651789Z [36;1mnpm run build[0m
+2026-10-21T23:23:51.8652093Z [36;1mnpx cap sync android[0m
+2026-10-21T23:23:51.8704490Z shell: /usr/bin/bash -e {0}
+2026-10-21T23:23:51.8704830Z env:
+2026-10-21T23:23:51.8705215Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.12-1/x64
+2026-10-21T23:23:51.8705818Z   JAVA_HOME_21_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.12-1/x64
+2026-10-21T23:23:51.8706308Z ##[endgroup]
+2026-10-21T23:23:54.1195510Z npm warn deprecated rimraf@2.6.3: Rimraf versions prior to v4 are no longer supported
+2026-10-21T23:23:54.5236297Z npm warn deprecated lodash.isequal@4.5.0: This package is deprecated. Use require('node:util').isDeepStrictEqual instead.
+2026-10-21T23:23:54.5554149Z npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+2026-10-21T23:23:54.6872487Z npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+2026-10-21T23:23:55.8962098Z npm warn deprecated boolean@3.2.0: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-10-21T23:23:56.7690100Z npm warn deprecated uuid@7.0.3: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+2026-10-21T23:24:03.5406043Z 
+2026-10-21T23:24:03.5406744Z added 523 packages, and audited 524 packages in 12s
+2026-10-21T23:24:03.5407252Z 
+2026-10-21T23:24:03.5407436Z 95 packages are looking for funding
+2026-10-21T23:24:03.5407796Z   run `npm fund` for details
+2026-10-21T23:24:03.6027874Z 
+2026-10-21T23:24:03.6028902Z 15 vulnerabilities (13 moderate, 2 high)
+2026-10-21T23:24:03.6029404Z 
+2026-10-21T23:24:03.6030084Z To address issues that do not require attention, run:
+2026-10-21T23:24:03.6030763Z   npm audit fix
+2026-10-21T23:24:03.6031026Z 
+2026-10-21T23:24:03.6031550Z To address all issues possible (including breaking changes), run:
+2026-10-21T23:24:03.6032313Z   npm audit fix --force
+2026-10-21T23:24:03.6032621Z 
+2026-10-21T23:24:03.6032987Z Some issues need review, and may require choosing
+2026-10-21T23:24:03.6033650Z a different dependency.
+2026-10-21T23:24:03.6033943Z 
+2026-10-21T23:24:03.6034206Z Run `npm audit` for details.
+2026-10-21T23:24:03.7644273Z 
+2026-10-21T23:24:03.7644781Z > shoplogic@1.3.5 build
+2026-10-21T23:24:03.7645150Z > tsc -b && vite build
+2026-10-21T23:24:03.7645322Z 
+2026-10-21T23:24:13.4000182Z [36mvite v8.3.2 [32mbuilding client environment for production...[36m[39m
+2026-10-21T23:24:13.4106370Z transforming...
+2026-10-21T23:24:13.7993569Z ✓ 3083 modules transformed.
+2026-10-21T23:24:13.9021589Z rendering chunks...
+2026-10-21T23:24:14.0530750Z computing gzip size...
+2026-10-21T23:24:14.0664025Z dist/index.html                             1.33 kB │ gzip:   0.65 kB
+2026-10-21T23:24:14.0664747Z dist/sw.js                                  2.52 kB
+2026-10-21T23:24:14.0665976Z dist/assets/index-Ca7Pr2ad.css             72.28 kB │ gzip:  12.17 kB
+2026-10-21T23:24:14.0667312Z dist/assets/subDays-DexUwu68.js             0.08 kB │ gzip:   0.09 kB
+2026-10-21T23:24:14.0668392Z dist/assets/addDays-hFBcUgXF.js             0.14 kB │ gzip:   0.14 kB
+2026-10-21T23:24:14.0669244Z dist/assets/plus-BKAqE9B0.js                0.17 kB │ gzip:   0.16 kB
+2026-10-21T23:24:14.0671187Z dist/assets/rotate-ccw-DP6JJULW.js          0.22 kB │ gzip:   0.20 kB
+2026-10-21T23:24:14.0672336Z dist/assets/undo-2-D9CxBCbD.js              0.23 kB │ gzip:   0.19 kB
+2026-10-21T23:24:14.0673246Z dist/assets/download-DIGWC705.js            0.25 kB │ gzip:   0.21 kB
+2026-10-21T23:24:14.0674305Z dist/assets/eye-DB0_MjKf.js                 0.28 kB │ gzip:   0.22 kB
+2026-10-21T23:24:14.0675368Z dist/assets/pencil-CpSJy4uv.js              0.30 kB │ gzip:   0.24 kB
+2026-10-21T23:24:14.0676024Z dist/assets/trash-CM0ItKgd.js               0.37 kB │ gzip:   0.24 kB
+2026-10-21T23:24:14.0676618Z dist/assets/subYears-CPC8QenD.js            0.37 kB │ gzip:   0.23 kB
+2026-10-21T23:24:14.0677209Z dist/assets/message-circle-C3X9YQWT.js      0.45 kB │ gzip:   0.32 kB
+2026-10-21T23:24:14.0677826Z dist/assets/PageHeader-DbEK-1Hx.js          0.70 kB │ gzip:   0.34 kB
+2026-10-21T23:24:14.0678435Z dist/assets/rolldown-runtime-hePW80VL.js    0.71 kB │ gzip:   0.42 kB
+2026-10-21T23:24:14.0679044Z dist/assets/aeat-soap-B8xsaLyv.js           2.05 kB │ gzip:   1.00 kB
+2026-10-21T23:24:14.0679952Z dist/assets/SortableTable-D22jMKIr.js       2.95 kB │ gzip:   1.34 kB
+2026-10-21T23:24:14.0680582Z dist/assets/BarcodeScanner-CO3OyBxF.js      3.53 kB │ gzip:   1.68 kB
+2026-10-21T23:24:14.0681199Z dist/assets/invoices-BJRqLvpT.js            4.04 kB │ gzip:   1.58 kB
+2026-10-21T23:24:14.0681865Z dist/assets/Automations-BIqgAMvD.js         4.21 kB │ gzip:   1.59 kB
+2026-10-21T23:24:14.0682463Z dist/assets/Notifications-IyL68-M1.js       4.87 kB │ gzip:   1.90 kB
+2026-10-21T23:24:14.0683058Z dist/assets/DeviceHistory-D1ocM7mj.js       5.21 kB │ gzip:   1.64 kB
+2026-10-21T23:24:14.0683650Z dist/assets/Providers-BbrriG7D.js           5.28 kB │ gzip:   1.95 kB
+2026-10-21T23:24:14.0684242Z dist/assets/StockMoves-CFymuZ1N.js          5.92 kB │ gzip:   2.15 kB
+2026-10-21T23:24:14.0685202Z dist/assets/Expenses-BcfVonjc.js            6.32 kB │ gzip:   2.34 kB
+2026-10-21T23:24:14.0686241Z dist/assets/Users-DPQMvJkx.js              10.91 kB │ gzip:   3.55 kB
+2026-10-21T23:24:14.0687214Z dist/assets/print-B5eXk6By.js              11.19 kB │ gzip:   3.52 kB
+2026-10-21T23:24:14.0687840Z dist/assets/TradeIns-C9wZFo7j.js           12.41 kB │ gzip:   4.10 kB
+2026-10-21T23:24:14.0688433Z dist/assets/Cash-BMW-vjg2.js               13.36 kB │ gzip:   4.13 kB
+2026-10-21T23:24:14.0689048Z dist/assets/Clients-CRdo_O1r.js            14.10 kB │ gzip:   3.68 kB
+2026-10-21T23:24:14.0690016Z dist/assets/Reports-Bkz8_Gk0.js            14.43 kB │ gzip:   4.81 kB
+2026-10-21T23:24:14.0690653Z dist/assets/Inventory-xawml-R4.js          15.63 kB │ gzip:   4.96 kB
+2026-10-21T23:24:14.0691283Z dist/assets/Quotes-1R7W6rWR.js             16.13 kB │ gzip:   4.93 kB
+2026-10-21T23:24:14.0691912Z dist/assets/service-DZFCyXpG.js            16.51 kB │ gzip:   4.83 kB
+2026-10-21T23:24:14.0692866Z dist/assets/Purchases-BSVHyzgQ.js          18.87 kB │ gzip:   5.14 kB
+2026-10-21T23:24:14.0693829Z dist/assets/Repairs-QWyAfoTs.js            23.19 kB │ gzip:   6.31 kB
+2026-10-21T23:24:14.0694808Z dist/assets/POS-BQBLdQFD.js                27.26 kB │ gzip:   8.34 kB
+2026-10-21T23:24:14.0695516Z dist/assets/Billing-vD_HIiWf.js            27.82 kB │ gzip:   7.09 kB
+2026-10-21T23:24:14.0696099Z dist/assets/purify.es-Bvo9QlJ8.js          28.08 kB │ gzip:  11.08 kB
+2026-10-21T23:24:14.0696696Z dist/assets/zh-aJ-fLXED.js                 33.35 kB │ gzip:  14.24 kB
+2026-10-21T23:24:14.0697270Z dist/assets/en-D-Tigj3X.js                 34.58 kB │ gzip:  12.91 kB
+2026-10-21T23:24:14.0697831Z dist/assets/es-CitQzRfy.js                 37.25 kB │ gzip:  14.00 kB
+2026-10-21T23:24:14.0698413Z dist/assets/pt-DsQadxPO.js                 37.76 kB │ gzip:  14.11 kB
+2026-10-21T23:24:14.0698984Z dist/assets/i18n-CNZ4I3xy.js               46.18 kB │ gzip:  14.88 kB
+2026-10-21T23:24:14.0699823Z dist/assets/ar-OcvOFdOM.js                 48.77 kB │ gzip:  15.30 kB
+2026-10-21T23:24:14.0700451Z dist/assets/schemas-DKeczAZV.js            60.06 kB │ gzip:  14.06 kB
+2026-10-21T23:24:14.0701270Z dist/assets/Settings-ChyrVo1k.js           81.88 kB │ gzip:  21.73 kB
+2026-10-21T23:24:14.0701874Z dist/assets/index.es-DloXoMwM.js          151.41 kB │ gzip:  48.90 kB
+2026-10-21T23:24:14.0702454Z dist/assets/UI-CBuxHu03.js                187.18 kB │ gzip:  60.80 kB
+2026-10-21T23:24:14.0703033Z dist/assets/Dashboard-DbGXy7Hc.js         197.38 kB │ gzip:  68.60 kB
+2026-10-21T23:24:14.0703773Z dist/assets/html2canvas-Dn6bw578.js       199.49 kB │ gzip:  46.77 kB
+2026-10-21T23:24:14.0704632Z dist/assets/index-Cb1yFia4.js             273.94 kB │ gzip:  85.57 kB
+2026-10-21T23:24:14.0705563Z dist/assets/pdf-DunKqiNW.js               429.29 kB │ gzip: 140.49 kB
+2026-10-21T23:24:14.0705959Z 
+2026-10-21T23:24:14.0706226Z [32m✓ built in 667ms[39m
+2026-10-21T23:24:14.8720245Z ✔ Copying web assets from dist to android/app/src/main/assets/public in 9.73ms
+2026-10-21T23:24:14.8729716Z ✔ Creating capacitor.config.json in android/app/src/main/assets in 574.23μs
+2026-10-21T23:24:14.8824088Z ✔ copy android in 39.84ms
+2026-10-21T23:24:14.9096453Z ✔ Updating Android plugins in 7.74ms
+2026-10-21T23:24:14.9316384Z ✔ update android in 38.60ms
+2026-10-21T23:24:14.9413999Z [info] Sync finished in 0.113s

@@ -1,0 +1,30 @@
+﻿2026-10-21T23:23:51.6040545Z ##[group]Run actions/setup-java@v4
+2026-10-21T23:23:51.6040978Z with:
+2026-10-21T23:23:51.6041273Z   distribution: temurin
+2026-10-21T23:23:51.6041593Z   java-version: 21
+2026-10-21T23:23:51.6041916Z   java-package: jdk
+2026-10-21T23:23:51.6042218Z   check-latest: false
+2026-10-21T23:23:51.6042530Z   server-id: github
+2026-10-21T23:23:51.6042833Z   server-username: GITHUB_ACTOR
+2026-10-21T23:23:51.6043199Z   server-password: GITHUB_TOKEN
+2026-10-21T23:23:51.6043548Z   overwrite-settings: true
+2026-10-21T23:23:51.6043870Z   job-status: success
+2026-10-21T23:23:51.6046354Z   token: ***
+2026-10-21T23:23:51.6046650Z ##[endgroup]
+2026-10-21T23:23:51.7805922Z ##[warning]setup-java v4 is deprecated and will no longer receive updates. Please migrate to actions/setup-java@v5.
+2026-10-21T23:23:51.7813135Z ##[group]Installed distributions
+2026-10-21T23:23:51.7863344Z Resolved Java 21.0.12+1 from tool-cache
+2026-10-21T23:23:51.7864348Z Setting Java 21.0.12+1 as the default
+2026-10-21T23:23:51.7869971Z (node:2350) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-21T23:23:51.7871857Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-21T23:23:51.7874310Z Creating toolchains.xml for JDK version 21 from temurin
+2026-10-21T23:23:51.7952936Z Writing to /home/runner/.m2/toolchains.xml
+2026-10-21T23:23:51.7953522Z 
+2026-10-21T23:23:51.7953853Z Java configuration:
+2026-10-21T23:23:51.7954491Z   Distribution: temurin
+2026-10-21T23:23:51.7955152Z   Version: 21.0.12+1
+2026-10-21T23:23:51.7956113Z   Path: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.12-1/x64
+2026-10-21T23:23:51.7956766Z 
+2026-10-21T23:23:51.7957449Z ##[endgroup]
+2026-10-21T23:23:51.7961859Z Creating settings.xml with server-id: github
+2026-10-21T23:23:51.7997489Z Writing to /home/runner/.m2/settings.xml

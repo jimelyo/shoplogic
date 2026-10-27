@@ -1,0 +1,34 @@
+﻿2026-10-21T23:23:48.9994659Z Current runner version: '2.338.0'
+2026-10-21T23:23:49.0031470Z ##[group]Runner Image Provisioner
+2026-10-21T23:23:49.0032952Z Hosted Compute Agent
+2026-10-21T23:23:49.0034018Z Version: 20261015.610
+2026-10-21T23:23:49.0035220Z Commit: 267fdb4e8bbec4ab5ea31367f3a00d5c480c7656
+2026-10-21T23:23:49.0036490Z Build Date: 2026-10-14T17:06:54Z
+2026-10-21T23:23:49.0038267Z Worker ID: {75e26972-a74c-4954-8422-a72da8d8dfde}
+2026-10-21T23:23:49.0039780Z Region: eastus
+2026-10-21T23:23:49.0040908Z Cloud: Azure
+2026-10-21T23:23:49.0041922Z ##[endgroup]
+2026-10-21T23:23:49.0044370Z ##[group]Operating System
+2026-10-21T23:23:49.0045592Z Ubuntu
+2026-10-21T23:23:49.0046483Z 24.04.5
+2026-10-21T23:23:49.0047539Z LTS
+2026-10-21T23:23:49.0048503Z ##[endgroup]
+2026-10-21T23:23:49.0049420Z ##[group]Runner Image
+2026-10-21T23:23:49.0050804Z Image: ubuntu-24.04
+2026-10-21T23:23:49.0051828Z Version: 20261018.339.1
+2026-10-21T23:23:49.0053881Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261018.339/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-21T23:23:49.0056910Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261018.339
+2026-10-21T23:23:49.0058798Z ##[endgroup]
+2026-10-21T23:23:49.0061129Z ##[group]GITHUB_TOKEN Permissions
+2026-10-21T23:23:49.0064223Z Contents: write
+2026-10-21T23:23:49.0065344Z Metadata: read
+2026-10-21T23:23:49.0066322Z ##[endgroup]
+2026-10-21T23:23:49.0069269Z Secret source: Actions
+2026-10-21T23:23:49.0071296Z Cache mode: write
+2026-10-21T23:23:49.0072824Z Prepare workflow directory
+2026-10-21T23:23:49.0553964Z Prepare all required actions
+2026-10-21T23:23:49.0626549Z Getting action download info
+2026-10-21T23:23:49.2868290Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-21T23:23:49.3865225Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2026-10-21T23:23:49.4784037Z Download action repository 'actions/setup-java@v4' (SHA:cf277c60eb25467037889841efdb72551f06f6c3)
+2026-10-21T23:23:49.8300750Z Complete job name: Android APK

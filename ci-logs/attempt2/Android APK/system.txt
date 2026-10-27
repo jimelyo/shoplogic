@@ -1,0 +1,8 @@
+2026-10-21T23:23:45.6680000Z Requested labels: ubuntu-latest
+2026-10-21T23:23:45.6680000Z Job defined at: jimelyo/shoplogic/.github/workflows/release.yml@refs/tags/v1.3.5
+2026-10-21T23:23:45.6680000Z Waiting for a runner to pick up this job...
+2026-10-21T23:23:45.6620000Z Evaluating android.if
+2026-10-21T23:23:45.6620000Z Evaluating: success()
+2026-10-21T23:23:45.6620000Z Result: true
+2026-10-21T23:23:46.1640000Z Job is about to start running on the hosted runner: GitHub Actions 1000000027
+2026-10-21T23:23:46.1640000Z Job is waiting for a hosted runner to come online.

@@ -1,5 +1,35 @@
 # Changelog
 
+## 1.3.6 — Hardening Electron, Dexie 4 y calidad (2026-10-27)
+
+### Seguridad (Electron)
+- **Fuses en el binario**: validación de integridad del asar embebido, el app
+  solo se carga desde el asar, `ELECTRON_RUN_AS_NODE` y flags de inspección
+  desactivados y `file:` sin privilegios extra (`electronFuses`).
+- **Origen `app://shoplogic` en producción**: el renderer ya no se sirve por
+  `file://`. Esquema privilegiado (secure + service workers) y handler con
+  fallback SPA y bloqueo de path traversal.
+- **Migración automática de datos `file://` → `app://`**: ventana oculta que
+  vuelca la IndexedDB del origen antiguo (incluye usuarios) y la importa en una
+  transacción atómica en el primer arranque; si falla, la app sigue en `file://`.
+- **Permisos de sesión cerrados por defecto**: solo `media` (escáner) pasados
+  por allow-list; cualquier otra petición se deniega.
+
+### Dependencias y datos
+- **Dexie 3.2 → 4.x** (y `dexie-react-hooks` 4.x): tipos `UpdateSpec` ajustados
+  en la pantalla de bloqueo, login y guard; swipe de guardado de ajustes a `put()`.
+- **electron-builder 26.18.1 / electron-updater 6.8.12** (últimas estables; los
+  manifiestos de actualización firmados Ed25519 llegan con la v27).
+
+### Calidad
+- Escape HTML centralizado en la impresión (`escHtml`); jsPDF no necesita
+  escapado (vectorial).
+- `Settings.tsx` dividido en secciones en `src/components/settings/*`.
+- **Accesibilidad**: `aria-label` en todos los botones icon-only, `role="dialog"`
+  y foco visible en la paleta de comandos (Ctrl/Cmd+K); 4 claves nuevas en los
+  5 idiomas (paridad verificada).
+- CI de release: build antes de los tests (fallo temprano de tipos/bundle).
+
 ## 1.3.5 — Mano de obra en reparaciones + hardening y calidad (2026-10-22)
 
 ### Reparaciones: mano de obra

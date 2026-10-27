@@ -1,0 +1,7 @@
+﻿2026-10-21T23:28:42.4653670Z ##[group]Run gh release edit "$GITHUB_REF_NAME" --latest
+2026-10-21T23:28:42.4655690Z [36;1mgh release edit "$GITHUB_REF_NAME" --latest[0m
+2026-10-21T23:28:42.4823454Z shell: /usr/bin/bash -e {0}
+2026-10-21T23:28:42.4824746Z env:
+2026-10-21T23:28:42.4835957Z   GH_TOKEN: ***
+2026-10-21T23:28:42.4836996Z ##[endgroup]
+2026-10-21T23:28:46.2504169Z https://github.com/jimelyo/shoplogic/releases/tag/v1.3.5

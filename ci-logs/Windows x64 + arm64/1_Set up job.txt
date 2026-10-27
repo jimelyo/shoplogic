@@ -1,0 +1,33 @@
+﻿2026-10-21T23:01:36.1981518Z Current runner version: '2.338.0'
+2026-10-21T23:01:36.2032516Z ##[group]Runner Image Provisioner
+2026-10-21T23:01:36.2033870Z Hosted Compute Agent
+2026-10-21T23:01:36.2034815Z Version: 20261015.610
+2026-10-21T23:01:36.2035927Z Commit: 267fdb4e8bbec4ab5ea31367f3a00d5c480c7656
+2026-10-21T23:01:36.2037390Z Build Date: 2026-10-14T17:06:54Z
+2026-10-21T23:01:36.2039180Z Worker ID: {03cbb220-80a2-45e1-901d-6f0100e6decb}
+2026-10-21T23:01:36.2040089Z Region: westus2
+2026-10-21T23:01:36.2040754Z Cloud: Azure
+2026-10-21T23:01:36.2041326Z ##[endgroup]
+2026-10-21T23:01:36.2042905Z ##[group]Operating System
+2026-10-21T23:01:36.2043638Z Microsoft Windows Server 2025
+2026-10-21T23:01:36.2044283Z 10.0.26100
+2026-10-21T23:01:36.2044793Z Datacenter
+2026-10-21T23:01:36.2045311Z ##[endgroup]
+2026-10-21T23:01:36.2045828Z ##[group]Runner Image
+2026-10-21T23:01:36.2046382Z Image: windows-2025-vs2026
+2026-10-21T23:01:36.2046981Z Version: 20261018.275.1
+2026-10-21T23:01:36.2048090Z Included Software: https://github.com/actions/runner-images/blob/win25-vs2026/20261018.275/images/windows/Windows2025-VS2026-Readme.md
+2026-10-21T23:01:36.2050058Z Image Release: https://github.com/actions/runner-images/releases/tag/win25-vs2026%2F20261018.275
+2026-10-21T23:01:36.2050986Z ##[endgroup]
+2026-10-21T23:01:36.2052095Z ##[group]GITHUB_TOKEN Permissions
+2026-10-21T23:01:36.2054590Z Contents: write
+2026-10-21T23:01:36.2055275Z Metadata: read
+2026-10-21T23:01:36.2055839Z ##[endgroup]
+2026-10-21T23:01:36.2057974Z Secret source: Actions
+2026-10-21T23:01:36.2058864Z Cache mode: write
+2026-10-21T23:01:36.2059554Z Prepare workflow directory
+2026-10-21T23:01:36.2455067Z Prepare all required actions
+2026-10-21T23:01:36.2520172Z Getting action download info
+2026-10-21T23:01:36.5809741Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-21T23:01:36.7128458Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2026-10-21T23:01:37.0148180Z Complete job name: Windows x64 + arm64

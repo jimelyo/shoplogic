@@ -1,0 +1,25 @@
+﻿2026-10-21T23:23:56.0734347Z ##[group]Run actions/setup-node@v4
+2026-10-21T23:23:56.0734751Z with:
+2026-10-21T23:23:56.0734981Z   node-version: 22
+2026-10-21T23:23:56.0735223Z   cache: npm
+2026-10-21T23:23:56.0735449Z   always-auth: false
+2026-10-21T23:23:56.0735726Z   check-latest: false
+2026-10-21T23:23:56.0739291Z   token: ***
+2026-10-21T23:23:56.0739518Z ##[endgroup]
+2026-10-21T23:23:56.2692258Z Found in cache @ C:\hostedtoolcache\windows\node\22.23.3\x64
+2026-10-21T23:23:56.2699568Z (node:8060) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-21T23:23:56.2700811Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-21T23:23:56.2703095Z ##[group]Environment details
+2026-10-21T23:24:01.6878837Z node: v22.23.3
+2026-10-21T23:24:01.6879266Z npm: 10.9.9
+2026-10-21T23:24:01.6879554Z yarn: 1.22.22
+2026-10-21T23:24:01.6880794Z ##[endgroup]
+2026-10-21T23:24:01.7735335Z [command]C:\Windows\system32\cmd.exe /D /S /C "C:\hostedtoolcache\windows\node\22.23.3\x64\npm.cmd config get cache"
+2026-10-21T23:24:02.4035245Z C:\npm\cache
+2026-10-21T23:24:02.6893341Z Cache hit for: node-cache-Windows-x64-npm-30c2cf22bea62bbeb6eeb267d0aa055aae60307474b2ab9f4e2de04e17729609
+2026-10-21T23:24:02.7015070Z (node:8060) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-21T23:24:03.4370751Z Received 100822440 of 100822440 (100.0%), 138.1 MBs/sec
+2026-10-21T23:24:03.4375106Z Cache Size: ~96 MB (100822440 B)
+2026-10-21T23:24:03.4621868Z [command]"C:\Program Files\Git\usr\bin\tar.exe" -xf D:/a/_temp/27b4029c-b222-4561-bfea-c127529cb732/cache.tzst -P -C D:/a/shoplogic/shoplogic --force-local --use-compress-program "zstd -d"
+2026-10-21T23:24:09.6872974Z Cache restored successfully
+2026-10-21T23:24:09.6949758Z Cache restored from key: node-cache-Windows-x64-npm-30c2cf22bea62bbeb6eeb267d0aa055aae60307474b2ab9f4e2de04e17729609

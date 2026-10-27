@@ -1,0 +1,45 @@
+﻿2026-10-21T23:03:03.3087913Z ##[group]Run npx electron-builder --win --x64 --arm64 --publish always
+2026-10-21T23:03:03.3088993Z [36;1mnpx electron-builder --win --x64 --arm64 --publish always[0m
+2026-10-21T23:03:03.3167377Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-21T23:03:03.3167858Z env:
+2026-10-21T23:03:03.3171677Z   GH_TOKEN: ***
+2026-10-21T23:03:03.3171969Z ##[endgroup]
+2026-10-21T23:03:05.3429021Z   • electron-builder  version=26.15.3 os=10.0.26100
+2026-10-21T23:03:05.3494890Z   • loaded configuration  file=package.json ("build" field)
+2026-10-21T23:03:05.3547425Z   • description is missed in the package.json  appPackageFile=D:\a\shoplogic\shoplogic\package.json
+2026-10-21T23:03:05.3550671Z   • author is missed in the package.json  appPackageFile=D:\a\shoplogic\shoplogic\package.json
+2026-10-21T23:03:06.5858806Z   ⨯ 
+2026-10-21T23:03:06.5859844Z 1. Cannot find module 'D:\a\shoplogic\shoplogic\scripts\notarize.cjs'
+2026-10-21T23:03:06.5860736Z Require stack:
+2026-10-21T23:03:06.5862058Z - D:\a\shoplogic\shoplogic\node_modules\app-builder-lib\helpers\dynamic-import.js
+2026-10-21T23:03:06.5863397Z - D:\a\shoplogic\shoplogic\node_modules\app-builder-lib\out\util\resolve.js
+2026-10-21T23:03:06.5864724Z - D:\a\shoplogic\shoplogic\node_modules\app-builder-lib\out\util\config\load.js
+2026-10-21T23:03:06.5865790Z - D:\a\shoplogic\shoplogic\node_modules\app-builder-lib\out\util\config\config.js
+2026-10-21T23:03:06.5866955Z - D:\a\shoplogic\shoplogic\node_modules\app-builder-lib\out\electron\electronVersion.js
+2026-10-21T23:03:06.5869260Z - D:\a\shoplogic\shoplogic\node_modules\electron-builder\out\cli\cli.js
+2026-10-21T23:03:06.5869800Z - D:\a\shoplogic\shoplogic\node_modules\electron-builder\cli.js
+2026-10-21T23:03:06.5871158Z 2. Only URLs with a scheme in: file, data, and node are supported by the default ESM loader. On Windows, absolute paths must be valid file:// URLs. Received protocol 'd:'  failedTask=build stackTrace=Error: 
+2026-10-21T23:03:06.5872396Z 1. Cannot find module 'D:\a\shoplogic\shoplogic\scripts\notarize.cjs'
+2026-10-21T23:03:06.5872784Z Require stack:
+2026-10-21T23:03:06.5873197Z - D:\a\shoplogic\shoplogic\node_modules\app-builder-lib\helpers\dynamic-import.js
+2026-10-21T23:03:06.5873806Z - D:\a\shoplogic\shoplogic\node_modules\app-builder-lib\out\util\resolve.js
+2026-10-21T23:03:06.5874380Z - D:\a\shoplogic\shoplogic\node_modules\app-builder-lib\out\util\config\load.js
+2026-10-21T23:03:06.5874979Z - D:\a\shoplogic\shoplogic\node_modules\app-builder-lib\out\util\config\config.js
+2026-10-21T23:03:06.5875616Z - D:\a\shoplogic\shoplogic\node_modules\app-builder-lib\out\electron\electronVersion.js
+2026-10-21T23:03:06.5876194Z - D:\a\shoplogic\shoplogic\node_modules\electron-builder\out\cli\cli.js
+2026-10-21T23:03:06.5876683Z - D:\a\shoplogic\shoplogic\node_modules\electron-builder\cli.js
+2026-10-21T23:03:06.5877564Z 2. Only URLs with a scheme in: file, data, and node are supported by the default ESM loader. On Windows, absolute paths must be valid file:// URLs. Received protocol 'd:'
+2026-10-21T23:03:06.5878399Z     at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+2026-10-21T23:03:06.5878908Z     at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)
+2026-10-21T23:03:06.5879386Z     at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)
+2026-10-21T23:03:06.5879847Z     at Function._load (node:internal/modules/cjs/loader:1216:25)
+2026-10-21T23:03:06.5880270Z     at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+2026-10-21T23:03:06.5880700Z     at Module.require (node:internal/modules/cjs/loader:1527:12)
+2026-10-21T23:03:06.5881095Z     at require (node:internal/modules/helpers:147:16)
+2026-10-21T23:03:06.5881721Z     at Object.dynamicImportMaybe (D:\a\shoplogic\shoplogic\node_modules\app-builder-lib\helpers\dynamic-import.js:31:12)
+2026-10-21T23:03:06.5882499Z     at resolveModule (D:\a\shoplogic\shoplogic\node_modules\app-builder-lib\src\util\resolve.ts:10:25)
+2026-10-21T23:03:06.5883207Z     at resolveFunction (D:\a\shoplogic\shoplogic\node_modules\app-builder-lib\src\util\resolve.ts:47:24)
+2026-10-21T23:03:06.5886482Z     at Packager.addPackagerEventHandlers (D:\a\shoplogic\shoplogic\node_modules\app-builder-lib\src\packager.ts:280:60)
+2026-10-21T23:03:06.5887287Z     at Packager.build (D:\a\shoplogic\shoplogic\node_modules\app-builder-lib\src\packager.ts:405:5)
+2026-10-21T23:03:06.5887964Z     at executeFinally (D:\a\shoplogic\shoplogic\node_modules\builder-util\src\promise.ts:12:14)
+2026-10-21T23:03:06.7624658Z ##[error]Process completed with exit code 1.

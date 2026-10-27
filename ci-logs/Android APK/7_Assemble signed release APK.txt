@@ -1,0 +1,212 @@
+﻿2026-10-21T23:02:06.7346476Z ##[group]Run cd android
+2026-10-21T23:02:06.7346768Z [36;1mcd android[0m
+2026-10-21T23:02:06.7346984Z [36;1mchmod +x gradlew[0m
+2026-10-21T23:02:06.7366221Z [36;1m./gradlew assembleRelease[0m
+2026-10-21T23:02:06.7428054Z shell: /usr/bin/bash -e {0}
+2026-10-21T23:02:06.7428326Z env:
+2026-10-21T23:02:06.7428640Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.12-1/x64
+2026-10-21T23:02:06.7429143Z   JAVA_HOME_21_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.12-1/x64
+2026-10-21T23:02:06.7429953Z   SL_KEYSTORE: /home/runner/work/shoplogic/shoplogic/android/keystore/release.jks
+2026-10-21T23:02:06.7430362Z   SL_KEYSTORE_PASS: 
+2026-10-21T23:02:06.7430581Z   SL_KEY_ALIAS: 
+2026-10-21T23:02:06.7430770Z   SL_KEY_PASS: 
+2026-10-21T23:02:06.7430958Z ##[endgroup]
+2026-10-21T23:02:08.2845596Z Downloading https://services.gradle.org/distributions/gradle-8.14.3-all.zip
+2026-10-21T23:02:11.1545189Z .....................10%.....................20%......................30%.....................40%......................50%.....................60%.....................70%......................80%.....................90%......................100%
+2026-10-21T23:02:14.7309454Z 
+2026-10-21T23:02:14.7310985Z Welcome to Gradle 8.14.3!
+2026-10-21T23:02:14.7311643Z 
+2026-10-21T23:02:14.7312164Z Here are the highlights of this release:
+2026-10-21T23:02:14.7313191Z  - Java 24 support
+2026-10-21T23:02:14.7314057Z  - GraalVM Native Image toolchain selection
+2026-10-21T23:02:14.7315093Z  - Enhancements to test reporting
+2026-10-21T23:02:14.7315939Z  - Build Authoring improvements
+2026-10-21T23:02:14.7316463Z 
+2026-10-21T23:02:14.7317199Z For more details see https://docs.gradle.org/8.14.3/release-notes.html
+2026-10-21T23:02:14.7317898Z 
+2026-10-21T23:02:14.9303100Z Starting a Gradle Daemon (subsequent builds will be faster)
+2026-10-21T23:02:45.8326490Z 
+2026-10-21T23:02:45.8369074Z > Configure project :app
+2026-10-21T23:02:45.8370907Z WARNING: Using flatDir should be avoided because it doesn't support any meta-data formats.
+2026-10-21T23:02:48.1303765Z 
+2026-10-21T23:02:48.1310967Z > Configure project :capacitor-cordova-android-plugins
+2026-10-21T23:02:48.1331001Z WARNING: Using flatDir should be avoided because it doesn't support any meta-data formats.
+2026-10-21T23:02:49.4310134Z 
+2026-10-21T23:02:49.4328962Z > Task :app:preBuild UP-TO-DATE
+2026-10-21T23:02:49.4336199Z > Task :app:preReleaseBuild UP-TO-DATE
+2026-10-21T23:02:49.6303262Z > Task :app:mergeReleaseJniLibFolders
+2026-10-21T23:02:49.6304403Z > Task :capacitor-android:preBuild UP-TO-DATE
+2026-10-21T23:02:49.6305523Z > Task :capacitor-android:preReleaseBuild UP-TO-DATE
+2026-10-21T23:02:49.6306508Z > Task :capacitor-android:mergeReleaseJniLibFolders
+2026-10-21T23:02:49.6307598Z > Task :capacitor-android:mergeReleaseNativeLibs NO-SOURCE
+2026-10-21T23:02:49.6309131Z > Task :capacitor-cordova-android-plugins:preBuild UP-TO-DATE
+2026-10-21T23:02:49.6310567Z > Task :capacitor-cordova-android-plugins:preReleaseBuild UP-TO-DATE
+2026-10-21T23:02:49.6311928Z > Task :capacitor-android:copyReleaseJniLibsProjectOnly
+2026-10-21T23:02:49.6313133Z > Task :capacitor-cordova-android-plugins:mergeReleaseJniLibFolders
+2026-10-21T23:02:49.6314466Z > Task :capacitor-cordova-android-plugins:mergeReleaseNativeLibs NO-SOURCE
+2026-10-21T23:02:49.6315822Z > Task :capacitor-cordova-android-plugins:copyReleaseJniLibsProjectOnly
+2026-10-21T23:02:49.6316965Z > Task :capacitor-android:generateReleaseResValues
+2026-10-21T23:02:57.2303963Z > Task :app:mergeReleaseNativeLibs NO-SOURCE
+2026-10-21T23:02:57.2340592Z > Task :app:stripReleaseDebugSymbols NO-SOURCE
+2026-10-21T23:02:57.2345777Z > Task :app:extractReleaseNativeSymbolTables NO-SOURCE
+2026-10-21T23:02:57.2346832Z > Task :app:mergeReleaseNativeDebugMetadata NO-SOURCE
+2026-10-21T23:02:57.2347802Z > Task :capacitor-android:generateReleaseResources
+2026-10-21T23:02:57.3303666Z > Task :capacitor-android:packageReleaseResources
+2026-10-21T23:02:57.3305903Z > Task :capacitor-android:processReleaseNavigationResources
+2026-10-21T23:02:57.7330972Z > Task :capacitor-cordova-android-plugins:generateReleaseResValues
+2026-10-21T23:02:57.7360367Z > Task :capacitor-android:javaPreCompileRelease
+2026-10-21T23:02:57.7390447Z > Task :capacitor-cordova-android-plugins:generateReleaseResources
+2026-10-21T23:02:57.8323589Z > Task :capacitor-cordova-android-plugins:packageReleaseResources
+2026-10-21T23:02:57.8371384Z > Task :capacitor-cordova-android-plugins:processReleaseNavigationResources
+2026-10-21T23:02:57.8373066Z > Task :capacitor-cordova-android-plugins:javaPreCompileRelease
+2026-10-21T23:02:57.8374154Z > Task :capacitor-android:parseReleaseLocalResources
+2026-10-21T23:02:58.1303090Z > Task :capacitor-cordova-android-plugins:parseReleaseLocalResources
+2026-10-21T23:02:58.1319620Z > Task :app:checkReleaseDuplicateClasses
+2026-10-21T23:02:58.1320276Z > Task :app:javaPreCompileRelease
+2026-10-21T23:02:58.1321042Z > Task :capacitor-cordova-android-plugins:writeReleaseAarMetadata
+2026-10-21T23:02:58.1321914Z > Task :capacitor-android:writeReleaseAarMetadata
+2026-10-21T23:02:58.1322651Z > Task :capacitor-android:generateReleaseRFile
+2026-10-21T23:02:58.1323472Z > Task :capacitor-cordova-android-plugins:generateReleaseRFile
+2026-10-21T23:02:58.2303581Z > Task :app:checkReleaseAarMetadata
+2026-10-21T23:03:04.1304420Z 
+2026-10-21T23:03:04.1309152Z > Task :capacitor-android:compileReleaseJavaWithJavac
+2026-10-21T23:03:04.1312416Z Note: Some input files use unchecked or unsafe operations.
+2026-10-21T23:03:04.1330685Z Note: Recompile with -Xlint:unchecked for details.
+2026-10-21T23:03:06.1302211Z 
+2026-10-21T23:03:06.1317330Z > Task :capacitor-cordova-android-plugins:compileReleaseJavaWithJavac NO-SOURCE
+2026-10-21T23:03:06.1341029Z > Task :capacitor-cordova-android-plugins:bundleLibRuntimeToDirRelease
+2026-10-21T23:03:06.2328392Z > Task :capacitor-android:bundleLibRuntimeToDirRelease
+2026-10-21T23:03:06.2331996Z > Task :app:processReleaseNavigationResources
+2026-10-21T23:03:06.8304099Z > Task :app:generateReleaseResValues
+2026-10-21T23:03:06.8330482Z > Task :app:compileReleaseNavigationResources
+2026-10-21T23:03:06.9320772Z > Task :app:mapReleaseSourceSetPaths
+2026-10-21T23:03:06.9321569Z > Task :app:generateReleaseResources
+2026-10-21T23:03:07.9352388Z > Task :app:packageReleaseResources
+2026-10-21T23:03:09.7329186Z > Task :app:createReleaseCompatibleScreenManifests
+2026-10-21T23:03:09.7330205Z > Task :app:extractDeepLinksRelease
+2026-10-21T23:03:09.7330876Z > Task :capacitor-android:extractDeepLinksRelease
+2026-10-21T23:03:09.7331548Z > Task :app:parseReleaseLocalResources
+2026-10-21T23:03:09.8311171Z > Task :capacitor-cordova-android-plugins:extractDeepLinksRelease
+2026-10-21T23:03:09.8330371Z > Task :capacitor-android:processReleaseManifest
+2026-10-21T23:03:09.8346240Z > Task :capacitor-cordova-android-plugins:processReleaseManifest
+2026-10-21T23:03:09.9303630Z > Task :capacitor-android:compileReleaseLibraryResources
+2026-10-21T23:03:10.0305385Z > Task :app:mergeReleaseResources
+2026-10-21T23:03:10.2303598Z > Task :app:processReleaseMainManifest
+2026-10-21T23:03:10.6313389Z > Task :app:processReleaseManifest
+2026-10-21T23:03:10.6340441Z > Task :app:processReleaseManifestForPackage
+2026-10-21T23:03:10.6350798Z > Task :capacitor-cordova-android-plugins:compileReleaseLibraryResources
+2026-10-21T23:03:10.9346950Z > Task :capacitor-android:bundleLibCompileToJarRelease
+2026-10-21T23:03:11.1311019Z > Task :capacitor-cordova-android-plugins:bundleLibCompileToJarRelease
+2026-10-21T23:03:11.2304017Z > Task :app:desugarReleaseFileDependencies
+2026-10-21T23:03:11.2370941Z > Task :app:mergeReleaseStartupProfile
+2026-10-21T23:03:12.0303259Z > Task :app:processReleaseResources
+2026-10-21T23:03:29.2310700Z > Task :app:compileReleaseJavaWithJavac
+2026-10-21T23:03:29.4313243Z > Task :app:dexBuilderRelease
+2026-10-21T23:03:29.4360611Z > Task :capacitor-android:prepareReleaseArtProfile
+2026-10-21T23:03:29.4406628Z > Task :capacitor-cordova-android-plugins:prepareReleaseArtProfile
+2026-10-21T23:03:29.4426470Z > Task :app:mergeReleaseArtProfile
+2026-10-21T23:03:29.4480907Z > Task :capacitor-cordova-android-plugins:bundleLibRuntimeToJarRelease
+2026-10-21T23:03:29.5360591Z > Task :capacitor-android:bundleLibRuntimeToJarRelease
+2026-10-21T23:03:29.5390225Z > Task :app:mergeReleaseShaders
+2026-10-21T23:03:29.5450366Z > Task :app:compileReleaseShaders NO-SOURCE
+2026-10-21T23:03:29.5510344Z > Task :app:generateReleaseAssets UP-TO-DATE
+2026-10-21T23:03:29.5516170Z > Task :capacitor-android:mergeReleaseShaders
+2026-10-21T23:03:29.5519186Z > Task :capacitor-android:compileReleaseShaders NO-SOURCE
+2026-10-21T23:03:29.5520533Z > Task :capacitor-android:generateReleaseAssets UP-TO-DATE
+2026-10-21T23:03:29.5521613Z > Task :capacitor-android:mergeReleaseAssets
+2026-10-21T23:03:29.5540874Z > Task :capacitor-cordova-android-plugins:mergeReleaseShaders
+2026-10-21T23:03:29.5541938Z > Task :capacitor-cordova-android-plugins:compileReleaseShaders NO-SOURCE
+2026-10-21T23:03:29.5543082Z > Task :capacitor-cordova-android-plugins:generateReleaseAssets UP-TO-DATE
+2026-10-21T23:03:29.6319797Z > Task :capacitor-cordova-android-plugins:mergeReleaseAssets
+2026-10-21T23:03:29.8320605Z > Task :app:mergeReleaseAssets
+2026-10-21T23:03:30.0330634Z > Task :app:extractReleaseVersionControlInfo
+2026-10-21T23:03:30.0368387Z > Task :app:extractProguardFiles
+2026-10-21T23:03:30.0410361Z > Task :capacitor-android:processReleaseJavaRes NO-SOURCE
+2026-10-21T23:03:30.0450317Z > Task :capacitor-android:createFullJarRelease
+2026-10-21T23:03:30.1330558Z > Task :capacitor-android:extractProguardFiles
+2026-10-21T23:03:30.2330581Z > Task :app:compressReleaseAssets
+2026-10-21T23:03:31.4305153Z > Task :capacitor-android:generateReleaseLintModel
+2026-10-21T23:03:31.4369489Z > Task :app:mergeExtDexRelease
+2026-10-21T23:03:31.4410313Z > Task :app:mergeReleaseGlobalSynthetics
+2026-10-21T23:03:31.5303925Z > Task :capacitor-cordova-android-plugins:processReleaseJavaRes NO-SOURCE
+2026-10-21T23:03:31.5309329Z > Task :capacitor-android:prepareLintJarForPublish
+2026-10-21T23:03:31.5310731Z > Task :capacitor-cordova-android-plugins:createFullJarRelease
+2026-10-21T23:03:31.5312003Z > Task :capacitor-cordova-android-plugins:extractProguardFiles
+2026-10-21T23:03:33.2303751Z > Task :app:mergeDexRelease
+2026-10-21T23:03:34.1310677Z > Task :capacitor-cordova-android-plugins:generateReleaseLintModel
+2026-10-21T23:03:34.1370358Z > Task :capacitor-cordova-android-plugins:prepareLintJarForPublish
+2026-10-21T23:03:34.1400093Z > Task :capacitor-android:checkReleaseAarMetadata
+2026-10-21T23:03:34.2309221Z > Task :app:generateReleaseLintVitalReportModel
+2026-10-21T23:03:34.2344128Z > Task :capacitor-android:stripReleaseDebugSymbols NO-SOURCE
+2026-10-21T23:03:34.2370390Z > Task :capacitor-android:copyReleaseJniLibsProjectAndLocalJars
+2026-10-21T23:03:34.3340607Z > Task :capacitor-android:extractDeepLinksForAarRelease
+2026-10-21T23:03:34.6310751Z > Task :app:compileReleaseArtProfile
+2026-10-21T23:03:39.4312119Z > Task :capacitor-android:extractReleaseAnnotations
+2026-10-21T23:03:39.4350548Z > Task :capacitor-android:mergeReleaseGeneratedProguardFiles
+2026-10-21T23:03:39.4351583Z > Task :capacitor-android:mergeReleaseConsumerProguardFiles
+2026-10-21T23:03:39.4352616Z > Task :capacitor-cordova-android-plugins:stripReleaseDebugSymbols NO-SOURCE
+2026-10-21T23:03:39.4353260Z > Task :capacitor-cordova-android-plugins:checkReleaseAarMetadata
+2026-10-21T23:03:39.4353909Z > Task :capacitor-cordova-android-plugins:copyReleaseJniLibsProjectAndLocalJars
+2026-10-21T23:03:39.4354566Z > Task :capacitor-cordova-android-plugins:extractDeepLinksForAarRelease
+2026-10-21T23:03:39.5315678Z > Task :capacitor-android:mergeReleaseJavaResource
+2026-10-21T23:03:39.8310985Z > Task :capacitor-cordova-android-plugins:extractReleaseAnnotations
+2026-10-21T23:03:39.8350587Z > Task :capacitor-android:syncReleaseLibJars
+2026-10-21T23:03:39.9302382Z > Task :capacitor-android:bundleReleaseLocalLintAar
+2026-10-21T23:03:39.9330813Z > Task :capacitor-cordova-android-plugins:mergeReleaseGeneratedProguardFiles
+2026-10-21T23:03:39.9350095Z > Task :capacitor-cordova-android-plugins:mergeReleaseConsumerProguardFiles
+2026-10-21T23:03:39.9390354Z > Task :capacitor-cordova-android-plugins:mergeReleaseJavaResource
+2026-10-21T23:03:39.9391676Z > Task :capacitor-cordova-android-plugins:syncReleaseLibJars
+2026-10-21T23:03:40.0340955Z > Task :capacitor-cordova-android-plugins:bundleReleaseLocalLintAar
+2026-10-21T23:03:40.0370328Z > Task :capacitor-android:writeReleaseLintModelMetadata
+2026-10-21T23:03:40.0400391Z > Task :capacitor-cordova-android-plugins:writeReleaseLintModelMetadata
+2026-10-21T23:03:40.0458679Z > Task :capacitor-android:generateReleaseLintVitalModel
+2026-10-21T23:03:40.1302351Z > Task :capacitor-cordova-android-plugins:generateReleaseLintVitalModel
+2026-10-21T23:03:40.1303614Z > Task :app:processReleaseJavaRes NO-SOURCE
+2026-10-21T23:03:40.3326225Z > Task :app:optimizeReleaseResources
+2026-10-21T23:03:40.4303779Z > Task :app:collectReleaseDependencies
+2026-10-21T23:03:40.5308960Z > Task :app:sdkReleaseDependencyData
+2026-10-21T23:03:40.5340444Z > Task :app:validateSigningRelease
+2026-10-21T23:03:40.5370488Z > Task :app:writeReleaseAppMetadata
+2026-10-21T23:03:40.6304107Z > Task :app:writeReleaseSigningConfigVersions
+2026-10-21T23:03:40.6330195Z > Task :capacitor-android:bundleReleaseAar
+2026-10-21T23:03:40.6340780Z > Task :capacitor-android:mapReleaseSourceSetPaths
+2026-10-21T23:03:40.7302393Z > Task :app:mergeReleaseJavaResource
+2026-10-21T23:03:41.2320829Z > Task :capacitor-android:mergeReleaseResources
+2026-10-21T23:03:41.3330819Z > Task :capacitor-cordova-android-plugins:bundleReleaseAar
+2026-10-21T23:03:41.3390518Z > Task :capacitor-cordova-android-plugins:mapReleaseSourceSetPaths
+2026-10-21T23:03:41.9314165Z > Task :capacitor-cordova-android-plugins:mergeReleaseResources
+2026-10-21T23:03:43.0310876Z > Task :capacitor-android:verifyReleaseResources
+2026-10-21T23:03:43.0338010Z > Task :capacitor-android:assembleRelease
+2026-10-21T23:03:43.6303180Z > Task :capacitor-cordova-android-plugins:verifyReleaseResources
+2026-10-21T23:03:43.6330441Z > Task :capacitor-cordova-android-plugins:assembleRelease
+2026-10-21T23:03:46.5302771Z > Task :capacitor-cordova-android-plugins:lintVitalAnalyzeRelease
+2026-10-21T23:03:49.4303706Z > Task :capacitor-android:lintVitalAnalyzeRelease
+2026-10-21T23:03:50.6312527Z > Task :app:lintVitalAnalyzeRelease
+2026-10-21T23:03:50.6313662Z > Task :app:lintVitalReportRelease
+2026-10-21T23:03:50.6314468Z > Task :app:lintVitalRelease
+2026-10-21T23:03:50.8303326Z > Task :app:packageRelease FAILED
+2026-10-21T23:03:50.9305756Z 
+2026-10-21T23:03:50.9318216Z 
+2026-10-21T23:03:50.9320232Z [Incubating] Problems report is available at: file:///home/runner/work/shoplogic/shoplogic/android/build/reports/problems/problems-report.html
+2026-10-21T23:03:50.9321776Z FAILURE: Build failed with an exception.
+2026-10-21T23:03:50.9322282Z 
+2026-10-21T23:03:50.9322402Z 
+2026-10-21T23:03:50.9323194Z Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+2026-10-21T23:03:50.9324605Z * What went wrong:
+2026-10-21T23:03:50.9324944Z 
+2026-10-21T23:03:50.9325404Z Execution failed for task ':app:packageRelease'.
+2026-10-21T23:03:50.9327082Z You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+2026-10-21T23:03:50.9329187Z > A failure occurred while executing com.android.build.gradle.tasks.PackageAndroidArtifact$IncrementalSplitterRunnable
+2026-10-21T23:03:50.9333433Z 
+2026-10-21T23:03:50.9344317Z    > com.android.ide.common.signing.KeytoolException: Failed to read key  from store "/home/runner/work/shoplogic/shoplogic/android/keystore/release.jks": keystore password was incorrect
+2026-10-21T23:03:50.9352454Z For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+2026-10-21T23:03:50.9359021Z 
+2026-10-21T23:03:50.9388234Z 123 actionable tasks: 123 executed
+2026-10-21T23:03:50.9390381Z * Try:
+2026-10-21T23:03:50.9392992Z > Run with --stacktrace option to get the stack trace.
+2026-10-21T23:03:50.9394619Z > Run with --info or --debug option to get more log output.
+2026-10-21T23:03:50.9401746Z > Run with --scan to get full insights.
+2026-10-21T23:03:50.9403366Z > Get more help at https://help.gradle.org.
+2026-10-21T23:03:50.9408004Z 
+2026-10-21T23:03:50.9408503Z BUILD FAILED in 1m 42s
+2026-10-21T23:03:51.3485894Z ##[error]Process completed with exit code 1.

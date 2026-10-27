@@ -118,6 +118,9 @@ export function CommandPalette() {
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 px-4 pt-[12vh] backdrop-blur-sm" onMouseDown={() => setOpen(false)}>
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={t('palette.title')}
         className="w-full max-w-xl animate-scale-in overflow-hidden rounded-2xl border border-sl-border bg-sl-card shadow-2xl"
         onMouseDown={(e) => e.stopPropagation()}
       >
@@ -129,7 +132,7 @@ export function CommandPalette() {
             onChange={(e) => { setQ(e.target.value); setSel(0); }}
             onKeyDown={onKeyDown}
             placeholder={t('palette.placeholder')}
-            className="w-full bg-transparent text-sm text-sl-text outline-none placeholder:text-sl-muted"
+            className="w-full rounded-md bg-transparent text-sm text-sl-text outline-none placeholder:text-sl-muted focus-visible:ring-2 focus-visible:ring-primary/50"
             aria-label={t('palette.title')}
           />
           <kbd className="rounded border border-sl-border px-1.5 py-0.5 text-[10px] text-sl-muted">Esc</kbd>
@@ -145,7 +148,8 @@ export function CommandPalette() {
               type="button"
               onMouseEnter={() => setSel(i)}
               onClick={() => go(h)}
-              className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-start ${i === sel ? 'bg-primary/10' : 'hover:bg-sl-hover'}`}
+              className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-start outline-none focus-visible:ring-2 focus-visible:ring-primary/50 ${i === sel ? 'bg-primary/10' : 'hover:bg-sl-hover'}`}
+              aria-current={i === sel || undefined}
             >
               <span className="rounded-md bg-sl-hover px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-sl-muted">{t(`nav.${h.module}`)}</span>
               <span className="min-w-0 flex-1">

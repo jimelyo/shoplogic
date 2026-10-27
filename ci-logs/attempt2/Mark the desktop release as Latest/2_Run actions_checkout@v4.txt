@@ -1,0 +1,89 @@
+﻿2026-10-21T23:28:40.8296054Z ##[group]Run actions/checkout@v4
+2026-10-21T23:28:40.8297041Z with:
+2026-10-21T23:28:40.8297532Z   repository: jimelyo/shoplogic
+2026-10-21T23:28:40.8301653Z   token: ***
+2026-10-21T23:28:40.8302114Z   ssh-strict: true
+2026-10-21T23:28:40.8302576Z   ssh-user: git
+2026-10-21T23:28:40.8303037Z   persist-credentials: true
+2026-10-21T23:28:40.8303547Z   clean: true
+2026-10-21T23:28:40.8304019Z   sparse-checkout-cone-mode: true
+2026-10-21T23:28:40.8304559Z   fetch-depth: 1
+2026-10-21T23:28:40.8305012Z   fetch-tags: false
+2026-10-21T23:28:40.8305671Z   show-progress: true
+2026-10-21T23:28:40.8306149Z   lfs: false
+2026-10-21T23:28:40.8306589Z   submodules: false
+2026-10-21T23:28:40.8307066Z   set-safe-directory: true
+2026-10-21T23:28:40.8307586Z   allow-unsafe-pr-checkout: false
+2026-10-21T23:28:40.8308393Z ##[endgroup]
+2026-10-21T23:28:40.9364660Z Syncing repository: jimelyo/shoplogic
+2026-10-21T23:28:40.9367607Z ##[group]Getting Git version info
+2026-10-21T23:28:40.9368809Z Working directory is '/home/runner/work/shoplogic/shoplogic'
+2026-10-21T23:28:40.9370641Z [command]/usr/bin/git version
+2026-10-21T23:28:40.9447344Z git version 2.55.0
+2026-10-21T23:28:40.9469408Z ##[endgroup]
+2026-10-21T23:28:40.9486049Z Temporarily overriding HOME='/home/runner/work/_temp/99c4a04c-8401-440e-ad6f-d24bb019aca7' before making global git config changes
+2026-10-21T23:28:40.9488496Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-21T23:28:40.9491845Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/shoplogic/shoplogic
+2026-10-21T23:28:40.9555759Z Deleting the contents of '/home/runner/work/shoplogic/shoplogic'
+2026-10-21T23:28:40.9565003Z ##[group]Initializing the repository
+2026-10-21T23:28:40.9566640Z [command]/usr/bin/git init /home/runner/work/shoplogic/shoplogic
+2026-10-21T23:28:40.9689847Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-21T23:28:40.9703445Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-21T23:28:40.9705529Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-21T23:28:40.9707109Z hint: call:
+2026-10-21T23:28:40.9707758Z hint:
+2026-10-21T23:28:40.9708561Z hint: 	git config --global init.defaultBranch <name>
+2026-10-21T23:28:40.9709538Z hint:
+2026-10-21T23:28:40.9710455Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-21T23:28:40.9711957Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-21T23:28:40.9713159Z hint:
+2026-10-21T23:28:40.9713815Z hint: 	git branch -m <name>
+2026-10-21T23:28:40.9714571Z hint:
+2026-10-21T23:28:40.9715782Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-21T23:28:40.9717740Z Initialized empty Git repository in /home/runner/work/shoplogic/shoplogic/.git/
+2026-10-21T23:28:40.9722489Z [command]/usr/bin/git remote add origin https://github.com/jimelyo/shoplogic
+2026-10-21T23:28:40.9782205Z ##[endgroup]
+2026-10-21T23:28:40.9783684Z ##[group]Disabling automatic garbage collection
+2026-10-21T23:28:40.9786615Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-21T23:28:40.9825453Z ##[endgroup]
+2026-10-21T23:28:40.9826623Z ##[group]Setting up auth
+2026-10-21T23:28:40.9833861Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-21T23:28:40.9872764Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-21T23:28:41.0276817Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-21T23:28:41.0326795Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-21T23:28:41.0601881Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-21T23:28:41.0650618Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-21T23:28:41.0901982Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-21T23:28:41.0956577Z ##[endgroup]
+2026-10-21T23:28:41.0957494Z ##[group]Fetching the repository
+2026-10-21T23:28:41.0966966Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +0a70d92013463af0938706fad3957f335a1d0d59:refs/tags/v1.3.5
+2026-10-21T23:28:42.3573225Z From https://github.com/jimelyo/shoplogic
+2026-10-21T23:28:42.3587310Z  * [new ref]         0a70d92013463af0938706fad3957f335a1d0d59 -> v1.3.5
+2026-10-21T23:28:42.3591686Z ##[endgroup]
+2026-10-21T23:28:42.3593121Z ##[group]Determining the checkout info
+2026-10-21T23:28:42.3594625Z ##[endgroup]
+2026-10-21T23:28:42.3595778Z [command]/usr/bin/git sparse-checkout disable
+2026-10-21T23:28:42.3656106Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-21T23:28:42.3701627Z ##[group]Checking out the ref
+2026-10-21T23:28:42.3707797Z [command]/usr/bin/git checkout --progress --force refs/tags/v1.3.5
+2026-10-21T23:28:42.4258574Z Note: switching to 'refs/tags/v1.3.5'.
+2026-10-21T23:28:42.4260116Z 
+2026-10-21T23:28:42.4261089Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-21T23:28:42.4263255Z changes and commit them, and you can discard any commits you make in this
+2026-10-21T23:28:42.4265409Z state without impacting any branches by switching back to a branch.
+2026-10-21T23:28:42.4266843Z 
+2026-10-21T23:28:42.4267820Z If you want to create a new branch to retain commits you create, you may
+2026-10-21T23:28:42.4269795Z do so (now or later) by using -c with the switch command. Example:
+2026-10-21T23:28:42.4271004Z 
+2026-10-21T23:28:42.4271596Z   git switch -c <new-branch-name>
+2026-10-21T23:28:42.4272517Z 
+2026-10-21T23:28:42.4273152Z Or undo this operation with:
+2026-10-21T23:28:42.4273987Z 
+2026-10-21T23:28:42.4274485Z   git switch -
+2026-10-21T23:28:42.4275904Z 
+2026-10-21T23:28:42.4276999Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-21T23:28:42.4278369Z 
+2026-10-21T23:28:42.4279339Z HEAD is now at 0a70d92 Track scripts/verify-forge-usage.mjs referenced by the security:forge script
+2026-10-21T23:28:42.4282707Z ##[endgroup]
+2026-10-21T23:28:42.4328839Z [command]/usr/bin/git log -1 --format=%H
+2026-10-21T23:28:42.4363351Z 0a70d92013463af0938706fad3957f335a1d0d59

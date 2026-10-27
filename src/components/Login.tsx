@@ -85,7 +85,7 @@ export function Login() {
             <>
               <div className="flex items-center gap-3">
                 <button type="button" onClick={() => { setSelected(null); setPassword(''); setError(''); }}
-                  title={t('common.close')}
+                  title={t('common.close')} aria-label={t('common.close')}
                   className="rounded-lg p-2 text-sl-muted hover:bg-sl-hover hover:text-sl-text"> ←</button>
                 <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-fuchsia-500 text-lg font-bold text-white shadow-lg shadow-primary/25">
                   {selected.name.charAt(0).toUpperCase()}

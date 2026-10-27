@@ -1,0 +1,64 @@
+﻿2026-10-21T23:25:18.8978973Z ##[group]Run npx electron-builder --win --x64 --arm64 --publish always
+2026-10-21T23:25:18.8979724Z [36;1mnpx electron-builder --win --x64 --arm64 --publish always[0m
+2026-10-21T23:25:18.9052772Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-21T23:25:18.9053229Z env:
+2026-10-21T23:25:18.9056981Z   GH_TOKEN: ***
+2026-10-21T23:25:18.9057240Z ##[endgroup]
+2026-10-21T23:25:20.8024771Z   • electron-builder  version=26.15.3 os=10.0.26100
+2026-10-21T23:25:20.8086677Z   • loaded configuration  file=package.json ("build" field)
+2026-10-21T23:25:20.8135998Z   • description is missed in the package.json  appPackageFile=D:\a\shoplogic\shoplogic\package.json
+2026-10-21T23:25:20.8139559Z   • author is missed in the package.json  appPackageFile=D:\a\shoplogic\shoplogic\package.json
+2026-10-21T23:25:21.8944839Z   • executing @electron/rebuild  electronVersion=44.7.0 arch=x64 buildFromSource=false workspaceRoot=D:\a\shoplogic\shoplogic projectDir=./ appDir=./
+2026-10-21T23:25:21.8947205Z   • installing native dependencies  arch=x64
+2026-10-21T23:25:22.2063851Z   • completed installing native dependencies
+2026-10-21T23:25:22.2128774Z   • packaging       platform=win32 arch=x64 electron=44.7.0 appOutDir=release\win-unpacked
+2026-10-21T23:25:22.2700706Z   • downloaded      label=electron progress=100%
+2026-10-21T23:25:27.7870153Z   • downloaded electron zip extracted successfully  output=D:\a\shoplogic\shoplogic\release\win-unpacked
+2026-10-21T23:25:27.8136393Z   • searching for node modules  pm=npm searchDir=D:\a\shoplogic\shoplogic
+2026-10-21T23:25:31.4747913Z   • duplicate dependency references  dependencies=["@capacitor/core@8.5.3","@emnapi/runtime@1.11.3","utrie@1.0.2","@types/react@19.3.0","string-width@4.2.3","string-width@4.2.3","strip-ansi@6.0.1","strip-ansi@6.0.1","chart.js@4.5.1","@types/react@19.3.0"]
+2026-10-21T23:26:01.1913032Z   • updating asar integrity executable resource  executablePath=release\win-unpacked\ShopLogic Pro.exe
+2026-10-21T23:26:01.5724503Z   • signing with signtool.exe  path=release\win-unpacked\ShopLogic Pro.exe
+2026-10-21T23:26:01.5765424Z   • executing @electron/rebuild  electronVersion=44.7.0 arch=arm64 buildFromSource=false workspaceRoot=D:\a\shoplogic\shoplogic projectDir=./ appDir=./
+2026-10-21T23:26:01.5767850Z   • installing native dependencies  arch=arm64
+2026-10-21T23:26:01.8921297Z   • completed installing native dependencies
+2026-10-21T23:26:01.8983515Z   • packaging       platform=win32 arch=arm64 electron=44.7.0 appOutDir=release\win-arm64-unpacked
+2026-10-21T23:26:02.0464008Z   • downloaded      label=electron progress=100%
+2026-10-21T23:26:07.2381611Z   • downloaded electron zip extracted successfully  output=D:\a\shoplogic\shoplogic\release\win-arm64-unpacked
+2026-10-21T23:26:07.2514007Z   • searching for node modules  pm=npm searchDir=D:\a\shoplogic\shoplogic
+2026-10-21T23:26:08.6043729Z   • duplicate dependency references  dependencies=["@capacitor/core@8.5.3","@emnapi/runtime@1.11.3","utrie@1.0.2","@types/react@19.3.0","string-width@4.2.3","string-width@4.2.3","strip-ansi@6.0.1","strip-ansi@6.0.1","chart.js@4.5.1","@types/react@19.3.0"]
+2026-10-21T23:26:35.6002615Z   • updating asar integrity executable resource  executablePath=release\win-arm64-unpacked\ShopLogic Pro.exe
+2026-10-21T23:26:35.9610539Z   • signing with signtool.exe  path=release\win-arm64-unpacked\ShopLogic Pro.exe
+2026-10-21T23:26:35.9632793Z   • building        target=nsis file=release\ShopLogic-Setup-1.3.5.exe archs=x64, arm64 oneClick=true perMachine=true
+2026-10-21T23:26:36.0090109Z   • downloaded      label=nsis-3.0.4.1.7z progress=100%
+2026-10-21T23:26:36.0770277Z   • downloaded      label=7zip-win-x64.tar.gz progress=100%
+2026-10-21T23:26:36.8718177Z   • signing with signtool.exe  path=release\win-unpacked\resources\elevate.exe
+2026-10-21T23:26:36.8725269Z   • signing with signtool.exe  path=release\win-arm64-unpacked\resources\elevate.exe
+2026-10-21T23:28:06.2275884Z   • building        target=nsis file=release\ShopLogic-Setup-1.3.5-x64.exe archs=x64 oneClick=true perMachine=true
+2026-10-21T23:28:06.2294015Z   • building        target=nsis file=release\ShopLogic-Setup-1.3.5-arm64.exe archs=arm64 oneClick=true perMachine=true
+2026-10-21T23:28:06.2912821Z   • downloaded      label=nsis-resources-3.4.1.7z progress=100%
+2026-10-21T23:28:07.8072286Z   • signing with signtool.exe  path=release\ShopLogic-Setup-1.3.5-x64.__uninstaller.exe
+2026-10-21T23:28:07.8083963Z   • signing with signtool.exe  path=release\ShopLogic-Setup-1.3.5-arm64.__uninstaller.exe
+2026-10-21T23:28:07.8088062Z   • signing with signtool.exe  path=release\ShopLogic-Setup-1.3.5.__uninstaller.exe
+2026-10-21T23:28:09.3023428Z   • signing with signtool.exe  path=release\ShopLogic-Setup-1.3.5-arm64.exe
+2026-10-21T23:28:09.3027876Z   • building block map  blockMapFile=release\ShopLogic-Setup-1.3.5-arm64.exe.blockmap
+2026-10-21T23:28:09.5646448Z   • signing with signtool.exe  path=release\ShopLogic-Setup-1.3.5-x64.exe
+2026-10-21T23:28:09.5759298Z   • building block map  blockMapFile=release\ShopLogic-Setup-1.3.5-x64.exe.blockmap
+2026-10-21T23:28:10.4826569Z   • signing with signtool.exe  path=release\ShopLogic-Setup-1.3.5.exe
+2026-10-21T23:28:10.5041091Z   • building block map  blockMapFile=release\ShopLogic-Setup-1.3.5.exe.blockmap
+2026-10-21T23:28:24.3978525Z   • publishing      publisher=Github (owner: jimelyo, project: shoplogic, version: 1.3.5)
+2026-10-21T23:28:24.3981140Z   • publishing      publisher=Github (owner: jimelyo, project: shoplogic, version: 1.3.5)
+2026-10-21T23:28:24.4243591Z   • uploading       file=ShopLogic-Setup-1.3.5-arm64.exe.blockmap provider=github
+2026-10-21T23:28:24.4312686Z   • uploading       file=ShopLogic-Setup-1.3.5-arm64.exe provider=github
+2026-10-21T23:28:24.9406585Z   • GitHub release not created  reason=existing type not compatible with publishing type tag=v1.3.5 version=1.3.5 existingType=release publishingType=draft
+2026-10-21T23:28:24.9408424Z   • skipped publishing  file=ShopLogic-Setup-1.3.5-arm64.exe.blockmap reason=existing type not compatible with publishing type tag=v1.3.5 version=1.3.5 existingType=release publishingType=draft
+2026-10-21T23:28:24.9441012Z   • GitHub release not created  reason=existing type not compatible with publishing type tag=v1.3.5 version=1.3.5 existingType=release publishingType=draft
+2026-10-21T23:28:24.9442880Z   • skipped publishing  file=ShopLogic-Setup-1.3.5-arm64.exe reason=existing type not compatible with publishing type tag=v1.3.5 version=1.3.5 existingType=release publishingType=draft
+2026-10-21T23:28:25.4501556Z   • uploading       file=ShopLogic-Setup-1.3.5-x64.exe.blockmap provider=github
+2026-10-21T23:28:25.4503988Z   • skipped publishing  file=ShopLogic-Setup-1.3.5-x64.exe.blockmap reason=existing type not compatible with publishing type tag=v1.3.5 version=1.3.5 existingType=release publishingType=draft
+2026-10-21T23:28:25.4505958Z   • uploading       file=ShopLogic-Setup-1.3.5-x64.exe provider=github
+2026-10-21T23:28:25.4508107Z   • skipped publishing  file=ShopLogic-Setup-1.3.5-x64.exe reason=existing type not compatible with publishing type tag=v1.3.5 version=1.3.5 existingType=release publishingType=draft
+2026-10-21T23:28:31.3529846Z   • uploading       file=ShopLogic-Setup-1.3.5.exe.blockmap provider=github
+2026-10-21T23:28:31.3531826Z   • skipped publishing  file=ShopLogic-Setup-1.3.5.exe.blockmap reason=existing type not compatible with publishing type tag=v1.3.5 version=1.3.5 existingType=release publishingType=draft
+2026-10-21T23:28:31.3532985Z   • uploading       file=ShopLogic-Setup-1.3.5.exe provider=github
+2026-10-21T23:28:31.3534142Z   • skipped publishing  file=ShopLogic-Setup-1.3.5.exe reason=existing type not compatible with publishing type tag=v1.3.5 version=1.3.5 existingType=release publishingType=draft
+2026-10-21T23:28:31.3790095Z   • skipped publishing  file=latest.yml reason=existing type not compatible with publishing type tag=v1.3.5 version=1.3.5 existingType=release publishingType=draft

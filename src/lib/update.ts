@@ -23,6 +23,10 @@ interface DesktopBridge {
   installUpdate: () => Promise<unknown>;
   setAutoDownload: (enabled: boolean) => Promise<unknown>;
   onStateChange: (cb: (p: StateEvent) => void) => () => void;
+  /** Migración de origen file:// → app:// (módulo origin-migration). */
+  sendOriginDump?: (json: string) => void;
+  getOriginMigration?: () => Promise<string | null>;
+  finishOriginMigration?: () => Promise<unknown>;
 }
 
 declare global {

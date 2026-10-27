@@ -303,7 +303,7 @@ function DiagnosticStep({ env }: { env: AeatEnvironment }) {
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       <Card className="p-5">
-        <SectionTitle right={<Button size="sm" variant="outline" onClick={() => { void refresh(); }}>↺</Button>}>
+        <SectionTitle right={<Button size="sm" variant="outline" aria-label={t('common.refresh')} onClick={() => { void refresh(); }}>↺</Button>}>
           🩺 {t('vfComp.queueTitle', 'Cola de remisión a la AEAT')}
         </SectionTitle>
         {!stats ? (
@@ -454,7 +454,7 @@ function IncidentsStep() {
             {showAll ? t('vf.showIncidents', 'Solo incidencias') : t('vf.showAll', 'Ver todo')}
           </Button>
           <Button size="sm" variant="secondary" onClick={() => { void retryAll(); }}>🔁 {t('vf.retryAllBtn', 'Reintentar pendientes')}</Button>
-          <Button size="sm" variant="outline" onClick={() => { void refresh(); }}>↺</Button>
+          <Button size="sm" variant="outline" aria-label={t('common.refresh')} onClick={() => { void refresh(); }}>↺</Button>
         </div>
       }>
         ⚠️ {t('vfComp.incidentsTitle', 'Centro de gestión de incidencias')}
