@@ -186,8 +186,12 @@ export const RECTIFYING_CODES: RectifyingCode[] = ['R1', 'R2', 'R3', 'R4', 'R5']
 export const RECTIFYING_ICONS: Record<RectifyingCode, string> = { R1: '↩️', R2: '📉', R3: '⌛', R4: '⚖️', R5: '🧾' };
 
 export interface ProductCategory { id: string; name: string; icon: string; color: string; isDefault?: boolean }
+/** Font family used when printing thermal tickets (monospace is the thermal classic). */
+export type TicketFont = 'courier' | 'arial' | 'times';
 export interface PrinterConfig {
   enabled: boolean; name: string; connection: PrinterConnection; width: '80mm' | '58mm'; header?: string; showLogo?: boolean;
+  /** Ticket typography: font family, body size in px and bold mode — thermal printer output varies, so it is tunable. */
+  font?: TicketFont; fontSize?: number; bold?: boolean;
 }
 export interface NormalPrinterConfig {
   enabled: boolean; name: string; connection: PrinterConnection; paper: 'A4' | 'Letter'; color: boolean; copies: number; watermark?: string;

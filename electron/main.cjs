@@ -12,6 +12,7 @@ const path = require('node:path');
 const fs = require('node:fs');
 const os = require('node:os');
 const { pathToFileURL } = require('node:url');
+const { spawn } = require('node:child_process');
 
 // Auto-update (electron-updater). Runs only in packaged builds; on GitHub
 // Releases it checks every 30 min and installs+relaunches in the background.
@@ -25,6 +26,15 @@ const DIST = path.join(__dirname, '..', 'dist');
 const APP_ORIGIN = 'app://shoplogic';
 
 let win = null;
+// Single instance: two copies running would make the NSIS updater fail to
+// close them and show the 'close the app manually + retry' dialog forever.
+if (!app.requestSingleInstanceLock()) app.quit();
+app.on('second-instance', () => {
+  if (win && !win.isDestroyed()) {
+    if (win.isMinimized()) win.restore();
+    win.focus();
+  }
+});
 
 // The app:// scheme must be privileged (standard host semantics + secure
 // context + service workers) BEFORE the Electron module system is ready.
@@ -218,11 +228,28 @@ function setupUpdater() {
     progress: progress,
   }));
   ipcMain.handle('updater:check', () => autoUpdater.checkForUpdates());
-  ipcMain.handle('updater:apply', () => {
+  ipcMain.handle('updater:apply', async () => {
     if (downloading) return; // Already in progress.
-    void autoUpdater.downloadUpdate();
+    downloading = true;
+    try {
+      const files = await autoUpdater.downloadUpdate();
+      installerPath = Array.isArray(files) ? files[0] : null;
+    } catch (e) {
+      send('updater:state-changed', { state: 'error', message: String(e) });
+    } finally {
+      downloading = false;
+    }
   });
-  ipcMain.handle('updater:install', () => { autoUpdater.quitAndInstall(); });
+  ipcMain.handle('updater:install', () => {
+    if (installerPath) {
+      // Start the NSIS installer and hard-exit right away: the installer never
+      // waits on the app closing (kills the 'cannot close app' retry dialog).
+      spawn(installerPath, ['/S', '--force-run'], { detached: true, stdio: 'ignore' }).unref();
+      app.exit(0);
+      return;
+    }
+    autoUpdater.quitAndInstall(true, true);
+  });
 
   autoUpdater.on('checking-for-update', () => send('updater:state-changed', { state: 'checking' }));
   autoUpdater.on('update-available', (i) => send('updater:state-changed', { state: 'updateReady', version: i?.version }));
@@ -238,6 +265,7 @@ function setupUpdater() {
 
 let downloading = false;
 let progress = null;
+let installerPath = null;
 
 // Auto-download when the store hasn't opted out (localStorage flag mirrored
 // by the renderer through `updater:set-auto`).

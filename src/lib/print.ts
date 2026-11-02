@@ -1,5 +1,5 @@
 import i18n from '../i18n';
-import type { Invoice, Quote, Repair, Sale, Settings } from '../types';
+import type { Invoice, PrinterConfig, Quote, Repair, Sale, Settings, TicketFont } from '../types';
 import { splitVat } from './calc';
 import { formatMoney, safeFormat } from './format';
 
@@ -44,17 +44,29 @@ export function printHtml(body: string, title = 'ShopLogic Pro') {
   }, 350);
 }
 
-const ticketCss = (width: string) => `<style>
+const FONT_STACKS: Record<TicketFont, string> = {
+  courier: "'Courier New', Courier, ui-monospace, monospace",
+  arial: 'Arial, Helvetica, sans-serif',
+  times: "'Times New Roman', Times, serif",
+};
+const clampPx = (n: unknown, fallback: number) => Math.min(24, Math.max(8, Math.round(Number(n) || fallback)));
+
+const ticketCss = (width: string, tp?: PrinterConfig) => {
+  const size = clampPx(tp?.fontSize, 12);
+  const boldWeight = '900';
+  const tpBold = !!tp?.bold;
+  return `<style>
   @page { size: ${width} auto; margin: 3mm; }
   * { box-sizing: border-box; }
-  body { font-family: 'Courier New', ui-monospace, monospace; font-size: 12px; color: #000; margin: 0 auto; width: ${width === '58mm' ? '52mm' : '72mm'}; }
-  .c { text-align: center; } .b { font-weight: 700; } .r { text-align: end; }
-  .logo { font-size: 22px; } h1 { font-size: 15px; margin: 4px 0; }
+  body { font-family: ${FONT_STACKS[tp?.font ?? 'courier']}; font-size: ${size}px; color: #000; margin: 0 auto; width: ${width === '58mm' ? '52mm' : '72mm'}; ${tpBold ? 'font-weight: 700;' : ''} }
+  .c { text-align: center; } .b { font-weight: ${tpBold ? boldWeight : '700'}; } .r { text-align: end; }
+  .logo { font-size: ${Math.round(size * 1.8)}px; } h1 { font-size: ${Math.round(size * 1.25)}px; margin: 4px 0; }
   hr { border: 0; border-top: 1px dashed #000; margin: 6px 0; }
   table { width: 100%; border-collapse: collapse; } td { vertical-align: top; padding: 1px 0; }
-  .tot td { font-size: 14px; font-weight: 700; }
-  .muted { color: #333; font-size: 11px; }
+  .tot td { font-size: ${Math.round(size * 1.15)}px; font-weight: ${tpBold ? boldWeight : '700'}; }
+  .muted { color: #333; font-size: ${Math.round(size * 0.92)}px; }
 </style>`;
+};
 
 function storeHeader(s: Settings, t: T) {
   const tp = s.ticketPrinter;
@@ -74,7 +86,7 @@ export function saleTicketHtml(sale: Sale, s: Settings, t: T) {
   const m = (n: number) => formatMoney(n, s, lang);
   const v = splitVat(sale.total, s.taxRate);
   const rows = sale.items.map((i) => `<tr><td>${i.quantity} x ${esc(i.name)}</td><td class="r">${m(i.price * i.quantity)}</td></tr>`).join('');
-  return `${ticketCss(s.ticketPrinter?.width ?? '80mm')}${storeHeader(s, t)}
+  return `${ticketCss(s.ticketPrinter?.width ?? '80mm', s.ticketPrinter)}${storeHeader(s, t)}
   <div><span class="b">${esc(t('pos.ticket'))}:</span> ${esc(sale.ticketNumber)}<br><span class="b">${esc(t('common.date'))}:</span> ${safeFormat(sale.date, 'dd/MM/yyyy HH:mm')}
   ${sale.customerName ? `<br><span class="b">${esc(t('common.customer'))}:</span> ${esc(sale.customerName)}` : ''}
   <br><span class="b">${esc(t('pos.paymentMethod'))}:</span> ${esc(t('payment.' + sale.paymentMethod))}</div><hr>
@@ -85,13 +97,24 @@ export function saleTicketHtml(sale: Sale, s: Settings, t: T) {
   <div class="c muted">${esc(s.ticketFooter || '')}</div>`;
 }
 
+/** Demo ticket built with the current printer + typography settings, to dial in thermal output. */
+export function testTicketHtml(s: Settings, t: T) {
+  const items = [
+    { name: 'Funda iPhone 15', quantity: 1, price: 12.99, productId: 0, category: '', cost: 0 },
+    { name: 'Cristal templado', quantity: 2, price: 4.95, productId: 0, category: '', cost: 0 },
+  ];
+  const total = items.reduce((acc, i) => acc + i.price * i.quantity, 0);
+  const demo: Sale = { ticketNumber: 'TEST-0001', date: new Date().toISOString(), items, subtotal: total, tax: 0, total, paymentMethod: 'cash' };
+  return saleTicketHtml(demo, s, t);
+}
+
 export function repairReceiptHtml(r: Repair, s: Settings, t: T) {
   const lang = i18n.language;
   const m = (n: number) => formatMoney(n, s, lang);
   const amount = r.finalCost ?? r.estimatedCost;
   const labor = r.laborMode === 'separate' ? r.laborCost ?? 0 : 0;
   const v = splitVat(amount + labor, s.taxRate);
-  return `${ticketCss(s.ticketPrinter?.width ?? '80mm')}${storeHeader(s, t)}
+  return `${ticketCss(s.ticketPrinter?.width ?? '80mm', s.ticketPrinter)}${storeHeader(s, t)}
   <div class="c b">${esc(t('repairs.receiptTitle'))}</div>
   <div class="c b" style="font-size:16px">${esc(r.ticketNumber)}</div><hr>
   <div><span class="b">${esc(t('repairs.dateIn'))}:</span> ${safeFormat(r.dateIn, 'dd/MM/yyyy HH:mm')}
@@ -116,7 +139,7 @@ export function quoteHtml(x: Quote, s: Settings, t: T) {
   const m = (n: number) => formatMoney(n, s, lang);
   const v = splitVat(x.total, s.taxRate);
   const rows = x.items.map((i) => `<tr><td>${i.quantity} x ${esc(i.name)}</td><td class="r">${m(i.price * i.quantity)}</td></tr>`).join('');
-  return `${ticketCss(s.ticketPrinter?.width ?? '80mm')}${storeHeader(s, t)}
+  return `${ticketCss(s.ticketPrinter?.width ?? '80mm', s.ticketPrinter)}${storeHeader(s, t)}
   <div class="c b">${esc(t('quotes.docTitle'))}</div>
   <div class="c b" style="font-size:16px">${esc(x.number)}</div><hr>
   <div><span class="b">${esc(t('common.date'))}:</span> ${safeFormat(x.date, 'dd/MM/yyyy')}
