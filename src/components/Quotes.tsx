@@ -50,6 +50,7 @@ export function Quotes() {
   const f = useFormat();
   const user = useStore((x) => x.currentUser);
   const quotes = useLiveQuery(() => db.quotes.reverse().sortBy('createdAt'), []);
+  const customers = useLiveQuery(() => db.customers.orderBy('name').toArray(), []);
   const [q, setQ] = useState('');
   const [status, setStatus] = useState<QuoteStatus | 'all'>('all');
   const [view, setView] = useViewMode('quotes');
@@ -59,15 +60,17 @@ export function Quotes() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [detail, setDetail] = useState<Quote | null>(null);
   const [busy, setBusy] = useState(false);
+  const [existing, setExisting] = useState('');
 
   const effStatus = (x: Quote): QuoteStatus => (quoteExpired(x) ? 'expired' : x.status);
   const list = useMemo(() => (quotes ?? []).filter((x) =>
     (status === 'all' || effStatus(x) === status) && matches(q, x.number, x.customerName, x.customerPhone, x.device)), [quotes, q, status]);
-  if (!quotes) return <LoadingPage />;
+  if (!quotes || !customers) return <LoadingPage />;
 
-  const openNew = () => { setEditing(null); setForm(emptyForm()); setErrors({}); setOpen(true); };
+  const openNew = () => { setEditing(null); setForm(emptyForm()); setErrors({}); setExisting(''); setOpen(true); };
   const openEdit = (x: Quote) => {
     setEditing(x);
+    setExisting(x.customerId ? String(x.customerId) : '');
     setForm({
       customerName: x.customerName, customerPhone: x.customerPhone ?? '', customerEmail: x.customerEmail ?? '',
       customerId: x.customerId ? String(x.customerId) : '', device: x.device ?? '', imei: x.imei ?? '',
@@ -77,6 +80,11 @@ export function Quotes() {
     setErrors({}); setOpen(true);
   };
 
+  const pickCustomer = (id: string) => {
+    setExisting(id);
+    const c = customers.find((x) => String(x.id) === id);
+    if (c) setForm((fm) => ({ ...fm, customerId: id, customerName: c.name, customerPhone: c.phone, customerEmail: c.email ?? '' }));
+  };
   const lines = () => form.items
     .filter((l) => l.name.trim())
     .map((l) => ({ name: l.name.trim(), quantity: Math.max(1, Number(l.quantity) || 1), price: Math.max(0, Number(l.price) || 0) }));
@@ -261,6 +269,11 @@ export function Quotes() {
       <Modal open={open} onClose={() => setOpen(false)} size="lg" title={editing ? `✏️ ${editing.number}` : `➕ ${t('quotes.new')}`}
         footer={<><Button variant="secondary" onClick={() => setOpen(false)}>{t('common.cancel')}</Button><Button onClick={save}>{t('common.save')}</Button></>}>
         <div className="space-y-4">
+          <Select label={t('repairs.existingCustomer')} value={existing} onChange={(e) => (e.target.value ? pickCustomer(e.target.value) : (setExisting(''), setForm((fm) => ({ ...fm, customerId: '' }))))}>
+            <option value="">➕ {t('repairs.newCustomerOption')}</option>
+            {customers.map((c) => <option key={c.id} value={c.id}>{c.name} · {c.phone}</option>)}
+          </Select>
+          {!existing && <p className="text-[11px] text-sl-muted">💡 {t('repairs.autoCustomerHint')}</p>}
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <Input label={t('common.name')} requiredMark value={form.customerName} onChange={(e) => setForm({ ...form, customerName: e.target.value })} error={errors.customerName} />
             <Input label={t('common.phone')} value={form.customerPhone} onChange={(e) => setForm({ ...form, customerPhone: e.target.value })} />
@@ -280,9 +293,9 @@ export function Quotes() {
             <div className="space-y-2">
               {form.items.map((line, idx) => (
                 <div key={idx} className="flex gap-2">
-                  <input className={`${fieldClass(!!errors[`items.${idx}.name`])} min-w-0 flex-1`} placeholder={t('common.description')} value={line.name} onChange={(e) => setForm({ ...form, items: form.items.map((l, i) => (i === idx ? { ...l, name: e.target.value } : l)) })} />
-                  <input type="number" min="1" step="1" className={`${fieldClass()} w-20`} placeholder="1" value={line.quantity} onChange={(e) => setForm({ ...form, items: form.items.map((l, i) => (i === idx ? { ...l, quantity: e.target.value } : l)) })} />
-                  <input type="number" min="0" step="0.01" className={`${fieldClass()} w-28`} placeholder="0.00" value={line.price} onChange={(e) => setForm({ ...form, items: form.items.map((l, i) => (i === idx ? { ...l, price: e.target.value } : l)) })} />
+                  <input className={`${fieldClass(!!errors[`items.${idx}.name`])} flex-1 min-w-0 shrink`} placeholder={t('common.description')} value={line.name} onChange={(e) => setForm({ ...form, items: form.items.map((l, i) => (i === idx ? { ...l, name: e.target.value } : l)) })} />
+                  <input type="number" min="1" step="1" className={`${fieldClass()} w-14! flex-none shrink-0 px-2! text-center`} placeholder="1" value={line.quantity} onChange={(e) => setForm({ ...form, items: form.items.map((l, i) => (i === idx ? { ...l, quantity: e.target.value } : l)) })} />
+                  <input type="number" min="0" step="0.01" className={`${fieldClass()} w-24! flex-none shrink-0 px-2! text-center`} placeholder="0.00" value={line.price} onChange={(e) => setForm({ ...form, items: form.items.map((l, i) => (i === idx ? { ...l, price: e.target.value } : l)) })} />
                   <IconButton title={t('common.delete')} tone="danger" disabled={form.items.length <= 1} onClick={() => setForm({ ...form, items: form.items.filter((_, i) => i !== idx) })}><Trash /></IconButton>
                 </div>
               ))}

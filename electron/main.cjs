@@ -26,6 +26,11 @@ const DIST = path.join(__dirname, '..', 'dist');
 const APP_ORIGIN = 'app://shoplogic';
 
 let win = null;
+// La ventana oculta de migración de origen (file:// → app://) se destruye al
+// terminar su volcado; sin este flag, ese cierre dispara 'window-all-closed' y
+// la app se cerraba sola en instalaciones NUEVAS, antes de crear la ventana
+// principal (el usuario veía un parpadeo y nada más).
+let mainWindowCreated = false;
 // Single instance: two copies running would make the NSIS updater fail to
 // close them and show the 'close the app manually + retry' dialog forever.
 if (!app.requestSingleInstanceLock()) app.quit();
@@ -33,7 +38,10 @@ app.on('second-instance', () => {
   if (win && !win.isDestroyed()) {
     if (win.isMinimized()) win.restore();
     win.focus();
+    return;
   }
+  // Sin ventana (arranque en curso o cerrada): abrir una nueva en vez de no hacer nada.
+  if (!DEV_URL && mainWindowCreated) createWindow();
 });
 
 // The app:// scheme must be privileged (standard host semantics + secure
@@ -109,6 +117,7 @@ function createWindow() {
     },
   });
 
+  mainWindowCreated = true;
   win.setMenuBarVisibility(false);
   win.on('closed', () => { win = null; });
 
@@ -338,10 +347,14 @@ ipcMain.handle('files:pick-dir', () => {
 app.whenReady().then(async () => {
   registerAppProtocol();
   setupSessionPermissions();
-  await ensureOriginMigrated();
+  try { await ensureOriginMigrated(); } catch { /* la migración nunca debe impedir abrir la app */ }
   createWindow();
   setupUpdater();
 });
 
-app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
+app.on('window-all-closed', () => {
+  // Solo se cierra si la ventana principal llegó a existir: el cierre de la
+  // ventana oculta de migración no debe terminar el proceso.
+  if (mainWindowCreated && process.platform !== 'darwin') app.quit();
+});
 app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
