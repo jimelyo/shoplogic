@@ -16,7 +16,7 @@ import { REPAIR_STATUS_COLORS } from '../lib/colors';
 import { createInvoiceFromRepair } from '../lib/invoices';
 import { printHtml, buildDoc, repairReceiptHtml } from '../lib/print';
 import { repairSchema, validateForm, type FormErrors } from '../schemas';
-import type { ChannelId, Repair, RepairStatus } from '../types';
+import type { ChannelId, PaymentMethod, Repair, RepairStatus } from '../types';
 import { REPAIR_STATUSES, REPAIR_STATUS_ICONS } from '../types';
 import { PageHeader } from './shared/PageHeader';
 import { Badge, Card, EmptyState, IconButton, InfoRow, SearchInput, Toolbar, ViewToggle, useViewMode } from './shared/UI';
@@ -28,8 +28,8 @@ const nowIso = () => new Date().toISOString();
 import { DataTable } from './shared/SortableTable';
 import { LoadingPage } from './shared/Skeleton';
 
-type RForm = { customerName: string; customerPhone: string; customerEmail: string; device: string; imei: string; problem: string; diagnosis: string; notes: string; status: RepairStatus; estimatedCost: string; finalCost: string; laborMode: 'included' | 'separate'; laborCost: string };
-const emptyForm = (): RForm => ({ customerName: '', customerPhone: '', customerEmail: '', device: '', imei: '', problem: '', diagnosis: '', notes: '', status: 'received', estimatedCost: '', finalCost: '', laborMode: 'included', laborCost: '' });
+type RForm = { customerName: string; customerPhone: string; customerEmail: string; device: string; imei: string; problem: string; diagnosis: string; notes: string; status: RepairStatus; estimatedCost: string; finalCost: string; laborMode: 'included' | 'separate'; laborCost: string; deposit: string; depositMethod: PaymentMethod; lockType: 'none' | 'pattern' | 'password'; unlockPattern: string; unlockCode: string };
+const emptyForm = (): RForm => ({ customerName: '', customerPhone: '', customerEmail: '', device: '', imei: '', problem: '', diagnosis: '', notes: '', status: 'received', estimatedCost: '', finalCost: '', laborMode: 'included', laborCost: '', deposit: '', depositMethod: 'cash', lockType: 'none', unlockPattern: '', unlockCode: '' });
 
 const NEXT: Partial<Record<RepairStatus, RepairStatus[]>> = {
   received: ['diagnosis', 'cancelled'],
@@ -38,6 +38,43 @@ const NEXT: Partial<Record<RepairStatus, RepairStatus[]>> = {
   waiting_parts: ['in_progress', 'completed'],
   completed: ['delivered'],
 };
+
+/**
+ * 3×3 pad to "draw" the device unlock pattern with the mouse or a finger.
+ * Dots are numbered 1-9 like a phone keypad (1 top-left, 9 bottom-right) and
+ * the drawn order is stored as "1-2-5-6-9" so it prints on the ticket.
+ */
+function PatternPad({ value, onChange }: { value: string; onChange: (update: (prev: string) => string) => void }) {
+  const { t } = useTranslation();
+  const seq = value ? value.split('-').filter(Boolean) : [];
+  // Functional update: fast taps/drags must not overwrite each other with a stale sequence.
+  const add = (n: number) => {
+    const key = String(n);
+    onChange((prev) => {
+      const cur = prev ? prev.split('-').filter(Boolean) : [];
+      return cur.includes(key) ? prev : [...cur, key].join('-'); // a dot cannot be used twice (same rule as Android)
+    });
+  };
+  return (
+    <div>
+      <div className="mx-auto grid w-40 grid-cols-3 gap-2 rounded-xl border border-sl-border bg-sl-card p-3">
+        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => {
+          const idx = seq.indexOf(String(n));
+          return (
+            <button key={n} type="button" onPointerDown={() => add(n)} onPointerEnter={(e) => { if (e.buttons === 1) add(n); }}
+              className={`flex h-10 w-10 items-center justify-center rounded-full border text-xs font-bold transition select-none ${idx >= 0 ? 'border-primary bg-primary text-white' : 'border-sl-border text-sl-muted hover:border-primary'}`}>
+              {idx >= 0 ? idx + 1 : n}
+            </button>
+          );
+        })}
+      </div>
+      <div className="mt-2 flex items-center justify-between gap-2 text-[11px] text-sl-muted">
+        <span className="font-mono text-sl-text">{seq.length ? seq.join(' → ') : t('repairs.lockPatternEmpty')}</span>
+        {seq.length > 0 && <button type="button" className="text-primary hover:underline" onClick={() => onChange(() => '')}>{t('repairs.lockClear')}</button>}
+      </div>
+    </div>
+  );
+}
 
 export function RepairStatusBadge({ status }: { status: RepairStatus }) {
   const { t } = useTranslation();
@@ -127,6 +164,8 @@ export function Repairs() {
   const [sending, setSending] = useState(false);
   /** Repair whose receipt is being previewed before printing. */
   const [preview, setPreview] = useState<Repair | null>(null);
+  /** Which variant of the repair document is being previewed/printed. */
+  const [previewInternal, setPreviewInternal] = useState(false);
 
   const list = useMemo(() => (repairs ?? []).filter((r) => (status === 'all' || r.status === status) && matches(q, r.ticketNumber, r.customerName, r.customerPhone, r.device, r.imei, r.problem)), [repairs, q, status]);
   if (!repairs || !customers || !invoices) return <LoadingPage />;
@@ -134,7 +173,7 @@ export function Repairs() {
   const openNew = () => { setEditing(null); setForm(emptyForm()); setErrors({}); setExisting(''); setOpen(true); };
   const openEdit = (r: Repair) => {
     setEditing(r); setExisting(r.customerId ? String(r.customerId) : '');
-    setForm({ customerName: r.customerName, customerPhone: r.customerPhone, customerEmail: r.customerEmail ?? '', device: r.device, imei: r.imei ?? '', problem: r.problem, diagnosis: r.diagnosis ?? '', notes: r.notes ?? '', status: r.status, estimatedCost: String(r.estimatedCost), finalCost: r.finalCost !== undefined ? String(r.finalCost) : '', laborMode: r.laborMode ?? 'included', laborCost: r.laborCost !== undefined ? String(r.laborCost) : '' });
+    setForm({ customerName: r.customerName, customerPhone: r.customerPhone, customerEmail: r.customerEmail ?? '', device: r.device, imei: r.imei ?? '', problem: r.problem, diagnosis: r.diagnosis ?? '', notes: r.notes ?? '', status: r.status, estimatedCost: String(r.estimatedCost), finalCost: r.finalCost !== undefined ? String(r.finalCost) : '', laborMode: r.laborMode ?? 'included', laborCost: r.laborCost !== undefined ? String(r.laborCost) : '', deposit: r.deposit !== undefined ? String(r.deposit) : '', depositMethod: r.depositMethod ?? 'cash', lockType: r.lockType ?? 'none', unlockPattern: r.unlockPattern ?? '', unlockCode: r.unlockCode ?? '' });
     setErrors({}); setOpen(true);
   };
   const pickCustomer = (id: string) => {
@@ -150,6 +189,13 @@ export function Repairs() {
     const inv = await createInvoiceFromRepair(r, t('repairs.repairOf'), t('repairs.labor'));
     await logAction('create', 'billing', `${inv.number} ← ${r.ticketNumber}`);
     toast.info(t('repairs.invoiceCreated', { number: inv.number }));
+  };
+
+  /** Audit entry for the advance payment (señal), only when one is actually recorded. */
+  const logDeposit = async (ticket: string, deposit?: number, method?: PaymentMethod, previous?: number) => {
+    if (!deposit || deposit <= 0) return;
+    if (previous !== undefined && previous === deposit) return;
+    await logAction('payment', 'repairs', `${ticket} · ${f.money(deposit)} · ${t(`payment.${method ?? 'cash'}`)}`);
   };
 
   const ensureCustomer = async (name: string, phone: string, email?: string): Promise<number> => {
@@ -168,12 +214,21 @@ export function Repairs() {
     if (!r.success) return;
     const d = r.data;
     const customerId = await ensureCustomer(d.customerName, d.customerPhone, d.customerEmail || undefined);
-    const payload = { ...d, customerEmail: d.customerEmail || undefined, customerId };
+    // The lock only keeps what matches the chosen mode: switching to "no lock" clears both.
+    const payload = {
+      ...d,
+      customerEmail: d.customerEmail || undefined,
+      customerId,
+      lockType: d.lockType ?? 'none',
+      unlockPattern: d.lockType === 'pattern' ? d.unlockPattern : undefined,
+      unlockCode: d.lockType === 'password' ? d.unlockCode : undefined,
+    };
     if (editing) {
       const delivered = d.status === 'delivered' && editing.status !== 'delivered';
       const dateOut = ['completed', 'delivered'].includes(d.status) ? editing.dateOut ?? nowIso() : undefined;
       await db.repairs.update(editing.id!, { ...payload, dateOut });
       await logAction('update', 'repairs', editing.ticketNumber);
+      await logDeposit(editing.ticketNumber, d.deposit, d.depositMethod, editing.deposit);
       toast.success(t('common.updated'));
       if (delivered) await maybeInvoice({ ...editing, ...payload, dateOut });
       // Completed from the edit form: the automations send it, else the prompt offers it.
@@ -186,10 +241,12 @@ export function Repairs() {
       const rep: Repair = { ...payload, ticketNumber: `R-${pad(n)}`, dateIn: now, createdAt: now, dateOut };
       rep.id = await db.repairs.add(rep);
       await logAction('create', 'repairs', `${rep.ticketNumber} · ${rep.device}`);
-      toast.success(t('repairs.created', { ticket: rep.ticketNumber }));
+      await logDeposit(rep.ticketNumber, rep.deposit, rep.depositMethod);
+      const pending = Math.max(0, (rep.finalCost ?? rep.estimatedCost) + laborAdd(rep) - (rep.deposit ?? 0));
+      toast.success(t('repairs.created', { ticket: rep.ticketNumber }) + ((rep.deposit ?? 0) > 0 ? ` · ${t('repairs.depositPending')}: ${f.money(pending)}` : ''));
       // Offer the check-in ticket right away: the customer is still at the counter.
       if (await confirmDialog(t('repairs.printTicketAsk'), { confirmLabel: t('repairs.printTicket'), title: rep.ticketNumber })) {
-        setPreview(rep);
+        openPreview(rep);
         logAction('print', 'repairs', rep.ticketNumber);
       }
       if (rep.status === 'delivered') await maybeInvoice(rep);
@@ -223,14 +280,32 @@ export function Repairs() {
     await logAction('delete', 'repairs', r.ticketNumber);
     toast.success(t('common.deleted'));
   };
-  const print = (r: Repair) => { printHtml(repairReceiptHtml(r, s, t), r.ticketNumber); logAction('print', 'repairs', r.ticketNumber); };
+  /** Open the document preview; the customer receipt is the default variant. */
+  const openPreview = (r: Repair, internal = false) => { setPreviewInternal(internal); setPreview(r); };
+  const print = (r: Repair, internal = false) => {
+    printHtml(repairReceiptHtml(r, s, t, { internal }), r.ticketNumber);
+    logAction('print', 'repairs', internal ? `${r.ticketNumber} · interna` : r.ticketNumber);
+  };
   /** The modal shows the exact document printHtml would send to the printer. */
-  const previewDoc = (r: Repair) => buildDoc(repairReceiptHtml(r, s, t), r.ticketNumber);
+  const previewDoc = (r: Repair, internal: boolean) => buildDoc(repairReceiptHtml(r, s, t, { internal }), r.ticketNumber);
   const invoiced = (r: Repair) => invoices.some((i) => i.repairId === r.id);
 
   /** Labor (VAT-included) amount that adds to the repair price when billed separately. */
   const laborAdd = (r: Pick<Repair, 'laborMode' | 'laborCost'>) => (r.laborMode === 'separate' ? r.laborCost ?? 0 : 0);
   const hasLabor = (r: Pick<Repair, 'laborMode' | 'laborCost'>) => (r.laborCost ?? 0) > 0;
+  /** Full repair amount (price + labor billed on top, VAT included). */
+  const repairTotal = (r: Pick<Repair, 'estimatedCost' | 'finalCost' | 'laborMode' | 'laborCost'>) => (r.finalCost ?? r.estimatedCost) + laborAdd(r);
+  /** Advance payment already handed over (señal), 0 when none. */
+  const depositOf = (r: Pick<Repair, 'deposit'>) => r.deposit ?? 0;
+  /** What the customer still owes when picking the device up. */
+  const pendingOf = (r: Pick<Repair, 'estimatedCost' | 'finalCost' | 'laborMode' | 'laborCost' | 'deposit'>) => Math.max(0, repairTotal(r) - depositOf(r));
+  /** Unlock code of the device, as stored (pattern sequence or plain password). */
+  const lockValue = (r: Pick<Repair, 'lockType' | 'unlockPattern' | 'unlockCode'>) => {
+    const seq = r.lockType === 'pattern' ? (r.unlockPattern ?? '').split('-').filter(Boolean) : [];
+    if (seq.length) return <span className="font-mono">{seq.join(' → ')}</span>;
+    if (r.lockType === 'password' && r.unlockCode) return <span className="font-mono">{r.unlockCode}</span>;
+    return <span className="text-sl-muted">🔓 {t('repairs.lockNone')}</span>;
+  };
   /** Small sub-line spelling the on-top labor charge, shown under the cost amounts. */
   const laborSuffix = (r: Pick<Repair, 'laborMode' | 'laborCost'>) =>
     r.laborMode === 'separate' && (r.laborCost ?? 0) > 0 ? (
@@ -258,7 +333,7 @@ export function Repairs() {
   const rowActions = (r: Repair) => (
     <div className="flex justify-end gap-0.5">
       <IconButton title={t('common.view')} onClick={() => setDetail(r)}><Eye /></IconButton>
-      <IconButton title={t('repairs.printReceipt')} onClick={() => setPreview(r)}><Printer /></IconButton>
+      <IconButton title={t('repairs.printReceipt')} onClick={() => openPreview(r)}><Printer /></IconButton>
       <IconButton title={t('common.edit')} tone="primary" onClick={() => openEdit(r)}><Pencil /></IconButton>
       <IconButton title={t('common.delete')} tone="danger" onClick={() => remove(r)}><Trash /></IconButton>
     </div>
@@ -300,6 +375,8 @@ export function Repairs() {
               </div>
               <div className="mt-2 text-sm text-sl-text">👤 {r.customerName} · <span className="text-sl-muted">{r.customerPhone}</span></div>
               <div className="mt-1 line-clamp-2 text-xs text-sl-muted">⚠️ {r.problem}</div>
+              {r.lockType === 'pattern' && r.unlockPattern && <div className="mt-0.5 font-mono text-[11px] text-sl-muted">🔒 {r.unlockPattern.split('-').join(' → ')}</div>}
+              {r.lockType === 'password' && r.unlockCode && <div className="mt-0.5 font-mono text-[11px] text-sl-muted">🔑 {r.unlockCode}</div>}
               <div className="mt-1 text-[11px] text-sl-muted">📅 {f.dateTime(r.dateIn)}</div>
               <div className="mt-3 grid grid-cols-2 gap-2 rounded-lg bg-sl-hover p-2 text-xs">
                 <div><div className="mb-0.5 text-sl-muted">{t('repairs.estimate')}</div>{vatLine(r.estimatedCost)}</div>
@@ -312,6 +389,16 @@ export function Repairs() {
                   <span className="font-semibold text-sl-muted">{t('common.total')}</span>
                   <span className="font-bold text-primary">{f.money(splitVat((r.finalCost ?? r.estimatedCost) + laborAdd(r), s.taxRate).total)}</span>
                 </div>}
+                {depositOf(r) > 0 && <>
+                  <div className="col-span-2 flex items-center justify-between border-t border-sl-border/60 pt-1.5">
+                    <span className="text-sl-muted">💰 {t('repairs.depositPaid')} <span className="text-[10px]">· {t(`payment.${r.depositMethod ?? 'cash'}`)}</span></span>
+                    <span className="font-semibold text-emerald-600">{f.money(depositOf(r))}</span>
+                  </div>
+                  <div className="col-span-2 flex items-center justify-between">
+                    <span className="font-semibold text-sl-muted">{t('repairs.depositPending')}</span>
+                    <span className="font-bold text-rose-600">{f.money(pendingOf(r))}</span>
+                  </div>
+                </>}
               </div>
               <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-sl-border pt-3">
                 {quick(r)}
@@ -330,7 +417,7 @@ export function Repairs() {
             { key: 'problem', label: t('repairs.problem'), render: (r) => <span className="line-clamp-1 max-w-[220px] text-sl-muted">{r.problem}</span> },
             { key: 'status', label: t('common.status'), render: (r) => <RepairStatusBadge status={r.status} />, sortValue: (r) => REPAIR_STATUSES.indexOf(r.status) },
             { key: 'estimatedCost', label: t('repairs.estimate'), render: (r) => vatLine(r.estimatedCost) },
-            { key: 'finalCost', label: t('repairs.finalCost'), render: (r) => <div>{vatLine(r.finalCost)}{laborSuffix(r)}{hasLabor(r) && <div className="font-bold text-primary">= {f.money(splitVat((r.finalCost ?? r.estimatedCost) + laborAdd(r), s.taxRate).total)}</div>}</div> },
+            { key: 'finalCost', label: t('repairs.finalCost'), render: (r) => <div>{vatLine(r.finalCost)}{laborSuffix(r)}{hasLabor(r) && <div className="font-bold text-primary">= {f.money(splitVat((r.finalCost ?? r.estimatedCost) + laborAdd(r), s.taxRate).total)}</div>}{depositOf(r) > 0 && <div className="text-[10px] leading-tight"><span className="text-emerald-600">💰 {f.money(depositOf(r))}</span> <span className="text-rose-600">· {t('repairs.depositPending')}: {f.money(pendingOf(r))}</span></div>}</div> },
             { key: '_a', label: '', sortable: false, render: rowActions },
           ]} />
       )}
@@ -375,6 +462,34 @@ export function Repairs() {
               </div>
               {form.laborMode === 'included' && form.laborCost && <p className="mt-2 text-[11px] text-sl-muted">ℹ️ {t('repairs.laborIncludedHint')}</p>}
             </div>
+            <div className="sm:col-span-2 rounded-xl border border-sl-border bg-sl-card2 p-3">
+              <div className="mb-2 text-xs font-bold uppercase tracking-wide text-sl-muted">🔒 {t('repairs.lock')}</div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <Select label={t('repairs.lock')} value={form.lockType} onChange={(e) => setForm({ ...form, lockType: e.target.value as 'none' | 'pattern' | 'password' })}>
+                  <option value="none">🔓 {t('repairs.lockNone')}</option>
+                  <option value="pattern">🔒 {t('repairs.lockPattern')}</option>
+                  <option value="password">🔑 {t('repairs.lockPassword')}</option>
+                </Select>
+                {form.lockType === 'password' && <Input label={t('repairs.lockCode')} placeholder="1234" value={form.unlockCode} onChange={(e) => setForm({ ...form, unlockCode: e.target.value })} error={errors.unlockCode} />}
+              </div>
+              {form.lockType === 'pattern' && <div className="mt-3">
+                <p className="mb-2 text-[11px] text-sl-muted">{t('repairs.lockPatternHint')}</p>
+                <PatternPad value={form.unlockPattern} onChange={(update) => setForm((fm) => ({ ...fm, unlockPattern: update(fm.unlockPattern) }))} />
+                {errors.unlockPattern && <p className="mt-1 text-[11px] text-rose-600">{t(errors.unlockPattern)}</p>}
+              </div>}
+              <p className="mt-2 text-[11px] text-sl-muted">💡 {t('repairs.lockHint')}</p>
+            </div>
+            <div className="sm:col-span-2 rounded-xl border border-sl-border bg-sl-card2 p-3">
+              <div className="mb-2 text-xs font-bold uppercase tracking-wide text-sl-muted">💰 {t('repairs.deposit')}</div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <Input label={t('repairs.depositAmount')} type="number" step="0.01" min="0" value={form.deposit} onChange={(e) => setForm({ ...form, deposit: e.target.value })} error={errors.deposit} hint={t('common.optional')} />
+                <Select label={t('repairs.depositMethod')} value={form.depositMethod} onChange={(e) => setForm({ ...form, depositMethod: e.target.value as PaymentMethod })}>
+                  {(['cash', 'card', 'transfer', 'other'] as PaymentMethod[]).map((pm) => <option key={pm} value={pm}>{t(`payment.${pm}`)}</option>)}
+                </Select>
+              </div>
+              <p className="mt-2 text-[11px] text-sl-muted">💡 {t('repairs.depositHint')}</p>
+              {Number(form.deposit) > 0 && <p className="mt-1 text-[11px] text-sl-text">🧾 {t('repairs.depositPending')}: <b className="text-rose-600">{f.money(Math.max(0, (Number(form.finalCost) || Number(form.estimatedCost) || 0) + (form.laborMode === 'separate' ? Number(form.laborCost) || 0 : 0) - Number(form.deposit)))}</b></p>}
+            </div>
           </div>
           {Number(form.estimatedCost) > 0 && (
             <div className="rounded-lg bg-sl-hover p-3 text-xs text-sl-muted">
@@ -394,21 +509,28 @@ export function Repairs() {
         title={preview ? `👁️ ${t('repairs.previewTitle')} · ${preview.ticketNumber}` : ''}
         footer={preview && <>
           <Button variant="secondary" onClick={() => setPreview(null)}>{t('common.cancel')}</Button>
-          <Button icon={<Printer />} onClick={() => { const r = preview; setPreview(null); print(r); }}>{t('common.print')}</Button>
+          <Button icon={<Printer />} onClick={() => { const r = preview; const internal = previewInternal; setPreview(null); print(r, internal); }}>{t('common.print')}</Button>
         </>}>
         {preview && (
-          <iframe
-            title={`${preview.ticketNumber} · ${t('repairs.previewTitle')}`}
-            srcDoc={previewDoc(preview)}
-            sandbox=""
-            className="mx-auto h-[60vh] w-full max-w-sm rounded-xl border border-sl-border bg-white"
-          />
+          <div className="space-y-3">
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" variant={previewInternal ? 'secondary' : 'primary'} onClick={() => setPreviewInternal(false)}>👤 {t('repairs.copyCustomer')}</Button>
+              <Button size="sm" variant={previewInternal ? 'primary' : 'secondary'} onClick={() => setPreviewInternal(true)}>🔒 {t('repairs.copyInternal')}</Button>
+            </div>
+            <p className="text-[11px] text-sl-muted">{previewInternal ? `🔐 ${t('repairs.copyInternalHint')}` : `👤 ${t('repairs.copyCustomerHint')}`}</p>
+            <iframe
+              title={`${preview.ticketNumber} · ${t('repairs.previewTitle')}`}
+              srcDoc={previewDoc(preview, previewInternal)}
+              sandbox=""
+              className="mx-auto h-[60vh] w-full max-w-sm rounded-xl border border-sl-border bg-white"
+            />
+          </div>
         )}
       </Modal>
 
       <Modal open={!!detail} onClose={() => setDetail(null)} size="lg" title={detail ? `🔧 ${detail.ticketNumber} · ${detail.device}` : ''}
         footer={detail && <>
-          <Button variant="secondary" icon={<Printer />} onClick={() => { const d = detail; setDetail(null); setPreview(d); }}>{t('repairs.printReceipt')}</Button>
+          <Button variant="secondary" icon={<Printer />} onClick={() => { const d = detail; setDetail(null); openPreview(d); }}>{t('repairs.printReceipt')}</Button>
           {canSendWa && !!detail.customerPhone && <Button variant="success" icon={<MessageCircle />} disabled={sending} loading={sending} onClick={() => { void sendMessage(detail, 'whatsapp'); }}>{t('channels.sendWhatsApp')}</Button>}
           {canSendMail && !!detail.customerEmail && <Button variant="secondary" icon={<Mail />} disabled={sending} loading={sending} onClick={() => { void sendMessage(detail, 'email'); }}>{t('channels.sendEmail')}</Button>}
           <Button variant="outline" icon={<Pencil />} onClick={() => { const d = detail; setDetail(null); openEdit(d); }}>{t('common.edit')}</Button>
@@ -430,12 +552,17 @@ export function Repairs() {
                   <button type="button" onClick={() => setDevice(detail.imei)} title={t('device.open')}
                     className="rounded px-1 font-mono hover:bg-sl-hover hover:text-primary">📟 {detail.imei}</button>
                 ) : <span className="font-mono">—</span>} />
+                <InfoRow label={`🔒 ${t('repairs.lock')}`} value={lockValue(detail)} />
                 <InfoRow label={t('repairs.estimate')} value={vatLine(detail.estimatedCost)} />
                 <InfoRow label={t('repairs.finalCost')} value={vatLine(detail.finalCost)} />
                 <InfoRow label={t('repairs.labor')} value={laborInfo(detail)} />
                 {laborAdd(detail) > 0 && <InfoRow label={`🔩 ${t('common.total')}`} value={
                   <div className="leading-tight"><div className="font-bold text-primary">{f.money(splitVat((detail.finalCost ?? detail.estimatedCost) + laborAdd(detail), s.taxRate).total)}</div><div className="text-[10px] text-sl-muted">{f.money(detail.finalCost ?? detail.estimatedCost)} + 🔩 {f.money(detail.laborCost!)} · {t('tax.included')}</div></div>
                 } />}
+                {depositOf(detail) > 0 && <>
+                  <InfoRow label={`💰 ${t('repairs.depositPaid')}`} value={<>{f.money(depositOf(detail))} <span className="text-[10px] text-sl-muted">· {t(`payment.${detail.depositMethod ?? 'cash'}`)}</span></>} />
+                  <InfoRow label={t('repairs.depositPending')} value={<span className="font-bold text-rose-600">{f.money(pendingOf(detail))}</span>} />
+                </>}
               </div>
             </div>
             <div className="rounded-lg bg-sl-hover p-3 text-sm"><b>⚠️ {t('repairs.problem')}:</b> {detail.problem}</div>

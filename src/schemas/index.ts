@@ -11,6 +11,9 @@ const optEmail = () =>
   z.string().optional().transform((v) => (v ? sanitize(v) : '')).pipe(z.union([z.literal(''), z.string().email('validation.email')]));
 const money = () => z.coerce.number({ invalid_type_error: 'validation.positive' }).min(0, 'validation.positive');
 const int = () => z.coerce.number({ invalid_type_error: 'validation.integer' }).int('validation.integer').min(0, 'validation.positive');
+/** Free text kept verbatim (passwords/patterns must round-trip exactly; the print layer escapes them). */
+const optRaw = (max = 64) =>
+  z.preprocess((v) => (v === '' || v === null || v === undefined ? undefined : v), z.string().trim().max(max).optional());
 const optMoney = () =>
   z.preprocess((v) => (v === '' || v === null || v === undefined ? undefined : v), z.coerce.number().min(0, 'validation.positive').optional());
 
@@ -42,9 +45,20 @@ export const repairSchema = z.object({
   /** Labor billed inside the price (included) or added on top (separate). */
   laborMode: z.enum(['included', 'separate']).default('included'),
   laborCost: optMoney(),
+  /** Advance payment (señal) taken when the device is dropped off. */
+  deposit: optMoney(),
+  depositMethod: z.enum(['cash', 'card', 'transfer', 'other']).optional(),
+  /** Device lock: no lock, drawn pattern or password/PIN. */
+  lockType: z.enum(['none', 'pattern', 'password']).default('none'),
+  unlockPattern: optRaw(40),
+  unlockCode: optRaw(),
 }).superRefine((d, ctx) => {
   if (d.laborMode === 'separate' && !(d.laborCost && d.laborCost > 0))
     ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['laborCost'], message: 'validation.positive' });
+  if (d.lockType === 'pattern' && !d.unlockPattern)
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['unlockPattern'], message: 'validation.required' });
+  if (d.lockType === 'password' && !d.unlockCode)
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['unlockCode'], message: 'validation.required' });
 });
 
 export const expenseSchema = z.object({

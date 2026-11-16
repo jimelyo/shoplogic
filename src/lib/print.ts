@@ -65,6 +65,9 @@ const ticketCss = (width: string, tp?: PrinterConfig) => {
   table { width: 100%; border-collapse: collapse; } td { vertical-align: top; padding: 1px 0; }
   .tot td { font-size: ${Math.round(size * 1.15)}px; font-weight: ${tpBold ? boldWeight : '700'}; }
   .muted { color: #333; font-size: ${Math.round(size * 0.92)}px; }
+  .pat { display: inline-grid; grid-template-columns: repeat(3, 7mm); gap: 1mm; margin-top: 2px; }
+  .pat div { width: 7mm; height: 7mm; border: 1px solid #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: ${Math.round(size * 0.9)}px; }
+  .pat div.on { background: #000; color: #fff; }
 </style>`;
 };
 
@@ -108,28 +111,61 @@ export function testTicketHtml(s: Settings, t: T) {
   return saleTicketHtml(demo, s, t);
 }
 
-export function repairReceiptHtml(r: Repair, s: Settings, t: T) {
+/**
+ * Repair document. Two variants:
+ * - Customer receipt (default): no unlock data at all.
+ * - `internal` workshop copy: adds the device pattern/password and is watermarked
+ *   so it is never handed to the customer.
+ */
+export function repairReceiptHtml(r: Repair, s: Settings, t: T, opts: { internal?: boolean } = {}) {
   const lang = i18n.language;
   const m = (n: number) => formatMoney(n, s, lang);
   const amount = r.finalCost ?? r.estimatedCost;
   const labor = r.laborMode === 'separate' ? r.laborCost ?? 0 : 0;
   const v = splitVat(amount + labor, s.taxRate);
+  /** Advance payment (señal) already handed over at check-in. */
+  const deposit = r.deposit ?? 0;
+  /** Unlock code: only on the internal workshop copy, never on the customer receipt. */
+  const internal = !!opts.internal;
+  const seq = internal && r.lockType === 'pattern' ? (r.unlockPattern ?? '').split('-').filter(Boolean) : [];
+  const lockLabel = internal
+    ? (seq.length
+        ? `<span class="b">${esc(t('repairs.lockPattern'))}:</span>`
+        : (r.lockType === 'password' && r.unlockCode
+            ? `<span class="b">${esc(t('repairs.lockPassword'))}:</span> <b style="font-size:${Math.round(12 * 1.15)}px">${esc(r.unlockCode)}</b>`
+            : ''))
+    : '';
+  /**
+   * Pattern as a 3×3 pad of circles: each dot used by the stroke is filled and
+   * carries its order number (1 = first dot drawn); unused dots stay empty.
+   */
+  const patGrid = seq.length
+    ? `<div class="c"><div class="pat">${Array.from({ length: 9 }, (_, i) => {
+        const idx = seq.indexOf(String(i + 1));
+        return idx >= 0 ? `<div class="on">${idx + 1}</div>` : '<div></div>';
+      }).join('')}</div></div>`
+    : '';
   return `${ticketCss(s.ticketPrinter?.width ?? '80mm', s.ticketPrinter)}${storeHeader(s, t)}
   <div class="c b">${esc(t('repairs.receiptTitle'))}</div>
-  <div class="c b" style="font-size:16px">${esc(r.ticketNumber)}</div><hr>
+  <div class="c b" style="font-size:16px">${esc(r.ticketNumber)}</div>
+  ${internal ? `<div class="c b" style="border:1px solid #000;padding:2px 0;margin-top:2px">${esc(t('repairs.copyInternalTitle'))}</div>` : ''}<hr>
   <div><span class="b">${esc(t('repairs.dateIn'))}:</span> ${safeFormat(r.dateIn, 'dd/MM/yyyy HH:mm')}
   ${r.dateOut ? `<br><span class="b">${esc(t('repairs.dateOut'))}:</span> ${safeFormat(r.dateOut, 'dd/MM/yyyy HH:mm')}` : ''}
   <br><span class="b">${esc(t('common.status'))}:</span> ${esc(t('repairStatus.' + r.status))}</div><hr>
   <div><span class="b">${esc(t('common.customer'))}:</span> ${esc(r.customerName)}<br><span class="b">${esc(t('common.phone'))}:</span> ${esc(r.customerPhone)}${r.customerEmail ? `<br>${esc(r.customerEmail)}` : ''}</div><hr>
   <div><span class="b">${esc(t('repairs.device'))}:</span> ${esc(r.device)}<br><span class="b">IMEI:</span> ${esc(r.imei || '—')}</div>
   <div style="margin-top:4px"><span class="b">${esc(t('repairs.problem'))}:</span> ${esc(r.problem)}</div>
-  ${r.diagnosis ? `<div style="margin-top:4px"><span class="b">${esc(t('repairs.diagnosis'))}:</span> ${esc(r.diagnosis)}</div>` : ''}<hr>
+  ${r.diagnosis ? `<div style="margin-top:4px"><span class="b">${esc(t('repairs.diagnosis'))}:</span> ${esc(r.diagnosis)}</div>` : ''}
+  ${lockLabel ? `<div style="margin-top:4px">🔒 ${esc(t('repairs.lock'))}: ${lockLabel}</div>${patGrid}` : ''}<hr>
   <table><tr><td class="b">${esc(r.finalCost !== undefined ? t('repairs.finalCost') : t('repairs.estimate'))}</td><td class="r">${m(amount)}</td></tr>
   ${labor > 0 ? `<tr><td>${esc(t('repairs.labor'))} (${esc(r.laborMode === 'separate' ? t('repairs.laborSeparate') : t('repairs.laborIncluded'))})</td><td class="r">${m(r.laborCost!)}</td></tr>` : ''}
   <tr><td>${esc(t('tax.base'))}</td><td class="r">${m(v.base)}</td></tr>
   <tr><td>${esc(t('tax.vat'))} (${s.taxRate}%)</td><td class="r">${m(v.vat)}</td></tr>
-  <tr class="tot"><td>${esc(t('tax.totalInc'))}</td><td class="r">${m(v.total)}</td></tr></table><hr>
-  <div class="c muted">${esc(t('repairs.thanks'))}</div>
+  <tr class="tot"><td>${esc(t('tax.totalInc'))}</td><td class="r">${m(v.total)}</td></tr>
+  ${deposit > 0 ? `<tr><td>${esc(t('repairs.depositPaid'))} (${esc(t('payment.' + (r.depositMethod ?? 'cash')))})</td><td class="r">${m(deposit)}</td></tr>
+  <tr class="tot"><td>${esc(t('repairs.depositPending'))}</td><td class="r">${m(Math.max(0, v.total - deposit))}</td></tr>` : ''}</table><hr>
+  ${internal ? `<div class="c b">${esc(t('repairs.internalNote'))}</div>` : ''}
+  ${internal ? '' : `<div class="c muted">${esc(t('repairs.thanks'))}</div>`}
   <div class="c muted" style="margin-top:14px">______________________<br>${esc(t('repairs.signature'))}</div>`;
 }
 

@@ -1,5 +1,33 @@
 # Changelog
 
+## 1.3.8 — Bloqueo del dispositivo, copia interna y señales (2026-11-16)
+
+### Reparaciones: bloqueo del equipo
+- **Selector «🔒 Bloqueo del dispositivo»** en nueva reparación y en edición:
+  **sin bloqueo**, **patrón** dibujado sobre un teclado 3×3 (1 arriba-izquierda …
+  9 abajo-derecha) o **contraseña/PIN** escrita.
+- El patrón se guarda como secuencia ordenada (`1-2-5-6-9`); cada punto se marca
+  con su orden y un punto no puede repetirse (misma regla que Android).
+- Validación Zod: con patrón o contraseña seleccionados el dato es obligatorio;
+  al volver a «sin bloqueo» se borran ambos para no dejar datos obsoletos.
+- La tarjeta y la ficha de la reparación muestran el patrón o la clave.
+
+### Impresión: dos variantes del resguardo
+- **Resguardo del cliente**: nunca incluye contraseña ni patrón.
+- **Copia interna del taller**: nueva variante seleccionable en la vista previa
+  del ticket; se marca «COPIA INTERNA — TALLER», imprime el patrón como **cuadro
+  3×3 de círculos** (rellenos con el **número de orden** del trazo, los no usados
+  vacíos) o la contraseña, y el aviso de no entregarla al cliente.
+- El uso de la copia interna queda registrado en auditoría (`R-000001 · interna`).
+
+### Reparaciones: señal / pago anticipado
+- Importe entregado y forma de pago al crear o editar la reparación, con saldo
+  pendiente calculado en vivo, visible en tarjetas, tabla y ficha, y en el
+  resguardo (señal pagada + saldo pendiente). Registro en auditoría al cobrarla.
+
+### Versión
+- Proyecto, instaladores y Android pasan a **1.3.8** (`versionCode 138`).
+
 ## 1.3.6 — Hardening Electron, Dexie 4 y calidad (2026-10-27)
 
 ### Seguridad (Electron)

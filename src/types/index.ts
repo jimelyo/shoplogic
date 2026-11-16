@@ -61,6 +61,16 @@ export interface Repair {
   laborMode?: 'included' | 'separate';
   /** Labor amount (VAT included). Informational when `laborMode` is 'included'. */
   laborCost?: number;
+  /** Money handed over before the repair (señal / pago anticipado), VAT included; deducted from the balance due. */
+  deposit?: number;
+  /** How that advance payment was collected. */
+  depositMethod?: PaymentMethod;
+  /** Whether the device came in locked and how it is unlocked. */
+  lockType?: 'none' | 'pattern' | 'password';
+  /** Unlock pattern as the ordered dots ("1-2-5-6-9"); 1 is top-left, 9 bottom-right. */
+  unlockPattern?: string;
+  /** Password or PIN written down by the customer. */
+  unlockCode?: string;
 }
 export type StockMoveType = 'initial' | 'sale' | 'purchase' | 'adjustment' | 'create' | 'delete' | 'repair' | 'return' | 'trade_in';
 /** A signed ledger entry for every change of a product's stock level. */
